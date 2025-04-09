@@ -2,7 +2,13 @@ name: Continuous Integration (CI)
 
 on:
   push:
+    branches:
+      - main
+      - kupon
   pull_request:
+    branches:
+      - main
+      - kupon
 
 jobs:
   test:
