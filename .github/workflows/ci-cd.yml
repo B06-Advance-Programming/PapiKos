@@ -61,17 +61,14 @@ jobs:
           chmod 600 ~/.netrc
           echo "Authentication setup complete."
 
-      # Step 9: Sync with Heroku remote main branch
-      - name: Sync with Heroku remote main branch
+      # Step 9: Force push to Heroku remote main branch
+      - name: Force Push to Heroku Remote
         run: |
           # Add Heroku remote if it doesn't exist
           git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_STAGING_APP_NAME }}.git || echo "Heroku remote already exists"
 
-          # Fetch the latest state from the Heroku main branch
-          git fetch heroku main || echo "No main branch found on Heroku yet."
-
-          # Ensure local changes are re-based onto the Heroku main branch
-          git rebase heroku/main || echo "No changes to rebase. You might need to resolve conflicts."
+          # Force push the local changes to the Heroku remote repository
+          git push heroku +HEAD:main -f
 
       # Step 10: Deploy to Heroku (Staging)
       - name: Deploy to Heroku (Staging)

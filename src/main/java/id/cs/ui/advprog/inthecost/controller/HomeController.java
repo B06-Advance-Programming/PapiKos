@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "Welcome to InTheKost Staging!";
+        return "Welcome to InTheKost Staging! (commit version: finalized staging early deployment)";
     }
 }
