@@ -33,12 +33,14 @@ jobs:
       - name: List JAR files
         run: ls -la build/libs/
 
-      - name: Deploy to Heroku (Staging)
+      - name: Create Procfile
+        run: echo "web: java -Dserver.port=\$PORT \$JAVA_OPTS -jar build/libs/*.jar" > Procfile
+        
+      - name: Deploy to Heroku
         if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
-        uses: akhileshns/heroku-deploy@v3.12.13
+        uses: AkhileshNS/heroku-deploy@v3.12.14
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          usedocker: false
-          justlogin: false
+          procfile: "web: java -Dserver.port=$PORT $JAVA_OPTS -jar build/libs/*.jar"
