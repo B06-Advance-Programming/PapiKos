@@ -8,7 +8,7 @@ on:
   workflow_dispatch:  
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,19 +33,13 @@ jobs:
       - name: Build executable JAR
         run: ./gradlew bootJar
 
-  deploy-staging:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
       - name: Deploy to Heroku (Staging)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
         uses: akhileshns/heroku-deploy@v3.12.13
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          procfile: "web: java -Dserver.port=$PORT $JAVA_OPTS -jar build/libs/*.jar"
           usedocker: false
           justlogin: false
