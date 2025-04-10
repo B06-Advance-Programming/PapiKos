@@ -1,7 +1,9 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
+    id("java")
 }
 
 group = "id.cs.ui.advprog"
@@ -23,6 +25,9 @@ repositories {
     mavenCentral()
 }
 
+val junitJupiterVersion = "5.9.1"
+val mockitoVersion = "5.2.0"
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -32,8 +37,16 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
+    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
 }
 
-tasks.withType<Test> {
+tasks.register<Test>("unitTest") {
+    description = "Runs unit tests."
+    group = "verification"
+}
+
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
