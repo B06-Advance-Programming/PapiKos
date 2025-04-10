@@ -44,26 +44,36 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      # Step 8: Sync local and Heroku remote repository branches
-      # Prevents push issues by ensuring local branch is up-to-date
+      # Step 8: Configure authentication for Heroku and Git using secrets
+      - name: Configure Heroku Authentication
+        run: |
+          # Write the Heroku API key and email into the .netrc file for authentication
+          {
+            echo "machine api.heroku.com"
+            echo "  login ${{ secrets.HEROKU_EMAIL }}"
+            echo "  password ${{ secrets.HEROKU_API_KEY }}"
+            echo "machine git.heroku.com"
+            echo "  login ${{ secrets.HEROKU_EMAIL }}"
+            echo "  password ${{ secrets.HEROKU_API_KEY }}"
+          } > ~/.netrc
+
+          # Restrict permissions for security
+          chmod 600 ~/.netrc
+          echo "Authentication setup complete."
+
+      # Step 9: Sync local and Heroku remote repository branches
       - name: Sync with Heroku remote main branch
         run: |
-          # Authenticate with Heroku
-          heroku auth:token | xargs echo "machine api.heroku.com login ${{ secrets.HEROKU_EMAIL }} password" > ~/.netrc
-          heroku auth:token | xargs echo "machine git.heroku.com login ${{ secrets.HEROKU_EMAIL }} password" >> ~/.netrc
-          chmod 600 ~/.netrc
+          # Add Heroku remote if it doesn't exist
+          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_STAGING_APP_NAME }}.git || echo "Heroku remote already exists"
 
-          # Add Heroku remote if it doesn't exist already
-          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_STAGING_APP_NAME }}.git || echo "Heroku remote exists"
+          # Fetch the latest state from Heroku's main branch
+          git fetch heroku main || echo "No main branch found on Heroku yet."
 
-          # Fetch the latest state of the remote Heroku branch
-          git fetch heroku main
+          # Merge Heroku's main branch into local staging branch
+          git merge heroku/main --no-edit || echo "Nothing to merge from Heroku."
 
-          # Merge the Heroku main branch into the local staging branch
-          git merge heroku/main --no-edit || echo "No changes to merge from Heroku."
-
-      # Step 9: Deploy to Heroku (Staging)
-      # Use the akhileshns/heroku-deploy action for deployment
+      # Step 10: Deploy to Heroku (Staging)
       - name: Deploy to Heroku (Staging)
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/staging' }}
         uses: akhileshns/heroku-deploy@v3.12.14
