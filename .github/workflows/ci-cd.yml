@@ -14,6 +14,8 @@ jobs:
     steps:
       # Step 1: Check out the code from the repository
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure we fetch the full Git history to avoid "shallow update not allowed"
 
       # Step 2: Set up JDK for building the application
       - name: Set up JDK
@@ -66,6 +68,9 @@ jobs:
         run: |
           # Add Heroku remote if it doesn't exist
           git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_STAGING_APP_NAME }}.git || echo "Heroku remote already exists"
+
+          # Ensure the Git repository has no shallow clone issues
+          git fetch --unshallow || echo "Repository already unshallowed"
 
           # Force push the local changes to the Heroku remote repository
           git push heroku +HEAD:main -f
