@@ -63,8 +63,8 @@ jobs:
           chmod 600 ~/.netrc
           echo "Authentication setup complete."
 
-      # Step 9: Force push to Heroku remote main branch
-      - name: Force Push to Heroku Remote
+      # Step 9: Deploy to Heroku (Staging)
+      - name: Deploy to Heroku (Staging)
         run: |
           # Add Heroku remote if it doesn't exist
           git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_STAGING_APP_NAME }}.git || echo "Heroku remote already exists"
@@ -74,15 +74,3 @@ jobs:
 
           # Force push the local changes to the Heroku remote repository
           git push heroku +HEAD:main -f
-
-      # Step 10: Deploy to Heroku (Staging)
-      - name: Deploy to Heroku (Staging)
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/staging' }}
-        uses: akhileshns/heroku-deploy@v3.12.14
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          usedocker: false
-          justlogin: false
-          dontautocreate: true
