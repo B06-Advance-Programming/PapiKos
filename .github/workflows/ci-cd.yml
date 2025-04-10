@@ -33,8 +33,13 @@ jobs:
       - name: List JAR files
         run: ls -la build/libs/
 
+      # Install Heroku CLI
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
       - name: Deploy to Heroku (Staging)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/staging' }}
         uses: akhileshns/heroku-deploy@v3.12.14
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
