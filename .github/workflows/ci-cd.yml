@@ -71,7 +71,7 @@ jobs:
           git fetch heroku main || echo "No main branch found on Heroku yet."
 
           # Ensure local changes are re-based onto the Heroku main branch
-          git rebase heroku/main || echo "No changes to rebase."
+          git rebase heroku/main || echo "No changes to rebase. You might need to resolve conflicts."
 
       # Step 10: Deploy to Heroku (Staging)
       - name: Deploy to Heroku (Staging)
