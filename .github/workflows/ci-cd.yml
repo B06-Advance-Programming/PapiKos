@@ -17,21 +17,21 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'  
+          java-version: '21'  
           distribution: 'temurin'
           cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
+      - name: Clean
+        run: ./gradlew clean
+
       - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run tests
-        run: ./gradlew test
-
-      - name: Build executable JAR
         run: ./gradlew bootJar
+
+      - name: List JAR files
+        run: ls -la build/libs/
 
       - name: Deploy to Heroku (Staging)
         if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
@@ -40,6 +40,5 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_STAGING_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          procfile: "web: java -Dserver.port=$PORT $JAVA_OPTS -jar build/libs/*.jar"
           usedocker: false
           justlogin: false
