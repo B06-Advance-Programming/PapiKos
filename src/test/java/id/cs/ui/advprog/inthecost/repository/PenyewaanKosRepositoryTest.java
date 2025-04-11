@@ -77,8 +77,8 @@ public class PenyewaanKosRepositoryTest {
     public void testUpdateFailsIfDisetujui() {
         PenyewaanKos p = new PenyewaanKos();
         p.setNamaLengkap("Bambang");
-        p.setStatus(StatusPenyewaan.DISETUJUI);
         PenyewaanKos saved = repository.save(p);
+        saved.setStatus(StatusPenyewaan.DISETUJUI);
         saved.setNamaLengkap("Diubah");
 
         assertThrows(IllegalStateException.class, () -> {
