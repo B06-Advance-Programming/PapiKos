@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.repository;
 
+import id.cs.ui.advprog.inthecost.Repository.PenyewaanKosRepository;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.KosSewa;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
