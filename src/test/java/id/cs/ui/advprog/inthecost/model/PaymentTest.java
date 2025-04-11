@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ public class PaymentTest {
         LocalDate date = LocalDate.of(2023, 5, 15);
         String paymentType = "TOP_UP";
         String description = "Top up saldo";
-        PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
+        PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
         Long userId = 1L;
 
         // Act
@@ -57,7 +58,7 @@ public class PaymentTest {
         LocalDate date = LocalDate.of(2023, 5, 15);
         String paymentType = "KOST_PAYMENT";
         String description = "Pembayaran kos bulan Mei";
-        PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
+        PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
         Long userId = 1L;
         Long ownerId = 2L;
         Long kostId = 3L;
@@ -96,7 +97,7 @@ public class PaymentTest {
         LocalDate date = LocalDate.of(2023, 6, 15);
         String paymentType = "KOST_PAYMENT";
         String description = "Pembayaran kos bulan Juni";
-        PaymentStatus paymentStatus = PaymentStatus.PENDING;
+        PaymentStatusEnum paymentStatus = PaymentStatusEnum.PENDING;
         Long userId = 1L;
         Long ownerId = 2L;
         Long kostId = 3L;
@@ -144,9 +145,9 @@ public class PaymentTest {
     @Test
     void testPaymentStatusEnum() {
         // Test all enum values
-        assertEquals("SUCCESS", PaymentStatus.SUCCESS.name());
-        assertEquals("PENDING", PaymentStatus.PENDING.name());
-        assertEquals("FAILED", PaymentStatus.FAILED.name());
-        assertEquals("CANCELLED", PaymentStatus.CANCELLED.name());
+        assertEquals("SUCCESS", PaymentStatusEnum.SUCCESS.name());
+        assertEquals("PENDING", PaymentStatusEnum.PENDING.name());
+        assertEquals("FAILED", PaymentStatusEnum.FAILED.name());
+        assertEquals("CANCELLED", PaymentStatusEnum.CANCELLED.name());
     }
 }
