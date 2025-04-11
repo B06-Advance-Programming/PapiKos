@@ -13,10 +13,13 @@ public class KuponRepository {
     private final Map<String, Kupon> kuponById = new HashMap<>();
     private final Map<String, Kupon> kuponByKodeUnik = new HashMap<>();
 
-
-    public Kupon save(Kupon kupon) {
+    private void putKupon(Kupon kupon) {
         kuponById.put(kupon.getIdKupon(), kupon);
         kuponByKodeUnik.put(kupon.getKodeUnik(), kupon);
+    }
+
+    public Kupon save(Kupon kupon) {
+        putKupon(kupon);
         return kupon;
     }
 
@@ -30,11 +33,9 @@ public class KuponRepository {
 
     public boolean deleteById(String idKupon) {
         Kupon removed = kuponById.remove(idKupon);
-        if (removed != null) {
-            kuponByKodeUnik.remove(removed.getKodeUnik());
-            return true;
-        }
-        return false;
+        if (removed == null) return false;
+        kuponByKodeUnik.remove(removed.getKodeUnik());
+        return true;
     }
 
     public List<Kupon> findAll() {
