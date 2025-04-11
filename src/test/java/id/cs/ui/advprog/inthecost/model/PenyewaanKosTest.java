@@ -22,12 +22,13 @@ public class PenyewaanKosTest {
         kos.setJumlahKamar(10);
         kos.setHargaSewaBulanan(1500000);
 
-        penyewaan = new PenyewaanKos();
-        penyewaan.setNamaLengkap("Budi Santoso");
-        penyewaan.setNomorTelepon("08123456789");
-        penyewaan.setTanggalCheckIn(LocalDate.of(2025, 5, 1));
-        penyewaan.setDurasiBulan(6);
-        penyewaan.setKos(kos);
+        penyewaan = PenyewaanKosBuilder.builder()
+                    .namaLengkap("Budi Santoso");
+                    .nomorTelepon("08123456789");
+                    .tanggalCheckIn(LocalDate.of(2025, 5, 1));
+                    .durasiBulan(6);
+                    .kos(kos)
+                    .build();
     }
 
     @Test

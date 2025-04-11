@@ -25,11 +25,12 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testCreatePenyewaan() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Ayu");
-        p.setNomorTelepon("08123456789");
-        p.setTanggalCheckIn(LocalDate.of(2025, 6, 1));
-        p.setDurasiBulan(3);
+        PenyewaanKos p = PenyewaanKosBuilder.builder()
+                        .namaLengkap("Ayu");
+                        .nomorTelepon("08123456789");
+                        .tanggalCheckIn(LocalDate.of(2025, 6, 1));
+                        .durasiBulan(3)
+                        .build();
 
         PenyewaanKos result = service.create(p);
 
@@ -39,8 +40,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testUpdatePenyewaanBerhasilJikaDiajukan() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Rina");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Rina").build;
         PenyewaanKos saved = service.create(p);
 
         saved.setNamaLengkap("Rina Update");
@@ -51,8 +51,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testUpdateGagalJikaStatusDisetujui() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Andi");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Andi").build;
         PenyewaanKos saved = service.create(p);
 
         p.setStatus(StatusPenyewaan.DISETUJUI);
@@ -65,8 +64,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testDeletePenyewaan() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Bayu");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Bayu").build;
         PenyewaanKos saved = service.create(p);
 
         service.delete(saved.getId());
@@ -77,8 +75,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testFindById() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Dina");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Dina").build();
         PenyewaanKos saved = service.create(p);
 
         PenyewaanKos found = service.findById(saved.getId());
@@ -87,8 +84,8 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testFindAll() {
-        service.create(new PenyewaanKos());
-        service.create(new PenyewaanKos());
+        service.create(PenyewaanKosBuilder.builder().build());
+        service.create(PenyewaanKosBuilder.builder().build());
 
         List<PenyewaanKos> all = service.findAll();
         assertEquals(2, all.size());

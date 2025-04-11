@@ -31,12 +31,13 @@ public class PenyewaanKosRepositoryTest {
 
     @Test
     public void testCreatePenyewaan() {
-        PenyewaanKos penyewaan = new PenyewaanKos();
-        penyewaan.setNamaLengkap("Andi");
-        penyewaan.setNomorTelepon("08123456789");
-        penyewaan.setTanggalCheckIn(LocalDate.of(2025, 6, 1));
-        penyewaan.setDurasiBulan(3);
-        penyewaan.setKos(kos);
+        PenyewaanKos penyewaan = PenyewaanKosBuilder.builder()
+                                .namaLengkap("Andi");
+                                .nomorTelepon("08123456789");
+                                .tanggalCheckIn(LocalDate.of(2025, 6, 1));
+                                .durasiBulan(3);
+                                .kos(kos)
+                                .build();
 
         PenyewaanKos saved = repository.save(penyewaan);
         assertNotNull(saved.getId());
@@ -45,16 +46,15 @@ public class PenyewaanKosRepositoryTest {
 
     @Test
     public void testGetAllPenyewaan() {
-        PenyewaanKos p1 = repository.save(new PenyewaanKos());
-        PenyewaanKos p2 = repository.save(new PenyewaanKos());
+        PenyewaanKos p1 = repository.save(PenyewaanKosBuilder.builder().build());
+        PenyewaanKos p2 = repository.save(PenyewaanKosBuilder.builder().build());
         List<PenyewaanKos> all = repository.findAll();
         assertEquals(2, all.size());
     }
 
     @Test
     public void testGetById() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Dina");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Dina").build();
         PenyewaanKos saved = repository.save(p);
         Optional<PenyewaanKos> found = repository.findById(saved.getId());
         assertTrue(found.isPresent());
@@ -63,8 +63,7 @@ public class PenyewaanKosRepositoryTest {
 
     @Test
     public void testUpdateIfDiajukan() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Ayu");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Ayu").build();
         PenyewaanKos saved = repository.save(p);
         saved.setNamaLengkap("Ayu Updated");
 
@@ -74,8 +73,7 @@ public class PenyewaanKosRepositoryTest {
 
     @Test
     public void testUpdateFailsIfDisetujui() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Bambang");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Bambang").build();
         PenyewaanKos saved = repository.save(p);
         saved.setStatus(StatusPenyewaan.DISETUJUI);
         saved.setNamaLengkap("Diubah");
@@ -87,8 +85,7 @@ public class PenyewaanKosRepositoryTest {
 
     @Test
     public void testDeletePenyewaan() {
-        PenyewaanKos p = new PenyewaanKos();
-        p.setNamaLengkap("Bayu");
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Bayu").build();
         PenyewaanKos saved = repository.save(p);
 
         repository.delete(saved.getId());
