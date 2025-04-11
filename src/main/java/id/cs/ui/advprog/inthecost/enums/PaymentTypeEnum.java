@@ -1,4 +1,8 @@
 package id.cs.ui.advprog.inthecost.enums;
 
-public class PaymentTypeEnum {
+public enum PaymentTypeEnum {
+    TOP_UP,
+    KOST_PAYMENT,
+    WITHDRAWAL,
+    REFUND
 }
