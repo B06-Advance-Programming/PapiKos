@@ -14,18 +14,39 @@ public class KuponServiceImpl implements KuponService {
     private KuponRepository kuponRepository;
 
     @Override
-    public Kupon createKupon(Kupon kupon) {return null;}
+    public Kupon createKupon(Kupon kupon) {
+        Kupon existKupon = kuponRepository.findByKodeUnik(kupon.getKodeUnik());
+
+        if (existKupon != null && !existKupon.getIdKupon().equals(kupon.getIdKupon())) {
+            throw new IllegalArgumentException("Kode unik sudah dipakai oleh kupon lain.");
+        }
+        return kuponRepository.save(kupon);
+    }
 
     @Override
-    public Kupon getKuponById(String id) {return null;}
+    public Kupon getKuponById(String id) {
+        Kupon kupon = kuponRepository.findById(id);
+        if (kupon == null) throw new NoSuchElementException("Kupon tidak ditemukan.");
+        return kupon;
+    }
 
     @Override
-    public Kupon getKuponByKodeUnik(String kodeUnik) {return null;}
+    public Kupon getKuponByKodeUnik(String kodeUnik) {
+        Kupon kupon = kuponRepository.findByKodeUnik(kodeUnik);
+        if (kupon == null) throw new NoSuchElementException("Kupon tidak ditemukan.");
+        return kupon;
+    }
 
     @Override
-    public void deleteKupon(String id){}
+    public void deleteKupon(String id) {
+        boolean success = kuponRepository.deleteById(id);
+        if (!success) {
+            throw new NoSuchElementException("Kupon tidak ditemukan.");
+        }
+    }
 
     @Override
-    public List<Kupon> getAllKupon() {return null;}
+    public List<Kupon> getAllKupon() {
+        return kuponRepository.findAll();
+    }
 }
-
