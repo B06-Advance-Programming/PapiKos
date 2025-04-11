@@ -16,10 +16,6 @@ public class KuponServiceImpl implements KuponService {
     @Override
     public Kupon createKupon(Kupon kupon) {
         Kupon existKupon = kuponRepository.findByKodeUnik(kupon.getKodeUnik());
-
-        if (existKupon != null && !existKupon.getIdKupon().equals(kupon.getIdKupon())) {
-            throw new IllegalArgumentException("Kode unik sudah dipakai oleh kupon lain.");
-        }
         return kuponRepository.save(kupon);
     }
 
