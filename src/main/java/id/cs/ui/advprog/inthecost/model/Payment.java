@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import java.time.LocalDate;
 
 public class Payment {
@@ -8,7 +9,7 @@ public class Payment {
     private LocalDate date;
     private String paymentType;
     private String description;
-    private String paymentStatus;
+    private PaymentStatusEnum paymentStatus;
     private Long userId;
     private Long ownerId;
     private Long kostId;
@@ -51,7 +52,7 @@ public class Payment {
         return description;
     }
 
-    public String getPaymentStatus() {
+    public PaymentStatusEnum getPaymentStatus() {
         return paymentStatus;
     }
 
@@ -88,7 +89,7 @@ public class Payment {
         this.description = description;
     }
 
-    public void setPaymentStatus(String paymentStatus) {
+    public void setPaymentStatus(PaymentStatusEnum paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
 
@@ -111,7 +112,7 @@ public class Payment {
         private LocalDate date;
         private String paymentType;
         private String description;
-        private String paymentStatus;
+        private PaymentStatusEnum paymentStatus;
         private Long userId;
         private Long ownerId;
         private Long kostId;
@@ -141,7 +142,7 @@ public class Payment {
             return this;
         }
 
-        public PaymentBuilder paymentStatus(String paymentStatus) {
+        public PaymentBuilder paymentStatus(PaymentStatusEnum paymentStatus) {
             this.paymentStatus = paymentStatus;
             return this;
         }
