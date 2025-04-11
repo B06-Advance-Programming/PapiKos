@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
