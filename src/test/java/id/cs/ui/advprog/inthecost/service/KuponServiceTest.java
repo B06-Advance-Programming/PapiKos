@@ -79,8 +79,8 @@ public class KuponServiceTest {
     @Test
     public void testGetKuponByKodeUnikSuccess(){
         Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
-        when(kuponRepository.findById(kupon.getKodeUnik())).thenReturn(kupon);
-        Kupon result = kuponService.getKuponById(kupon.getKodeUnik());
+        when(kuponRepository.findByKodeUnik(kupon.getKodeUnik())).thenReturn(kupon);
+        Kupon result = kuponService.getKuponByKodeUnik(kupon.getKodeUnik());
         assertEquals(kupon, result);
     }
 
