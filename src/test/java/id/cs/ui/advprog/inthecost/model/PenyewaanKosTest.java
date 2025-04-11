@@ -82,22 +82,18 @@ public class PenyewaanKosTest {
 
     @Test
     public void testBisaEditJikaDiajukan() {
-        assertTrue(bisaEdit(penyewaan));
+        assertTrue(penyewaan.isEditable());
     }
 
     @Test
     public void testTidakBisaEditJikaDisetujui() {
         penyewaan.setStatus(StatusPenyewaan.DISETUJUI);
-        assertFalse(bisaEdit(penyewaan));
+        assertFalse(penyewaan.isEditable());
     }
 
     @Test
     public void testTidakBisaEditJikaDibatalkan() {
         penyewaan.setStatus(StatusPenyewaan.DIBATALKAN);
-        assertFalse(bisaEdit(penyewaan));
-    }
-
-    private boolean bisaEdit(PenyewaanKos p) {
-        return p.getStatus() == StatusPenyewaan.DIAJUKAN;
+        assertFalse(penyewaan.isEditable());
     }
 }
