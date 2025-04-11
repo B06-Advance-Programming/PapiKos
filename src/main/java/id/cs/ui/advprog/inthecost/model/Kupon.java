@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.time.format.DateTimeFormatter;
 
 import id.cs.ui.advprog.inthecost.enums.KuponStatus;
+import id.cs.ui.advprog.inthecost.strategy.KuponStatusStrategy;
+import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
 
 @Getter
 @Setter
@@ -24,6 +26,7 @@ public class Kupon{
     private String deskripsi;
     @Setter(AccessLevel.NONE)
     private KuponStatus statusKupon;
+    private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
     private boolean kuponGlobal;
 
     public Kupon(String pemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
@@ -62,7 +65,7 @@ public class Kupon{
     }
 
     public void refreshStatus() {
-        this.statusKupon = KuponStatus.evaluate(this);
+        this.statusKupon = defaultStatusStrategy.evaluate(this);
     }
 
     public void setPersentase(int persentase) {

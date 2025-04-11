@@ -15,12 +15,4 @@ public enum KuponStatus {
     KuponStatus(String value) {
         this.value = value;
     }
-
-    public static KuponStatus evaluate(Kupon kupon) {
-        if (kupon.getMasaBerlaku().isBefore(LocalDate.now())) {
-            return INVALID;
-        } else {
-            return VALID;
-        }
-    }
 }

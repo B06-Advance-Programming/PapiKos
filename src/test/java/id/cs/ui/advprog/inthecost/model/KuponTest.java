@@ -51,6 +51,9 @@ public class KuponTest {
         assertThrows(IllegalArgumentException.class, ()->{
             Kupon newKupon = new Kupon(null, LocalDate.of(2026, 4, 10), 10, "Kupon Lebaran Idul Fitri 2026", true);
         });
+        assertThrows(IllegalArgumentException.class, ()->{
+            Kupon newKupon = new Kupon("", LocalDate.of(2026, 4, 10), 10, "Kupon Lebaran Idul Fitri 2026", true);
+        });
     }
 
     @Test
@@ -67,6 +70,9 @@ public class KuponTest {
         });
         assertThrows(IllegalArgumentException.class, () -> {
             Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), 0, "Kupon Lebaran Idul Fitri 2026", true);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), 129, "Kupon Lebaran Idul Fitri 2026", true);
         });
     }
 
@@ -87,9 +93,21 @@ public class KuponTest {
     }
 
     @Test
+    void testSetPersentaseValid() {
+        kupon.setPersentase(20);
+        assertEquals(20, kupon.getPersentase());
+    }
+
+    @Test
     void testSetDeskripsiInvalid() {
         assertThrows(IllegalArgumentException.class, () -> kupon.setDeskripsi(""));
         assertThrows(IllegalArgumentException.class, () -> kupon.setDeskripsi(null));
+    }
+
+    @Test
+    void testSetDeskripsiValid() {
+        kupon.setDeskripsi("Updated Description");
+        assertEquals("Updated Description", kupon.getDeskripsi());
     }
 
     @Test
