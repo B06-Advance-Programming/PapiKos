@@ -2,6 +2,8 @@ package id.cs.ui.advprog.inthecost.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InboxNotificationTest {
@@ -17,8 +19,10 @@ public class InboxNotificationTest {
 
     @Test
     void testEqualsAndHashCode() {
-        InboxNotification notif1 = new InboxNotification("user1", "Tes");
-        InboxNotification notif2 = new InboxNotification("user1", "Tes");
+        LocalDateTime now = LocalDateTime.now();
+
+        InboxNotification notif1 = new InboxNotification("user1", "Tes", now);
+        InboxNotification notif2 = new InboxNotification("user1", "Tes", now);
 
         assertEquals(notif1, notif2);
         assertEquals(notif1.hashCode(), notif2.hashCode());
