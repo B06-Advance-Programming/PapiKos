@@ -1,4 +1,5 @@
 package id.cs.ui.advprog.inthecost.Model;
+import id.cs.ui.advprog.inthecost.Exception.*;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,47 +55,47 @@ public class KostTest {
     @Test
     public void testHargaPerBulanHarusPositif() {
         // Menguji setHargaPerBulan dengan nilai negatif
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
             kost.setHargaPerBulan(-1000);  // Set harga per bulan negatif
         });
-        assertEquals("Harga per bulan harus lebih besar dari 0", exception.getMessage());
+        assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
 
         // Menguji setHargaPerBulan dengan nilai 0
-        exception = assertThrows(IllegalArgumentException.class, () -> {
+        exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
             kost.setHargaPerBulan(0);  // Set harga per bulan 0
         });
-        assertEquals("Harga per bulan harus lebih besar dari 0", exception.getMessage());
+        assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 5. Test Jumlah kamar tidak boleh negatif
     @Test
     public void testJumlahKamarTidakBolehNegatif() {
         // Menguji setJumlahKamar dengan nilai negatif
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", 10, 600000);
             kost.setJumlahKamar(-5);  // Set jumlah kamar negatif
         });
-        assertEquals("Jumlah kamar tidak boleh negatif", exception.getMessage());
+        assertEquals(ValidationErrorCode.NEGATIVE_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 6. Test Deskripsi tidak boleh kosong
     @Test
     public void testDeskripsiTidakBolehKosong() {
         // Menguji setDeskripsi dengan deskripsi kosong
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "", 5, 450000);
             kost.setDeskripsi("");  // Set deskripsi kosong
         });
-        assertEquals("Deskripsi kosan tidak boleh kosong", exception.getMessage());
+        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
         // Menguji setDeskripsi dengan deskripsi null
-        exception = assertThrows(IllegalArgumentException.class, () -> {
+        exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", null, 5, 450000);
             kost.setDeskripsi(null);  // Set deskripsi null
         });
-        assertEquals("Deskripsi kosan tidak boleh kosong", exception.getMessage());
+        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 7. Test KosID auto-generate berbeda untuk setiap instance
@@ -110,35 +111,35 @@ public class KostTest {
     @Test
     public void testNamaTidakBolehKosong() {
         // Memeriksa jika nama kosong melempar exception
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost();
             kost.setNama("");  // Set nama kosong
         });
-        assertEquals("Nama kosan tidak boleh kosong", exception.getMessage());
+        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
         // Memeriksa jika nama null melempar exception
-        exception = assertThrows(IllegalArgumentException.class, () -> {
+        exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost();
             kost.setNama(null);  // Set nama null
         });
-        assertEquals("Nama kosan tidak boleh kosong", exception.getMessage());
+        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // Test untuk alamat tidak boleh kosong
     @Test
     public void testAlamatTidakBolehKosong() {
         // Memeriksa jika alamat kosong melempar exception
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost();
             kost.setAlamat("");  // Set alamat kosong
         });
-        assertEquals("Alamat kosan tidak boleh kosong", exception.getMessage());
+        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
         // Memeriksa jika alamat null melempar exception
-        exception = assertThrows(IllegalArgumentException.class, () -> {
+        exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost();
             kost.setAlamat(null);  // Set alamat null
         });
-        assertEquals("Alamat kosan tidak boleh kosong", exception.getMessage());
+        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 }
