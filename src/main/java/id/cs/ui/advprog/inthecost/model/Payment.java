@@ -1,13 +1,14 @@
 package id.cs.ui.advprog.inthecost.model;
 
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
+import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import java.time.LocalDate;
 
 public class Payment {
     private Long id;
     private Double amount;
     private LocalDate date;
-    private String paymentType;
+    private PaymentTypeEnum paymentType;
     private String description;
     private PaymentStatusEnum paymentStatus;
     private Long userId;
@@ -44,7 +45,7 @@ public class Payment {
         return date;
     }
 
-    public String getPaymentType() {
+    public PaymentTypeEnum getPaymentType() {
         return paymentType;
     }
 
@@ -81,7 +82,7 @@ public class Payment {
         this.date = date;
     }
 
-    public void setPaymentType(String paymentType) {
+    public void setPaymentType(PaymentTypeEnum paymentType) {
         this.paymentType = paymentType;
     }
 
@@ -110,7 +111,7 @@ public class Payment {
         private Long id;
         private Double amount;
         private LocalDate date;
-        private String paymentType;
+        private PaymentTypeEnum paymentType;
         private String description;
         private PaymentStatusEnum paymentStatus;
         private Long userId;
@@ -132,7 +133,7 @@ public class Payment {
             return this;
         }
 
-        public PaymentBuilder paymentType(String paymentType) {
+        public PaymentBuilder paymentType(PaymentTypeEnum paymentType) {
             this.paymentType = paymentType;
             return this;
         }
