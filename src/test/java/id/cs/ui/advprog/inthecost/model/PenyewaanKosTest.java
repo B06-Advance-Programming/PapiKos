@@ -73,4 +73,30 @@ public class PenyewaanKosTest {
     public void testGetKosHargaSewaBulanan() {
         assertEquals(1500000, kos.getHargaSewaBulanan());
     }
+
+    @Test
+    public void testStatusDefaultDiajukan() {
+        assertEquals(StatusPenyewaan.DIAJUKAN, penyewaan.getStatus());
+    }
+
+    @Test
+    public void testBisaEditJikaDiajukan() {
+        assertTrue(bisaEdit(penyewaan));
+    }
+
+    @Test
+    public void testTidakBisaEditJikaDisetujui() {
+        penyewaan.setStatus(StatusPenyewaan.DISETUJUI);
+        assertFalse(bisaEdit(penyewaan));
+    }
+
+    @Test
+    public void testTidakBisaEditJikaDibatalkan() {
+        penyewaan.setStatus(StatusPenyewaan.DIBATALKAN);
+        assertFalse(bisaEdit(penyewaan));
+    }
+
+    private boolean bisaEdit(PenyewaanKos p) {
+        return p.getStatus() == StatusPenyewaan.DIAJUKAN;
+    }
 }
