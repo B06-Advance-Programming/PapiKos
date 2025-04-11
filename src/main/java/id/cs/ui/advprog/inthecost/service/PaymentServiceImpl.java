@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,14 +65,8 @@ public class PaymentServiceImpl implements PaymentService {
         // Get all user transactions first
         List<Payment> userTransactions = paymentRepository.findByUserId(userId);
 
-        // Apply filters using Java streams
-        return userTransactions.stream()
-                .filter(payment -> paymentType == null || payment.getPaymentType() == paymentType)
-                .filter(payment -> (startDate == null && endDate == null) ||
-                        (payment.getDate() != null &&
-                                !payment.getDate().isBefore(startDate) &&
-                                !payment.getDate().isAfter(endDate)))
-                .collect(Collectors.toList());
+        // Apply filters using extracted filter methods
+        return filterPayments(userTransactions, paymentType, startDate, endDate);
     }
 
     @Override
@@ -85,13 +80,28 @@ public class PaymentServiceImpl implements PaymentService {
         // Get all owner transactions first
         List<Payment> ownerTransactions = paymentRepository.findByOwnerId(ownerId);
 
-        // Apply filters using Java streams
-        return ownerTransactions.stream()
-                .filter(payment -> paymentType == null || payment.getPaymentType() == paymentType)
-                .filter(payment -> (startDate == null && endDate == null) ||
+        // Apply filters using extracted filter methods
+        return filterPayments(ownerTransactions, paymentType, startDate, endDate);
+    }
+
+    private List<Payment> filterPayments(List<Payment> payments,
+                                         PaymentTypeEnum paymentType,
+                                         LocalDate startDate,
+                                         LocalDate endDate) {
+        // Create predicates for type and date filtering
+        Predicate<Payment> typeFilter = payment ->
+                paymentType == null || payment.getPaymentType() == paymentType;
+
+        Predicate<Payment> dateFilter = payment ->
+                (startDate == null && endDate == null) ||
                         (payment.getDate() != null &&
                                 !payment.getDate().isBefore(startDate) &&
-                                !payment.getDate().isAfter(endDate)))
+                                !payment.getDate().isAfter(endDate));
+
+        // Apply all filters in a chain
+        return payments.stream()
+                .filter(typeFilter)
+                .filter(dateFilter)
                 .collect(Collectors.toList());
     }
 }
