@@ -1,0 +1,76 @@
+name: Deploy to Heroku Staging
+
+on:
+  push:
+    branches: [ staging ]
+  pull_request:
+    branches: [ staging ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the repository
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure we fetch the full Git history to avoid "shallow update not allowed"
+
+      # Step 2: Set up JDK for building the application
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      # Step 3: Grant execute permission to Gradle wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # Step 4: Clean the build directory
+      - name: Clean
+        run: ./gradlew clean
+
+      # Step 5: Build the application
+      - name: Build with Gradle
+        run: ./gradlew bootJar
+
+      # Step 6: List JAR files to verify the build
+      - name: List JAR files
+        run: ls -la build/libs/
+
+      # Step 7: Install the Heroku CLI
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
+      # Step 8: Configure authentication for Heroku and Git using secrets
+      - name: Configure Heroku Authentication
+        run: |
+          # Write the Heroku API key and email into the .netrc file for authentication
+          {
+            echo "machine api.heroku.com"
+            echo "  login ${{ secrets.HEROKU_EMAIL }}"
+            echo "  password ${{ secrets.HEROKU_API_KEY }}"
+            echo "machine git.heroku.com"
+            echo "  login ${{ secrets.HEROKU_EMAIL }}"
+            echo "  password ${{ secrets.HEROKU_API_KEY }}"
+          } > ~/.netrc
+
+          # Restrict permissions for security
+          chmod 600 ~/.netrc
+          echo "Authentication setup complete."
+
+      # Step 9: Deploy to Heroku (Staging)
+      - name: Deploy to Heroku (Staging)
+        run: |
+          # Add Heroku remote if it doesn't exist
+          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_STAGING_APP_NAME }}.git || echo "Heroku remote already exists"
+
+          # Ensure the Git repository has no shallow clone issues
+          git fetch --unshallow || echo "Repository already unshallowed"
+
+          # Force push the local changes to the Heroku remote repository
+          git push heroku +HEAD:main -f

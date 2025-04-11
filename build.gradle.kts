@@ -37,3 +37,12 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// Add these configurations to fix the JAR issues
+tasks.bootJar {
+    archiveClassifier.set("")
+}
+
+tasks.jar {
+    enabled = false
+}
