@@ -16,4 +16,8 @@ public class PenyewaanKos {
     private int durasiBulan;
     private KosSewa kos;
     private StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
+
+    public boolean isEditable() {
+        return this.status == StatusPenyewaan.DIAJUKAN;
+    }
 }
