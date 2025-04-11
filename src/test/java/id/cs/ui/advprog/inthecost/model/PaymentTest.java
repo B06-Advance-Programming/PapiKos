@@ -3,6 +3,7 @@ package id.cs.ui.advprog.inthecost.model;
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 
 import java.time.LocalDate;
 
@@ -24,7 +25,7 @@ public class PaymentTest {
         Long id = 1L;
         Double amount = 100000.0;
         LocalDate date = LocalDate.of(2023, 5, 15);
-        String paymentType = "TOP_UP";
+        PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP; // Change here
         String description = "Top up saldo";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
         Long userId = 1L;
@@ -56,7 +57,7 @@ public class PaymentTest {
         Long id = 2L;
         Double amount = 500000.0;
         LocalDate date = LocalDate.of(2023, 5, 15);
-        String paymentType = "KOST_PAYMENT";
+        PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT; // Change here
         String description = "Pembayaran kos bulan Mei";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
         Long userId = 1L;
@@ -95,7 +96,7 @@ public class PaymentTest {
         Long id = 3L;
         Double amount = 750000.0;
         LocalDate date = LocalDate.of(2023, 6, 15);
-        String paymentType = "KOST_PAYMENT";
+        PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT; // Change here
         String description = "Pembayaran kos bulan Juni";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.PENDING;
         Long userId = 1L;
@@ -149,5 +150,46 @@ public class PaymentTest {
         assertEquals("PENDING", PaymentStatusEnum.PENDING.name());
         assertEquals("FAILED", PaymentStatusEnum.FAILED.name());
         assertEquals("CANCELLED", PaymentStatusEnum.CANCELLED.name());
+    }
+
+    @Test
+    void testPaymentTypeEnum() {
+        // Test all enum values
+        assertEquals("TOP_UP", PaymentTypeEnum.TOP_UP.name());
+        assertEquals("KOST_PAYMENT", PaymentTypeEnum.KOST_PAYMENT.name());
+        assertEquals("WITHDRAWAL", PaymentTypeEnum.WITHDRAWAL.name());
+        assertEquals("REFUND", PaymentTypeEnum.REFUND.name());
+    }
+
+    @Test
+    void testPaymentWithTypeEnum() {
+        // Arrange
+        Long id = 4L;
+        Double amount = 250000.0;
+        LocalDate date = LocalDate.now();
+        PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
+        String description = "Top up via bank transfer";
+        PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
+        Long userId = 5L;
+
+        // Act
+        payment = paymentBuilder
+                .id(id)
+                .amount(amount)
+                .date(date)
+                .paymentType(paymentType)
+                .description(description)
+                .paymentStatus(paymentStatus)
+                .userId(userId)
+                .build();
+
+        // Assert
+        assertEquals(id, payment.getId());
+        assertEquals(amount, payment.getAmount());
+        assertEquals(date, payment.getDate());
+        assertEquals(paymentType, payment.getPaymentType());
+        assertEquals(description, payment.getDescription());
+        assertEquals(paymentStatus, payment.getPaymentStatus());
+        assertEquals(userId, payment.getUserId());
     }
 }
