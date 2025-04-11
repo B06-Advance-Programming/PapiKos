@@ -50,3 +50,11 @@ tasks.register<Test>("unitTest") {
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
+
+tasks.test{
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport{
+    dependsOn(tasks.test)
+}

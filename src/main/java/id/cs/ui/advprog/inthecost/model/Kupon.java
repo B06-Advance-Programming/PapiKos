@@ -26,7 +26,6 @@ public class Kupon{
     }
 
     private String generateKodeUnik(){
-        return UUID.randomUUID().toString().substring(0,6).toUpperCase();
+        return UUID.randomUUID().toString().substring(0,4).toUpperCase();
     }
-
 }
