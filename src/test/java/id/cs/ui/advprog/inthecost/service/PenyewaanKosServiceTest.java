@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PenyewaanKosServiceTest {
 
-    private PenyewaanKosServiceImpl service;
+    private PenyewaanKosService service;
     private PenyewaanKosRepository repository;
 
     @BeforeEach
@@ -53,9 +53,9 @@ public class PenyewaanKosServiceTest {
     public void testUpdateGagalJikaStatusDisetujui() {
         PenyewaanKos p = new PenyewaanKos();
         p.setNamaLengkap("Andi");
-        p.setStatus(StatusPenyewaan.DISETUJUI);
+        PenyewaanKos saved = service.create(p);
 
-        PenyewaanKos saved = repository.save(p);
+        p.setStatus(StatusPenyewaan.DISETUJUI);
         saved.setNamaLengkap("Tidak Boleh Diubah");
 
         assertThrows(IllegalStateException.class, () -> {
