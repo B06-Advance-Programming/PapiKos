@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.service;
 
+import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
@@ -26,9 +27,9 @@ public class PenyewaanKosServiceTest {
     @Test
     public void testCreatePenyewaan() {
         PenyewaanKos p = PenyewaanKosBuilder.builder()
-                        .namaLengkap("Ayu");
-                        .nomorTelepon("08123456789");
-                        .tanggalCheckIn(LocalDate.of(2025, 6, 1));
+                        .namaLengkap("Ayu")
+                        .nomorTelepon("08123456789")
+                        .tanggalCheckIn(LocalDate.of(2025, 6, 1))
                         .durasiBulan(3)
                         .build();
 
@@ -40,7 +41,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testUpdatePenyewaanBerhasilJikaDiajukan() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Rina").build;
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Rina").build();
         PenyewaanKos saved = service.create(p);
 
         saved.setNamaLengkap("Rina Update");
@@ -51,7 +52,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testUpdateGagalJikaStatusDisetujui() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Andi").build;
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Andi").build();
         PenyewaanKos saved = service.create(p);
 
         p.setStatus(StatusPenyewaan.DISETUJUI);
@@ -64,7 +65,7 @@ public class PenyewaanKosServiceTest {
 
     @Test
     public void testDeletePenyewaan() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Bayu").build;
+        PenyewaanKos p = PenyewaanKosBuilder.builder().namaLengkap("Bayu").build();
         PenyewaanKos saved = service.create(p);
 
         service.delete(saved.getId());

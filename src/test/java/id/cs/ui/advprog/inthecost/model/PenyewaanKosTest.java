@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,10 @@ public class PenyewaanKosTest {
         kos.setHargaSewaBulanan(1500000);
 
         penyewaan = PenyewaanKosBuilder.builder()
-                    .namaLengkap("Budi Santoso");
-                    .nomorTelepon("08123456789");
-                    .tanggalCheckIn(LocalDate.of(2025, 5, 1));
-                    .durasiBulan(6);
+                    .namaLengkap("Budi Santoso")
+                    .nomorTelepon("08123456789")
+                    .tanggalCheckIn(LocalDate.of(2025, 5, 1))
+                    .durasiBulan(6)
                     .kos(kos)
                     .build();
     }

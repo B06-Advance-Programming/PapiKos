@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.repository;
 
+import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.KosSewa;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
@@ -32,10 +33,10 @@ public class PenyewaanKosRepositoryTest {
     @Test
     public void testCreatePenyewaan() {
         PenyewaanKos penyewaan = PenyewaanKosBuilder.builder()
-                                .namaLengkap("Andi");
-                                .nomorTelepon("08123456789");
-                                .tanggalCheckIn(LocalDate.of(2025, 6, 1));
-                                .durasiBulan(3);
+                                .namaLengkap("Andi")
+                                .nomorTelepon("08123456789")
+                                .tanggalCheckIn(LocalDate.of(2025, 6, 1))
+                                .durasiBulan(3)
                                 .kos(kos)
                                 .build();
 
