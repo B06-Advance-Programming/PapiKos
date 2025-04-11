@@ -1,17 +1,9 @@
-name: Continuous Integration (CI)
-
+name: Unit Test
 on:
   push:
-    branches:
-      - main
-      - kupon
+    branches: [ staging, auth, kupon, payment, pengelolaan_kos, penyewaan_kos, wishlist]
   pull_request:
-    branches:
-      - main
-      - kupon
-
-permissions:
-  contents: read
+    branches: [ staging, auth, kupon, payment, pengelolaan_kos, penyewaan_kos, wishlist]
 
 jobs:
   test:
@@ -27,3 +19,9 @@ jobs:
           distribution: "temurin"
           java-version: "21"
           cache: "gradle"
+
+      - name: Add gradlew permission
+        run: chmod +x gradlew
+
+      - name: Run unit tests
+        run: ./gradlew test
