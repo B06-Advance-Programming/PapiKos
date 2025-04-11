@@ -1,4 +1,4 @@
-package id.cs.ui.advprog.inthecost;
+package id.cs.ui.advprog.inthecost.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
