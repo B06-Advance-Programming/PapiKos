@@ -1,5 +1,7 @@
 package id.cs.ui.advprog.inthecost.observer;
 
+import id.cs.ui.advprog.inthecost.model.Kos;
+import id.cs.ui.advprog.inthecost.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
