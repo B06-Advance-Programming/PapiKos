@@ -25,7 +25,7 @@ public class PaymentTest {
         LocalDate date = LocalDate.of(2023, 5, 15);
         String paymentType = "TOP_UP";
         String description = "Top up saldo";
-        String paymentStatus = "SUCCESS";
+        PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
         Long userId = 1L;
 
         // Act
@@ -57,7 +57,7 @@ public class PaymentTest {
         LocalDate date = LocalDate.of(2023, 5, 15);
         String paymentType = "KOST_PAYMENT";
         String description = "Pembayaran kos bulan Mei";
-        String paymentStatus = "SUCCESS";
+        PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
         Long userId = 1L;
         Long ownerId = 2L;
         Long kostId = 3L;
@@ -96,7 +96,7 @@ public class PaymentTest {
         LocalDate date = LocalDate.of(2023, 6, 15);
         String paymentType = "KOST_PAYMENT";
         String description = "Pembayaran kos bulan Juni";
-        String paymentStatus = "PENDING";
+        PaymentStatus paymentStatus = PaymentStatus.PENDING;
         Long userId = 1L;
         Long ownerId = 2L;
         Long kostId = 3L;
@@ -139,5 +139,14 @@ public class PaymentTest {
         assertNull(payment.getUserId());
         assertNull(payment.getOwnerId());
         assertNull(payment.getKostId());
+    }
+
+    @Test
+    void testPaymentStatusEnum() {
+        // Test all enum values
+        assertEquals("SUCCESS", PaymentStatus.SUCCESS.name());
+        assertEquals("PENDING", PaymentStatus.PENDING.name());
+        assertEquals("FAILED", PaymentStatus.FAILED.name());
+        assertEquals("CANCELLED", PaymentStatus.CANCELLED.name());
     }
 }
