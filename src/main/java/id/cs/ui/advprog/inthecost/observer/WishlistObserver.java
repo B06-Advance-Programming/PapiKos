@@ -3,6 +3,8 @@ package id.cs.ui.advprog.inthecost.observer;
 import id.ac.ui.cs.papikos.model.Kos;
 import id.ac.ui.cs.papikos.service.NotificationService;
 
+import java.util.Observer;
+
 public class WishlistObserver implements Observer {
 
     private NotificationService notificationService;
