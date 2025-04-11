@@ -3,17 +3,14 @@ package id.cs.ui.advprog.inthecost.Model;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.UUID;
-
 public class KostTest {
-
     // 1. Test Constructor tanpa parameter (kosID harus auto-generate)
     @Test
     public void testConstructorTanpaParameter() {
         Kost kost = new Kost();
 
         // Pastikan kosID auto-generated
-        assertNotNull(kost.getKosID(), "kosID seharusnya otomatis ter-generate");
+        assertNotNull(kost.getKostID(), "kosID seharusnya otomatis ter-generate");
     }
 
     // 2. Test Constructor dengan parameter
@@ -27,7 +24,7 @@ public class KostTest {
 
         Kost kost = new Kost(nama, alamat, deskripsi, jumlahKamar, hargaPerBulan);
 
-        assertNotNull(kost.getKosID(), "kosID harus ter-generate");
+        assertNotNull(kost.getKostID(), "kosID harus ter-generate");
         assertEquals(nama, kost.getNama());
         assertEquals(alamat, kost.getAlamat());
         assertEquals(deskripsi, kost.getDeskripsi());
@@ -40,15 +37,12 @@ public class KostTest {
     public void testSetterDanGetter() {
         Kost kost = new Kost();
 
-        UUID customID = UUID.randomUUID();
-        kost.setKosID(customID);
         kost.setNama("Kos Anggrek");
         kost.setAlamat("Jl. Kenanga No. 12");
         kost.setDeskripsi("Kos sejuk dan bersih");
         kost.setJumlahKamar(5);
         kost.setHargaPerBulan(650000);
 
-        assertEquals(customID, kost.getKosID());
         assertEquals("Kos Anggrek", kost.getNama());
         assertEquals("Jl. Kenanga No. 12", kost.getAlamat());
         assertEquals("Kos sejuk dan bersih", kost.getDeskripsi());
@@ -109,7 +103,7 @@ public class KostTest {
         Kost kost1 = new Kost("Kos A", "Jl. A", "Dekat kampus", 12, 850000);
         Kost kost2 = new Kost("Kos B", "Jl. B", "Dekat pusat perbelanjaan", 8, 900000);
 
-        assertNotEquals(kost1.getKosID(), kost2.getKosID(), "KosID harus unik untuk setiap instance");
+        assertNotEquals(kost1.getKostID(), kost2.getKostID(), "KosID harus unik untuk setiap instance");
     }
 
     // 8. Test untuk nama tidak boleh kosong
