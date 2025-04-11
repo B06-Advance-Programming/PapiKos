@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,4 +15,5 @@ public class PenyewaanKos {
     private LocalDate tanggalCheckIn;
     private int durasiBulan;
     private KosSewa kos;
+    private StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
 }
