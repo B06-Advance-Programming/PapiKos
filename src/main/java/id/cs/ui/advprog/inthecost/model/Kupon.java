@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
 import java.time.format.DateTimeFormatter;
 
 import id.cs.ui.advprog.inthecost.enums.KuponStatus;
@@ -28,14 +30,16 @@ public class Kupon{
     private KuponStatus statusKupon;
     private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
     private boolean kuponGlobal;
+    private List<String> kosPemilik = new ArrayList<>();
 
-    public Kupon(String pemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
+    public Kupon(String pemilik, List<String> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
         validateInput(pemilik, masaBerlaku, persentase, deskripsi);
         this.idKupon = generateIdKupon();
         this.pemilik = pemilik;
         this.kodeUnik = generateKodeUnik();
         this.persentase = persentase;
         this.masaBerlaku = masaBerlaku;
+        this.kosPemilik = kosPemilik;
         refreshStatus();
         this.deskripsi = deskripsi;
         this.kuponGlobal = kuponGlobal;
