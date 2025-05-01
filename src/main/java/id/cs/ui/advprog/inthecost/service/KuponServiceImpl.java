@@ -20,7 +20,12 @@ public class KuponServiceImpl implements KuponService {
     }
 
     @Override
-    public Kupon updateKupon(Kupon kupon){return null;}
+    public Kupon updateKupon(Kupon kupon){
+        if (kuponRepository.findById(kupon.getIdKupon()) == null) {
+            throw new NoSuchElementException("Kupon tidak ditemukan.");
+        }
+        return kuponRepository.save(kupon);
+    }
 
     @Override
     public Kupon getKuponById(String id) {
