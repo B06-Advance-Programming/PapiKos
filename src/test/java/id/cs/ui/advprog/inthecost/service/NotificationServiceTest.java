@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NotificationServiceTest {
 
@@ -66,7 +67,18 @@ public class NotificationServiceTest {
 
         List<InboxNotification> result = notificationService.getInbox(userId);
 
-        assert result.size() == 1;
-        assert result.get(0).getMessage().contains("Sakura");
+        assertEquals(1, result.size());
+        assertEquals("Kamar tersedia di Kos Sakura", result.get(0).getMessage());
+    }
+
+    @Test
+    void testNotifyUsersHandlesNullWishlist() {
+        Kos kos = mock(Kos.class);
+        when(kos.getKosName()).thenReturn("Kos Null Wishlist");
+        when(kos.getWishlistedBy()).thenReturn(null);
+
+        notificationService.notifyUsers(kos);
+
+        verifyNoInteractions(inboxRepositoryMock);
     }
 }
