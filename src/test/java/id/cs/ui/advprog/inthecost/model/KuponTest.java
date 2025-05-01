@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,8 +19,9 @@ public class KuponTest {
         LocalDate masaBerlaku = LocalDate.of(2026, 10, 10);
         String deskripsi = "Kupon Lebaran Idul Fitri 2026";
         boolean kuponGlobal = true;
+        List<String> kosPemilik = List.of("KOS1", "KOS2");
 
-        this.kupon = new Kupon(pemilik, masaBerlaku, persentase, deskripsi,kuponGlobal);
+        this.kupon = new Kupon(pemilik, kosPemilik, masaBerlaku, persentase, deskripsi,kuponGlobal);
     }
 
     @Test
@@ -27,6 +29,9 @@ public class KuponTest {
 
     @Test
     void testGetPemilikKupon(){assertEquals("Admin", this.kupon.getPemilik());}
+
+    @Test
+    void testGetKosPemilikKupon(){assertEquals(List.of("KOS1", "KOS2"), this.kupon.getKosPemilik());}
 
     @Test
     void testGetPersentase(){assertEquals(10, this.kupon.getPersentase());}
@@ -49,40 +54,46 @@ public class KuponTest {
     @Test
     void testPemilikNull(){
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon(null, LocalDate.of(2026, 4, 10), 10, "Kupon Lebaran Idul Fitri 2026", true);
+            Kupon newKupon = new Kupon(null, List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), 10, "Kupon Lebaran Idul Fitri 2026", true);
         });
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon("", LocalDate.of(2026, 4, 10), 10, "Kupon Lebaran Idul Fitri 2026", true);
+            Kupon newKupon = new Kupon("", List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), 10, "Kupon Lebaran Idul Fitri 2026", true);
         });
+    }
+
+    @Test
+    void testUpdateKosPemilik(){
+        this.kupon.setKosPemilik(List.of("KOS1", "KOS3", "KOS4"));
+        assertEquals(List.of("KOS1", "KOS3", "KOS4"), this.kupon.getKosPemilik());
     }
 
     @Test
     void testMasaBerlakuNull(){
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon("Admin", null, 10, "Kupon Lebaran Idul Fitri 2026", true);
+            Kupon newKupon = new Kupon("Admin", List.of("KOS1", "KOS2") ,null, 10, "Kupon Lebaran Idul Fitri 2026", true);
         });
     }
 
     @Test
     void testPersentaseInvalid(){
         assertThrows(IllegalArgumentException.class, () -> {
-            Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), -30, "Kupon Lebaran Idul Fitri 2026", true);
+            Kupon newKupon = new Kupon("Admin", List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), -30, "Kupon Lebaran Idul Fitri 2026", true);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), 0, "Kupon Lebaran Idul Fitri 2026", true);
+            Kupon newKupon = new Kupon("Admin", List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), 0, "Kupon Lebaran Idul Fitri 2026", true);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), 129, "Kupon Lebaran Idul Fitri 2026", true);
+            Kupon newKupon = new Kupon("Admin", List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), 129, "Kupon Lebaran Idul Fitri 2026", true);
         });
     }
 
     @Test
     void testDeskripsiNull(){
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), 10, null, true);
+            Kupon newKupon = new Kupon("Admin", List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), 10, null, true);
         });
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon("Admin", LocalDate.of(2026, 4, 10), 10, "", true);
+            Kupon newKupon = new Kupon("Admin", List.of("KOS1", "KOS2"),LocalDate.of(2026, 4, 10), 10, "", true);
         });
     }
 

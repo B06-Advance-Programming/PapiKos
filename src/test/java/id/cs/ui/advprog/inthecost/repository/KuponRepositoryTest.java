@@ -22,13 +22,13 @@ public class KuponRepositoryTest {
 
         kuponList = new ArrayList<>();
 
-        Kupon kupon1 = new Kupon("PemilikKos1", LocalDate.of(2025, 10, 20), 15, "Kupon Hari Pahlawan 2025", false);
+        Kupon kupon1 = new Kupon("PemilikKos1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 10, 20), 15, "Kupon Hari Pahlawan 2025", false);
         kuponList.add(kupon1);
 
-        Kupon kupon2 = new Kupon("PemilikKos1", LocalDate.of(2026, 3, 1), 15, "Kupon Tahun Baru 2025", false);
+        Kupon kupon2 = new Kupon("PemilikKos1", List.of("KOS3", "KOS4"),LocalDate.of(2026, 3, 1), 15, "Kupon Tahun Baru 2025", false);
         kuponList.add(kupon2);
 
-        Kupon kupon3 = new Kupon("Admin", LocalDate.of(2025, 5, 22), 15, "Kupon Pendatang Baru", true);
+        Kupon kupon3 = new Kupon("Admin", List.of("KOS1", "KOS2", "KOS3", "KOS4", "KOS5", "KOS6"),LocalDate.of(2025, 5, 22), 15, "Kupon Pendatang Baru", true);
         kuponList.add(kupon3);
     }
 
@@ -43,6 +43,7 @@ public class KuponRepositoryTest {
         assertEquals(result.getStatusKupon(), findResult.getStatusKupon());
         assertEquals(result.getDeskripsi(),findResult.getDeskripsi());
         assertEquals(result.getPemilik(), findResult.getPemilik());
+        assertEquals(result.getKosPemilik(), findResult.getKosPemilik());
         assertEquals(result.getPersentase(), findResult.getPersentase());
         assertEquals(result.getMasaBerlaku(), findResult.getMasaBerlaku());
         assertEquals(result.getKodeUnik(), findResult.getKodeUnik());
@@ -50,17 +51,20 @@ public class KuponRepositoryTest {
 
     @Test
     void testSaveUpdateKupon(){
-        Kupon kupon = new Kupon("user1", LocalDate.of(2025, 4, 10), 30, "Diskon awal", false);
+        Kupon kupon = new Kupon("user1", List.of("KOS5"),LocalDate.of(2025, 4, 10), 30, "Diskon awal", false);
         kuponRepository.save(kupon);
 
         kupon.setMasaBerlaku(LocalDate.now().plusDays(10));
         kupon.setDeskripsi("Diskon Update");
         kupon.setPersentase(25);
+        kupon.setKosPemilik(List.of("KOS5", "KOS6"));
+
         kuponRepository.save(kupon);
 
         Kupon updated = kuponRepository.findById(kupon.getIdKupon());
         assertNotNull(updated);
         assertEquals(kupon.getPemilik(), updated.getPemilik());
+        assertEquals(List.of("KOS5", "KOS6"), updated.getKosPemilik());
         assertEquals(kupon.getKodeUnik(), updated.getKodeUnik());
         assertEquals("Diskon Update", updated.getDeskripsi());
         assertEquals(25, updated.getPersentase());
@@ -78,6 +82,7 @@ public class KuponRepositoryTest {
 
         assertEquals(target.getIdKupon(), findResult.getIdKupon());
         assertEquals(target.getPemilik(), findResult.getPemilik());
+        assertEquals(target.getKosPemilik(), findResult.getKosPemilik());
         assertEquals(target.getKodeUnik(), findResult.getKodeUnik());
         assertEquals(target.getDeskripsi(), findResult.getDeskripsi());
         assertEquals(target.getPersentase(), findResult.getPersentase());
@@ -105,6 +110,7 @@ public class KuponRepositoryTest {
 
         assertEquals(target.getIdKupon(), findResult.getIdKupon());
         assertEquals(target.getPemilik(), findResult.getPemilik());
+        assertEquals(target.getKosPemilik(), findResult.getKosPemilik());
         assertEquals(target.getKodeUnik(), findResult.getKodeUnik());
         assertEquals(target.getDeskripsi(), findResult.getDeskripsi());
         assertEquals(target.getPersentase(), findResult.getPersentase());

@@ -30,11 +30,12 @@ public class KuponServiceTest {
 
     @Test
     public void testCreateKupon(){
-        Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Kupon addedKupon = kuponService.createKupon(kupon);
         assertEquals(kupon.getIdKupon(), addedKupon.getIdKupon());
         assertEquals(kupon.getPemilik(), addedKupon.getPemilik());
+        assertEquals(kupon.getKosPemilik(), addedKupon.getKosPemilik());
         assertEquals(kupon.getKodeUnik(), addedKupon.getKodeUnik());
         assertEquals(kupon.getDeskripsi(), addedKupon.getDeskripsi());
         assertEquals(kupon.getPersentase(), addedKupon.getPersentase());
@@ -45,18 +46,20 @@ public class KuponServiceTest {
 
     @Test
     public void testUpdateKupon(){
-        Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(kuponRepository.findByKodeUnik(kupon.getKodeUnik())).thenReturn(null);
         Kupon addedKupon = kuponService.createKupon(kupon);
         addedKupon.setPersentase(15);
         addedKupon.setDeskripsi("New Kupon Edit");
         addedKupon.setMasaBerlaku(LocalDate.of(2025, 10, 10));
+        addedKupon.setKosPemilik(List.of("KOS2", "KOS3"));
         when(kuponRepository.findById(addedKupon.getIdKupon())).thenReturn(addedKupon);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Kupon editedKupon = kuponService.updateKupon(addedKupon);
         assertEquals(addedKupon.getIdKupon(), editedKupon.getIdKupon());
         assertEquals(addedKupon.getPemilik(), editedKupon.getPemilik());
+        assertEquals(addedKupon.getKosPemilik(), editedKupon.getKosPemilik());
         assertEquals(addedKupon.getKodeUnik(), editedKupon.getKodeUnik());
         assertEquals(addedKupon.getDeskripsi(), editedKupon.getDeskripsi());
         assertEquals(addedKupon.getPersentase(), editedKupon.getPersentase());
@@ -67,7 +70,7 @@ public class KuponServiceTest {
 
     @Test
     public void testGetKuponByIdSuccess(){
-        Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
         when(kuponRepository.findById(kupon.getIdKupon())).thenReturn(kupon);
         Kupon result = kuponService.getKuponById(kupon.getIdKupon());
         assertEquals(kupon, result);
@@ -81,7 +84,7 @@ public class KuponServiceTest {
 
     @Test
     public void testGetKuponByKodeUnikSuccess(){
-        Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
         when(kuponRepository.findByKodeUnik(kupon.getKodeUnik())).thenReturn(kupon);
         Kupon result = kuponService.getKuponByKodeUnik(kupon.getKodeUnik());
         assertEquals(kupon, result);
@@ -95,7 +98,7 @@ public class KuponServiceTest {
 
     @Test
     void testDeleteKuponSuccess() {
-        Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Kupon createdKupon = kuponService.createKupon(kupon);
 
@@ -113,8 +116,8 @@ public class KuponServiceTest {
 
     @Test
     void testGetAllKupon() {
-        Kupon kupon1 = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
-        Kupon kupon2 = new Kupon("Admin", LocalDate.of(2026, 10, 22), 20, "Admin Kupon Test", true);
+        Kupon kupon1 = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+        Kupon kupon2 = new Kupon("Admin", List.of("KOS1", "KOS2", "KOS3", "KOS4"),LocalDate.of(2026, 10, 22), 20, "Admin Kupon Test", true);
         List<Kupon> list = List.of(kupon1, kupon2);
 
         when(kuponRepository.findAll()).thenReturn(list);
