@@ -1,17 +1,35 @@
 package id.cs.ui.advprog.inthecost.Model;
 import id.cs.ui.advprog.inthecost.Exception.*;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
+import jakarta.persistence.Column;
 
 import java.util.UUID;
 
 @Getter
+@Entity
+@Table(name = "kost")
 public class Kost {
+    @Id
+    @Column(name = "kost_id")
     private UUID kostID;
+
+    @Column(name = "nama")
     private String nama;
+
+    @Column(name = "alamat")
     private String alamat;
+
+    @Column(name = "deskripsi")
     private String deskripsi;
+
+    @Column(name = "jumlah_kamar")
     private int jumlahKamar;
+
+    @Column(name = "harga_per_bulan")
     private int hargaPerBulan;
 
     // manual set each times
