@@ -47,11 +47,14 @@ public class KuponServiceTest {
     public void testUpdateKupon(){
         Kupon kupon = new Kupon("user1", LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(kuponRepository.findByKodeUnik(kupon.getKodeUnik())).thenReturn(null);
         Kupon addedKupon = kuponService.createKupon(kupon);
         addedKupon.setPersentase(15);
         addedKupon.setDeskripsi("New Kupon Edit");
         addedKupon.setMasaBerlaku(LocalDate.of(2025, 10, 10));
-        Kupon editedKupon = kuponService.createKupon(addedKupon);
+        when(kuponRepository.findById(addedKupon.getIdKupon())).thenReturn(addedKupon);
+        when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Kupon editedKupon = kuponService.updateKupon(addedKupon);
         assertEquals(addedKupon.getIdKupon(), editedKupon.getIdKupon());
         assertEquals(addedKupon.getPemilik(), editedKupon.getPemilik());
         assertEquals(addedKupon.getKodeUnik(), editedKupon.getKodeUnik());
