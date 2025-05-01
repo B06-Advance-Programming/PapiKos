@@ -33,4 +33,11 @@ public class InboxNotificationTest {
         InboxNotification notif = new InboxNotification("user2", "Notif contoh");
         assertNotNull(notif.toString());
     }
+
+    @Test
+    void testDefaultCreatedAt() {
+        InboxNotification notif = new InboxNotification("user3", "Default timestamp test");
+        assertNotNull(notif.getCreatedAt());
+        assertTrue(notif.getCreatedAt().isBefore(LocalDateTime.now().plusSeconds(1)));
+    }
 }
