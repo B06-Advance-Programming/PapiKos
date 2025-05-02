@@ -4,7 +4,7 @@ import id.cs.ui.advprog.inthecost.Exception.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class KostTest {
+public class KostModelTest {
     // 1. Test Constructor tanpa parameter (kosID harus auto-generate)
     @Test
     public void testConstructorTanpaParameter() {

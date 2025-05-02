@@ -43,6 +43,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // untuk user
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 tasks.register<Test>("unitTest") {
