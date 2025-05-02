@@ -40,6 +40,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.register<Test>("unitTest") {
@@ -57,4 +60,12 @@ tasks.test{
 
 tasks.jacocoTestReport{
     dependsOn(tasks.test)
+}
+
+tasks.bootJar {
+    archiveClassifier.set("")
+}
+
+tasks.jar {
+    enabled = false
 }

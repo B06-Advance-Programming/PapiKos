@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,11 +17,20 @@ import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
 
 @Getter
 @Setter
+@Entity
+@Table(name = "kupon")
 public class Kupon{
     @Setter(AccessLevel.NONE)
-    private String idKupon;
+    @Id
+    @Column(name = "id_kupon", nullable = false, columnDefinition = "uuid")
+    private UUID idKupon;
+
     @Setter(AccessLevel.NONE)
-    private String pemilik; //To be updated
+    @ManyToOne
+    @JoinColumn(name = "pemilik", nullable = false)
+    private Pengguna pemilik;
+
+
     @Setter(AccessLevel.NONE)
     private String kodeUnik;
     private int persentase;
