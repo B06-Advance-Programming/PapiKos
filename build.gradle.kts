@@ -39,6 +39,9 @@ dependencies {
     implementation("org.postgresql:postgresql")
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // untuk user
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 tasks.withType<Test> {
