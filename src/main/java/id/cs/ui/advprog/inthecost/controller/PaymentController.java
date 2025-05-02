@@ -26,8 +26,7 @@ public class PaymentController {
      * buat logging aja
      */
     private void logRequestContext(String testingMode, String methodName) {
-        boolean isTestRequest = "true".equalsIgnoreCase(testingMode);
-        if (isTestRequest) {
+        if ("true".equalsIgnoreCase(testingMode)) {
             System.out.println(methodName + " called from test context");
         } else {
             System.out.println(methodName + " called from normal runtime");
@@ -35,47 +34,43 @@ public class PaymentController {
     }
 
     /**
-     * Validate if user session is active and valid
-     * // Mockup: replace with real integration logic
+     * Validate jika session user aktif dan valid
+     * // Mockup: ganti dengan integrasi service sesungguhnya
      */
     private boolean validateUserSession(Long userId) {
-        // TODO: implement real session validation with auth service
         System.out.println("Validate session for userId=" + userId + " (mockup always true)");
         return true;
     }
 
     /**
-     * Check if a kost payment is already made by user for that kost and period
-     * // Mockup: replace with real persistence check
+     * Cek apakah user sudah bayar kost untuk periode tersebut
+     * // Mockup: ganti dengan cek persistence data asli
      */
     private boolean isKostAlreadyPaid(Long userId, Long kostId) {
-        // TODO: check from DB or payment service if kost already paid for user and kostId
         System.out.println("Checking if kost is already paid userId=" + userId + ", kostId=" + kostId + " (mockup false)");
         return false;
     }
 
     /**
-     * Check if the kostId belongs to user or is allowed for user to pay
-     * // Mockup: replace with real ownership check
+     * Cek apakah kost tersebut milik user atau user berhak bayar
+     * // Mockup: ganti dengan cek kepemilikan yang sebenarnya
      */
     private boolean isUserAllowedToPayKost(Long userId, Long kostId) {
-        // TODO: verify kost ownership or permission
         System.out.println("Validating kost ownership userId=" + userId + ", kostId=" + kostId + " (mockup true)");
         return true;
     }
 
     /**
-     * Validate discount coupon: check coupon code validity and remaining quantity
-     * // Mockup: replace with real coupon validation
+     * Validasi kupon diskon: validasi kode kupon dan sisa kuantitas
+     * // Mockup: ganti dengan validasi kupon asli
      */
     private boolean isCouponValid(String couponCode, int quantity) {
-        // TODO: validate coupon code and quantity left for that coupon
         System.out.println("Validating couponCode=" + couponCode + ", quantity=" + quantity + " (mockup true)");
         return true;
     }
 
     /**
-     * API untuk top up balance user
+     * API untuk top up saldo user
      */
     @PostMapping("/topup")
     public ResponseEntity<?> topUp(
@@ -88,14 +83,14 @@ public class PaymentController {
             return ResponseEntity.status(401).body("Invalid user session");
         }
 
-        // Assume top-up does not accept coupon/discount currently
+        // Top-up saat ini belum menerima kupon/diskon
         Payment payment = paymentService.recordTopUpPayment(req.getUserId(), req.getAmount(), req.getDescription());
+
         return ResponseEntity.ok(payment);
     }
 
-
     /**
-     * API untuk pembayaran kos
+     * API untuk pembayaran kos dengan validasi dan dukungan diskon
      */
     @PostMapping("/kost")
     public ResponseEntity<?> kostPayment(
@@ -108,24 +103,20 @@ public class PaymentController {
             return ResponseEntity.status(401).body("Invalid user session");
         }
 
-        // Validate kost ownership
         if (!isUserAllowedToPayKost(req.getUserId(), req.getKostId())) {
-            return ResponseEntity.status(403).body("User not allowed to pay for this kost");
+            return ResponseEntity.status(403).body("User tidak diizinkan membayar kost ini");
         }
 
-        // Check if already paid
         if (isKostAlreadyPaid(req.getUserId(), req.getKostId())) {
-            return ResponseEntity.badRequest().body("Kost already paid for this period");
+            return ResponseEntity.badRequest().body("Kost sudah dibayar untuk periode ini");
         }
 
-        // Validate coupon if provided
-        if (req.getCouponCode() != null && !req.getCouponCode().isEmpty()) {
-            if (!isCouponValid(req.getCouponCode(), req.getCouponQuantity())) {
-                return ResponseEntity.badRequest().body("Invalid or exhausted coupon");
+        if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
+            if (!isCouponValid(req.getCouponCode(), req.getCouponQuantity() != null ? req.getCouponQuantity() : 0)) {
+                return ResponseEntity.badRequest().body("Kupon tidak valid atau kuantitas habis");
             }
         }
 
-        // Calculate discounted amount if coupon applied
         double finalAmount = req.getAmount();
         if (req.getDiscountPrice() != null && req.getDiscountPrice() > 0) {
             finalAmount = req.getAmount() - req.getDiscountPrice();
@@ -137,14 +128,14 @@ public class PaymentController {
                 req.getOwnerId(),
                 req.getKostId(),
                 finalAmount,
-                req.getDescription());
+                req.getDescription()
+        );
 
         return ResponseEntity.ok(payment);
     }
 
-
     /**
-     * API untuk transaksi pengguna lengkap
+     * API untuk mendapatkan riwayat transaksi lengkap user, harus valid session
      */
     @GetMapping("/history/{userId}")
     public ResponseEntity<?> getTransactionHistory(
@@ -152,16 +143,17 @@ public class PaymentController {
             @RequestHeader(value = "X-Session-Token", required = false) String sessionToken) {
 
         if (!validateUserSession(userId)) {
-            return ResponseEntity.status(401).body("Invalid or expired session");
+            return ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa");
         }
 
         List<Payment> history = paymentService.getTransactionHistory(userId);
+
         return ResponseEntity.ok(history);
     }
 
-
     /**
-     * API untuk filtered transaksi pengguna berdasarkan tanggal atau payment type
+     * API untuk mendapatkan riwayat transaksi user yang difilter berdasarkan tanggal atau tipe pembayaran,
+     * harus valid session
      */
     @GetMapping("/history/{userId}/filter")
     public ResponseEntity<?> getFilteredTransactionHistory(
@@ -172,14 +164,15 @@ public class PaymentController {
             @RequestHeader(value = "X-Session-Token", required = false) String sessionToken) {
 
         if (!validateUserSession(userId)) {
-            return ResponseEntity.status(401).body("Invalid or expired session");
+            return ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa");
         }
 
         List<Payment> filtered = paymentService.getFilteredTransactionHistory(userId, paymentType, startDate, endDate);
+
         return ResponseEntity.ok(filtered);
     }
 
-
+    /** DTO request untuk top-up */
     public static class TopUpRequest {
         private Long userId;
         private Double amount;
@@ -195,6 +188,7 @@ public class PaymentController {
         public void setDescription(String description) { this.description = description; }
     }
 
+    /** DTO request untuk pembayaran kost dengan dukungan kupon/diskon */
     public static class KostPaymentRequest {
         private Long userId;
         private Long ownerId;
@@ -202,10 +196,9 @@ public class PaymentController {
         private Double amount;
         private String description;
 
-        // Adding coupon fields
-        private String couponCode;        // nullable coupon code
-        private Integer couponQuantity;   // nullable quantity for coupon
-        private Double discountPrice;     // nullable discount price
+        private String couponCode;        // kupon bisa null
+        private Integer couponQuantity;   // jumlah kupon bisa null
+        private Double discountPrice;     // harga diskon bisa null
 
         public Long getUserId() { return userId; }
         public void setUserId(Long userId) { this.userId = userId; }
