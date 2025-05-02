@@ -73,11 +73,11 @@ public class UserRepositoryTest {
 
         userRepository.save(user);
 
-        Optional<User> foundUser = userRepository.findByEmail("john@example.com");
+        Optional<User> foundUser = userRepository.findByEmail("johnbukandoe@example.com");
 
         assertThat(foundUser).isPresent(); // Pastikan user ditemukan
         assertThat(foundUser.get().getUsername()).isEqualTo("john_doe");
-        assertThat(foundUser.get().getEmail()).isEqualTo("john@example.com");
+        assertThat(foundUser.get().getEmail()).isEqualTo("johnbukandoe@example.com");
         assertThat(foundUser.get().getRoles()).contains(userRole); // Pastikan role yang terkait ada
     }
 
