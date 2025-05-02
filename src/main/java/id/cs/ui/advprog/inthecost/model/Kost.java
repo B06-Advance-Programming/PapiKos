@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Getter
 @Entity
-@Table(name = "kost     ")
+@Table(name = "kost")
 public class Kost {
     @Id
     @Column(name = "kost_id")

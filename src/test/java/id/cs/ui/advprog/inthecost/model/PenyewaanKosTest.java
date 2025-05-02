@@ -12,16 +12,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PenyewaanKosTest {
 
     private PenyewaanKos penyewaan;
-    private KosSewa kos;
+    private Kost kos;
 
     @BeforeEach
     public void setUp() {
-        kos = new KosSewa();
+        kos = new Kost();
         kos.setNama("Kos Mawar");
         kos.setAlamat("Jl. Melati No. 2");
         kos.setDeskripsi("Kos nyaman dekat kampus");
         kos.setJumlahKamar(10);
-        kos.setHargaSewaBulanan(1500000);
+        kos.setHargaPerBulan(1500000);
 
         penyewaan = PenyewaanKosBuilder.builder()
                     .namaLengkap("Budi Santoso")
@@ -74,7 +74,7 @@ public class PenyewaanKosTest {
 
     @Test
     public void testGetKosHargaSewaBulanan() {
-        assertEquals(1500000, kos.getHargaSewaBulanan());
+        assertEquals(1500000, kos.getHargaPerBulan());
     }
 
     @Test

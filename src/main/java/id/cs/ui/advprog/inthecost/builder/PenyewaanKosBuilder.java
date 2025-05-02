@@ -1,7 +1,7 @@
 package id.cs.ui.advprog.inthecost.builder;
 
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
-import id.cs.ui.advprog.inthecost.model.KosSewa;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 
 import java.time.LocalDate;
@@ -12,7 +12,7 @@ public class PenyewaanKosBuilder {
     private String nomorTelepon;
     private LocalDate tanggalCheckIn;
     private int durasiBulan;
-    private KosSewa kos;
+    private Kost kos;
     private StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
 
     public static PenyewaanKosBuilder builder() {
@@ -44,7 +44,7 @@ public class PenyewaanKosBuilder {
         return this;
     }
 
-    public PenyewaanKosBuilder kos(KosSewa kos) {
+    public PenyewaanKosBuilder kos(Kost kos) {
         this.kos = kos;
         return this;
     }

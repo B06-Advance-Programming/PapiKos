@@ -2,7 +2,7 @@ package id.cs.ui.advprog.inthecost.repository;
 
 import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
-import id.cs.ui.advprog.inthecost.model.KosSewa;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,18 +16,17 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PenyewaanKosRepositoryTest {
 
     private PenyewaanKosRepository repository;
-    private KosSewa kos;
+    private Kost kos;
 
     @BeforeEach
     public void setUp() {
         repository = new PenyewaanKosRepository();
-        kos = new KosSewa();
-        kos.setId(1L);
+        kos = new Kost();
         kos.setNama("Kos Mawar");
         kos.setAlamat("Jl. Melati No. 2");
         kos.setDeskripsi("Kos nyaman");
         kos.setJumlahKamar(5);
-        kos.setHargaSewaBulanan(1200000);
+        kos.setHargaPerBulan(1200000);
     }
 
     @Test

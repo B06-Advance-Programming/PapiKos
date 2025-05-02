@@ -14,7 +14,7 @@ public class PenyewaanKos {
     private String nomorTelepon;
     private LocalDate tanggalCheckIn;
     private int durasiBulan;
-    private KosSewa kos;
+    private Kost kos;
     private StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
 
     public boolean isEditable() {
