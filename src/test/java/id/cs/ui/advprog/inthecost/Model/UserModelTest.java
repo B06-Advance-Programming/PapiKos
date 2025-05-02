@@ -1,4 +1,4 @@
-package id.cs.ui.advprog.inthecost.Model;
+package id.cs.ui.advprog.inthecost.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

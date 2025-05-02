@@ -1,7 +1,7 @@
-package id.cs.ui.advprog.inthecost.Repository;
+package id.cs.ui.advprog.inthecost.repository;
 
-import id.cs.ui.advprog.inthecost.Model.Role;
-import id.cs.ui.advprog.inthecost.Model.User;
+import id.cs.ui.advprog.inthecost.model.Role;
+import id.cs.ui.advprog.inthecost.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

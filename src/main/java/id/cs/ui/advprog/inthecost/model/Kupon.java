@@ -1,14 +1,11 @@
 package id.cs.ui.advprog.inthecost.model;
 
-import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.List;
-import java.util.ArrayList;
 import java.time.format.DateTimeFormatter;
 
 import id.cs.ui.advprog.inthecost.enums.KuponStatus;
@@ -17,20 +14,11 @@ import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "kupon")
 public class Kupon{
     @Setter(AccessLevel.NONE)
-    @Id
-    @Column(name = "id_kupon", nullable = false, columnDefinition = "uuid")
-    private UUID idKupon;
-
+    private String idKupon;
     @Setter(AccessLevel.NONE)
-    @ManyToOne
-    @JoinColumn(name = "pemilik", nullable = false)
-    private Pengguna pemilik;
-
-
+    private String pemilik; //To be updated
     @Setter(AccessLevel.NONE)
     private String kodeUnik;
     private int persentase;
@@ -40,16 +28,14 @@ public class Kupon{
     private KuponStatus statusKupon;
     private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
     private boolean kuponGlobal;
-    private List<String> kosPemilik = new ArrayList<>();
 
-    public Kupon(String pemilik, List<String> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
+    public Kupon(String pemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
         validateInput(pemilik, masaBerlaku, persentase, deskripsi);
         this.idKupon = generateIdKupon();
         this.pemilik = pemilik;
         this.kodeUnik = generateKodeUnik();
         this.persentase = persentase;
         this.masaBerlaku = masaBerlaku;
-        this.kosPemilik = kosPemilik;
         refreshStatus();
         this.deskripsi = deskripsi;
         this.kuponGlobal = kuponGlobal;
