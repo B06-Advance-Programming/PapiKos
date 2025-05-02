@@ -49,7 +49,6 @@ public class PaymentControllerTest {
         when(paymentService.recordTopUpPayment(1L, 150000.0, "Top Up via bank"))
                 .thenReturn(expectedPayment);
 
-        // Inject header with "true" to simulate test mode
         String testHeaderValue = "true";
 
         // Act
@@ -62,7 +61,7 @@ public class PaymentControllerTest {
     }
 
     @Test
-    void testKostPayment() {
+    void testKostPayment_withDiscount() {
         // Arrange
         PaymentController.KostPaymentRequest req = new PaymentController.KostPaymentRequest();
         req.setUserId(2L);
@@ -70,23 +69,29 @@ public class PaymentControllerTest {
         req.setKostId(5L);
         req.setAmount(500000.0);
         req.setDescription("Monthly Kost Payment");
+        // New discount/coupon related fields
+        req.setCouponCode("DISCOUNT2025");
+        req.setCouponQuantity(1);
+        req.setDiscountPrice(50000.0);  // discount 50k
+
+        double discountedAmount = req.getAmount() - req.getDiscountPrice(); // 450000.0
 
         Payment expectedPayment = new Payment.PaymentBuilder()
                 .id(2L)
                 .userId(2L)
                 .ownerId(20L)
                 .kostId(5L)
-                .amount(500000.0)
+                .amount(discountedAmount)
                 .description("Monthly Kost Payment")
                 .paymentType(PaymentTypeEnum.KOST_PAYMENT)
                 .paymentStatus(PaymentStatusEnum.SUCCESS)
                 .date(LocalDate.now())
                 .build();
 
-        when(paymentService.recordKostPayment(2L, 20L, 5L, 500000.0, "Monthly Kost Payment"))
+        // The mock expects the discounted amount passed
+        when(paymentService.recordKostPayment(2L, 20L, 5L, discountedAmount, "Monthly Kost Payment"))
                 .thenReturn(expectedPayment);
 
-        // Inject header with "true" to simulate test mode
         String testHeaderValue = "true";
 
         // Act
@@ -116,7 +121,7 @@ public class PaymentControllerTest {
         when(paymentService.getTransactionHistory(userId)).thenReturn(payments);
 
         // Act
-        var response = paymentController.getTransactionHistory(userId);
+        var response = paymentController.getTransactionHistory(userId, null);
 
         // Assert
         assertNotNull(response);
@@ -147,7 +152,7 @@ public class PaymentControllerTest {
                 .thenReturn(filteredPayments);
 
         // Act
-        var response = paymentController.getFilteredTransactionHistory(userId, paymentType, startDate, endDate);
+        var response = paymentController.getFilteredTransactionHistory(userId, paymentType, startDate, endDate, null);
 
         // Assert
         assertNotNull(response);
