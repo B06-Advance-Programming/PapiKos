@@ -44,7 +44,7 @@ public class KuponTest {
     void testGetPemilikKupon(){assertEquals("Admin", this.kupon.getPemilik().getUsername());}
 
     @Test
-    void testGetKosPemilikKupon(){assertEquals(List.of("Kos Alamanda", "KOS Griya Asri"), this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());}
+    void testGetKosPemilikKupon(){assertEquals(List.of("Kos Alamanda", "Kos Griya Asri"), this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());}
 
     @Test
     void testGetPersentase(){assertEquals(10, this.kupon.getPersentase());}
