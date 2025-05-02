@@ -1,6 +1,6 @@
-package id.cs.ui.advprog.inthecost.Repository;
+package id.cs.ui.advprog.inthecost.repository;
 
-import id.cs.ui.advprog.inthecost.Model.User;
+import id.cs.ui.advprog.inthecost.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 import java.util.UUID;

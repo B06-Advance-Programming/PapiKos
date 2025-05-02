@@ -1,6 +1,6 @@
-package id.cs.ui.advprog.inthecost.Repository;
+package id.cs.ui.advprog.inthecost.repository;
 
-import id.cs.ui.advprog.inthecost.Model.Kost;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

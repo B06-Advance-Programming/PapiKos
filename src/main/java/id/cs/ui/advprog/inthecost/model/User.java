@@ -1,4 +1,4 @@
-package id.cs.ui.advprog.inthecost.Model;
+package id.cs.ui.advprog.inthecost.model;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;

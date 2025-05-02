@@ -1,4 +1,4 @@
-package id.cs.ui.advprog.inthecost.Exception;
+package id.cs.ui.advprog.inthecost.exception;
 
 import lombok.Getter;
 

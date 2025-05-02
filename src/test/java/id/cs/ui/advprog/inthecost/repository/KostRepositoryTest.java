@@ -1,6 +1,6 @@
-package id.cs.ui.advprog.inthecost.Repository;
+package id.cs.ui.advprog.inthecost.repository;
 
-import id.cs.ui.advprog.inthecost.Model.Kost;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
