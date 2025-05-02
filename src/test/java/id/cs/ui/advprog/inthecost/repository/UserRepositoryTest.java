@@ -15,7 +15,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@Transactional
+//@Transactional
 public class UserRepositoryTest {
 
     @Autowired
@@ -69,7 +69,7 @@ public class UserRepositoryTest {
         // Uji apakah bisa menemukan pengguna berdasarkan username
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
+        User user = new User("john_doe", "password123", "johnbukandoe@example.com", roles);
 
         userRepository.save(user);
 
@@ -94,7 +94,7 @@ public class UserRepositoryTest {
         // Uji apakah user dapat dihapus
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
+        User user = new User("john_doe", "password123", "johdihapuskasiann@example.com", roles);
 
         User savedUser = userRepository.save(user);
 
@@ -131,7 +131,7 @@ public class UserRepositoryTest {
         // Uji apakah role dapat dikaitkan dengan user
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
+        User user = new User("john_doe", "password123", "johdioawundn@example.com", roles);
 
         User savedUser = userRepository.save(user);
 
