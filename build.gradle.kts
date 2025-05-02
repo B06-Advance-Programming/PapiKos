@@ -29,7 +29,9 @@ val junitJupiterVersion = "5.9.1"
 val mockitoVersion = "5.2.0"
 
 dependencies {
+    implementation("org.springframework.data:spring-data-commons:3.4.4")
     implementation("io.github.cdimascio:dotenv-java:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql:42.6.0")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
