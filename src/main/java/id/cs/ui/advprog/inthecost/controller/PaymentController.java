@@ -35,11 +35,26 @@ public class PaymentController {
      *     "description": "Top Up via bank transfer"
      * }
      *
+     * Header for test detection:
+     * X-Testing-Mode: true
+     *
      * Response: Returns the created Payment record with status 200 OK.
      */
-
     @PostMapping("/topup")
-    public ResponseEntity<Payment> topUp(@RequestBody TopUpRequest req) {
+    public ResponseEntity<Payment> topUp(
+            @RequestBody TopUpRequest req,
+            @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
+
+        boolean isTestRequest = "true".equalsIgnoreCase(testingMode);
+
+        if (isTestRequest) {
+            // test request
+            System.out.println("topUp called from test context");
+        } else {
+            // real request
+            System.out.println("topUp called from normal runtime");
+        }
+
         Payment payment = paymentService.recordTopUpPayment(req.getUserId(), req.getAmount(), req.getDescription());
         return ResponseEntity.ok(payment);
     }
@@ -60,11 +75,24 @@ public class PaymentController {
      *     "description": "Monthly Kost Payment for May"
      * }
      *
+     * Header for test detection:
+     * X-Testing-Mode: true
+     *
      * Response: Returns the created kost Payment record with status 200 OK.
      */
-
     @PostMapping("/kost")
-    public ResponseEntity<Payment> kostPayment(@RequestBody KostPaymentRequest req) {
+    public ResponseEntity<Payment> kostPayment(
+            @RequestBody KostPaymentRequest req,
+            @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
+
+        boolean isTestRequest = "true".equalsIgnoreCase(testingMode);
+
+        if (isTestRequest) {
+            System.out.println("kostPayment called from test context");
+        } else {
+            System.out.println("kostPayment called from normal runtime");
+        }
+
         Payment payment = paymentService.recordKostPayment(
                 req.getUserId(),
                 req.getOwnerId(),
@@ -73,6 +101,7 @@ public class PaymentController {
                 req.getDescription());
         return ResponseEntity.ok(payment);
     }
+
 
     /**
      * API untuk transaksi pengguna lengkap
@@ -85,12 +114,12 @@ public class PaymentController {
      *
      * Response: Returns a list of all Payment records of that user.
      */
-
     @GetMapping("/history/{userId}")
     public ResponseEntity<List<Payment>> getTransactionHistory(@PathVariable Long userId) {
         List<Payment> history = paymentService.getTransactionHistory(userId);
         return ResponseEntity.ok(history);
     }
+
 
     /**
      * API untuk filtered transaksi pengguna berdasarkan tanggal atau payment type
@@ -111,7 +140,6 @@ public class PaymentController {
      *
      * Response: Returns a list of Payment records matching filters.
      */
-
     @GetMapping("/history/{userId}/filter")
     public ResponseEntity<List<Payment>> getFilteredTransactionHistory(
             @PathVariable Long userId,
@@ -121,6 +149,7 @@ public class PaymentController {
         List<Payment> filtered = paymentService.getFilteredTransactionHistory(userId, paymentType, startDate, endDate);
         return ResponseEntity.ok(filtered);
     }
+
 
     public static class TopUpRequest {
         private Long userId;

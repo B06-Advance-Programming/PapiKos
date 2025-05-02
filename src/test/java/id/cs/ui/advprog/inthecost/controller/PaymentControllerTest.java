@@ -49,8 +49,11 @@ public class PaymentControllerTest {
         when(paymentService.recordTopUpPayment(1L, 150000.0, "Top Up via bank"))
                 .thenReturn(expectedPayment);
 
+        // Inject header with "true" to simulate test mode
+        String testHeaderValue = "true";
+
         // Act
-        var response = paymentController.topUp(req);
+        var response = paymentController.topUp(req, testHeaderValue);
 
         // Assert
         assertNotNull(response);
@@ -83,8 +86,11 @@ public class PaymentControllerTest {
         when(paymentService.recordKostPayment(2L, 20L, 5L, 500000.0, "Monthly Kost Payment"))
                 .thenReturn(expectedPayment);
 
+        // Inject header with "true" to simulate test mode
+        String testHeaderValue = "true";
+
         // Act
-        var response = paymentController.kostPayment(req);
+        var response = paymentController.kostPayment(req, testHeaderValue);
 
         // Assert
         assertNotNull(response);
