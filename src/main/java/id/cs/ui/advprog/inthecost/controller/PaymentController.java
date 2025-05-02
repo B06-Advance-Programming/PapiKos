@@ -23,6 +23,18 @@ public class PaymentController {
     }
 
     /**
+     * tujuan untuk logging internal
+     */
+    private void logRequestContext(String testingMode, String methodName) {
+        boolean isTestRequest = "true".equalsIgnoreCase(testingMode);
+        if (isTestRequest) {
+            System.out.println(methodName + " called from test context");
+        } else {
+            System.out.println(methodName + " called from normal runtime");
+        }
+    }
+
+    /**
      * API untuk top up balance user
      *
      * HTTP Method: POST
@@ -45,15 +57,7 @@ public class PaymentController {
             @RequestBody TopUpRequest req,
             @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
 
-        boolean isTestRequest = "true".equalsIgnoreCase(testingMode);
-
-        if (isTestRequest) {
-            // test request
-            System.out.println("topUp called from test context");
-        } else {
-            // real request
-            System.out.println("topUp called from normal runtime");
-        }
+        logRequestContext(testingMode, "topUp");
 
         Payment payment = paymentService.recordTopUpPayment(req.getUserId(), req.getAmount(), req.getDescription());
         return ResponseEntity.ok(payment);
@@ -85,13 +89,7 @@ public class PaymentController {
             @RequestBody KostPaymentRequest req,
             @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
 
-        boolean isTestRequest = "true".equalsIgnoreCase(testingMode);
-
-        if (isTestRequest) {
-            System.out.println("kostPayment called from test context");
-        } else {
-            System.out.println("kostPayment called from normal runtime");
-        }
+        logRequestContext(testingMode, "kostPayment");
 
         Payment payment = paymentService.recordKostPayment(
                 req.getUserId(),
