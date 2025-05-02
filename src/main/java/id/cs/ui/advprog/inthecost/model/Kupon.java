@@ -1,12 +1,16 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 import id.cs.ui.advprog.inthecost.enums.KuponStatus;
 import id.cs.ui.advprog.inthecost.strategy.KuponStatusStrategy;
@@ -14,36 +18,69 @@ import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
 
 @Getter
 @Setter
+@Entity
+@Table(name = "kupon")
 public class Kupon{
+
     @Setter(AccessLevel.NONE)
-    private String idKupon;
+    @Id
+    @Column(name = "id_kupon", nullable = false, columnDefinition = "uuid")
+    private UUID idKupon;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pemilik", nullable = false)
+    private User pemilik;
+
     @Setter(AccessLevel.NONE)
-    private String pemilik; //To be updated
-    @Setter(AccessLevel.NONE)
+    @Column(name = "kode_unik", nullable = false, length = 10, unique = true)
     private String kodeUnik;
+
+    @Column(name = "persentase", nullable = false)
     private int persentase;
+
+    @Column(name = "masa_berlaku", nullable = false)
     private LocalDate masaBerlaku;
+
+    @Column(name = "deskripsi", nullable = false)
     private String deskripsi;
+
     @Setter(AccessLevel.NONE)
+    @Column(name = "status_kupon", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
     private KuponStatus statusKupon;
-    private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
+
+    @Column(name = "kupon_global", nullable = false)
     private boolean kuponGlobal;
 
-    public Kupon(String pemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
+    @ManyToMany
+    @JoinTable(
+            name = "kupon_kost",
+            joinColumns = @JoinColumn(name = "id_kupon"),
+            inverseJoinColumns = @JoinColumn(name = "id_kost")
+    )
+    private List<Kost> kosPemilik = new ArrayList<>();
+
+    private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
+
+    public Kupon() {
+    }
+
+    public Kupon(User pemilik, List<Kost> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
         validateInput(pemilik, masaBerlaku, persentase, deskripsi);
-        this.idKupon = generateIdKupon();
+        this.idKupon = UUID.randomUUID();
         this.pemilik = pemilik;
         this.kodeUnik = generateKodeUnik();
         this.persentase = persentase;
         this.masaBerlaku = masaBerlaku;
-        refreshStatus();
+        this.kosPemilik = kosPemilik;
         this.deskripsi = deskripsi;
         this.kuponGlobal = kuponGlobal;
+        refreshStatus();
     }
 
-    private void validateInput(String pemilik, LocalDate masaBerlaku, int persentase, String deskripsi) {
-        if (pemilik == null || pemilik.isBlank()) {
-            throw new IllegalArgumentException("Pemilik cannot be null or empty");
+    private void validateInput(User pemilik, LocalDate masaBerlaku, int persentase, String deskripsi) {
+        if (pemilik == null) {
+            throw new IllegalArgumentException("Pemilik cannot be null");
         }
         if (masaBerlaku == null) {
             throw new IllegalArgumentException("Masa berlaku cannot be null");
@@ -54,10 +91,6 @@ public class Kupon{
         if (deskripsi == null || deskripsi.isBlank()) {
             throw new IllegalArgumentException("Deskripsi cannot be null or empty");
         }
-    }
-
-    private String generateIdKupon(){
-        return UUID.randomUUID().toString();
     }
 
     private String generateKodeUnik() {
@@ -92,6 +125,18 @@ public class Kupon{
 
     @Override
     public String toString() {
-        return String.format("Kupon[%s, %s, %d%%, Hingga: %s, Status: %s]", kodeUnik, pemilik, persentase, masaBerlaku.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),statusKupon);
+        String namaPemilik = pemilik != null ? pemilik.getUsername() : "null";
+        String namaKos = kosPemilik.stream()
+                .map(Kost::getNama)
+                .collect(Collectors.joining(", "));
+        String status = statusKupon != null ? statusKupon.toString() : "UNKNOWN";
+
+        return String.format("Kupon[%s, %s, %d%%, Hingga: %s, Status: %s, Kost: [%s]]",
+                kodeUnik,
+                namaPemilik,
+                persentase,
+                masaBerlaku.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
+                status,
+                namaKos);
     }
 }
