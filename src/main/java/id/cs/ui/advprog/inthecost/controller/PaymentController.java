@@ -22,22 +22,95 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
+    /**
+     * API untuk top up balance user
+     *
+     * HTTP Method: POST
+     * URL: /api/payments/topup
+     *
+     * Contoh Payload:
+     * {
+     *     "userId": 1,
+     *     "amount": 150000.0,
+     *     "description": "Top Up via bank transfer"
+     * }
+     *
+     * Response: Returns the created Payment record with status 200 OK.
+     */
+
     @PostMapping("/topup")
     public ResponseEntity<Payment> topUp(@RequestBody TopUpRequest req) {
-        // masih template
-        return null;
+        Payment payment = paymentService.recordTopUpPayment(req.getUserId(), req.getAmount(), req.getDescription());
+        return ResponseEntity.ok(payment);
     }
+
+
+    /**
+     * API untuk pembayaran kos
+     *
+     * HTTP Method: POST
+     * URL: /api/payments/kost
+     *
+     * Contoh Payload:
+     * {
+     *     "userId": 2,
+     *     "ownerId": 20,
+     *     "kostId": 5,
+     *     "amount": 500000.0,
+     *     "description": "Monthly Kost Payment for May"
+     * }
+     *
+     * Response: Returns the created kost Payment record with status 200 OK.
+     */
 
     @PostMapping("/kost")
     public ResponseEntity<Payment> kostPayment(@RequestBody KostPaymentRequest req) {
-        // masih template
-        return null;
+        Payment payment = paymentService.recordKostPayment(
+                req.getUserId(),
+                req.getOwnerId(),
+                req.getKostId(),
+                req.getAmount(),
+                req.getDescription());
+        return ResponseEntity.ok(payment);
     }
+
+    /**
+     * API untuk transaksi pengguna lengkap
+     *
+     * HTTP Method: GET
+     * URL: /api/payments/history/{userId}
+     *
+     * Path Variable:
+     *  - userId: The ID of the user whose transaction history to retrieve
+     *
+     * Response: Returns a list of all Payment records of that user.
+     */
 
     @GetMapping("/history/{userId}")
     public ResponseEntity<List<Payment>> getTransactionHistory(@PathVariable Long userId) {
-        return null;
+        List<Payment> history = paymentService.getTransactionHistory(userId);
+        return ResponseEntity.ok(history);
     }
+
+    /**
+     * API untuk filtered transaksi pengguna berdasarkan tanggal atau payment type
+     *
+     * HTTP Method: GET
+     * URL: /api/payments/history/{userId}/filter
+     *
+     * Path Variable:
+     *  - userId: The ID of the user whose filtered transaction history to retrieve
+     *
+     * Query Parameters (all optional):
+     *  - paymentType: Filter by payment type (e.g., TOP_UP, KOST_PAYMENT)
+     *  - startDate: Filter transactions from this date (format: yyyy-MM-dd)
+     *  - endDate: Filter transactions up to this date (format: yyyy-MM-dd)
+     *
+     * Example URL:
+     *   /api/payments/history/1/filter?paymentType=TOP_UP&startDate=2024-05-01&endDate=2024-05-31
+     *
+     * Response: Returns a list of Payment records matching filters.
+     */
 
     @GetMapping("/history/{userId}/filter")
     public ResponseEntity<List<Payment>> getFilteredTransactionHistory(
@@ -45,7 +118,8 @@ public class PaymentController {
             @RequestParam(required = false) PaymentTypeEnum paymentType,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        return null;
+        List<Payment> filtered = paymentService.getFilteredTransactionHistory(userId, paymentType, startDate, endDate);
+        return ResponseEntity.ok(filtered);
     }
 
     public static class TopUpRequest {
