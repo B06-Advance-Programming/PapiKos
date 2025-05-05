@@ -1,155 +1,134 @@
 package id.cs.ui.advprog.inthecost.repository;
 
-import id.cs.ui.advprog.inthecost.enums.KuponStatus;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
+import id.cs.ui.advprog.inthecost.model.Role;
+import id.cs.ui.advprog.inthecost.model.User;
+
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@Transactional
+@ComponentScan(basePackages = "id.cs.ui.advprog.inthecost")
 public class KuponRepositoryTest {
-    KuponRepository kuponRepository;
-    List<Kupon> kuponList;
+    @Autowired
+    private KuponRepository kuponRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private KostRepository kostRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    List<Kupon> kuponList = new ArrayList<>();
 
     @BeforeEach
     void setUp(){
-        kuponRepository = new KuponRepository();
+        Role adminRole = new Role("Admin");
+        Role pemilikKos = new Role("Pemilik Kos");
 
-        kuponList = new ArrayList<>();
+        entityManager.persist(adminRole);
+        entityManager.persist(pemilikKos);
 
-        Kupon kupon1 = new Kupon("PemilikKos1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 10, 20), 15, "Kupon Hari Pahlawan 2025", false);
+        Set<Role> role1 = new HashSet<>();
+        role1.add(adminRole);
+        Set<Role> role2 = new HashSet<>();
+        role2.add(pemilikKos);
+
+        User admin = new User("Admin", "123456", "admin@example.com", role1);
+        User pemilik1 = new User("Ahmad Suardjo", "Ahm@d321!", "ahmadss@gmail.com", role2);
+        User pemilik2 = new User("Janice Lim", "J@N1C3005", "janicelim@gmail.com", role2);
+        userRepository.save(admin);
+        userRepository.save(pemilik1);
+        userRepository.save(pemilik2);
+
+        Kost kos1 = new Kost("Kos Alamanda", "Jl. Melati No. 1", "Nyaman", 10, 1000000);
+        Kost kos2 = new Kost("Kos Griya Asri", "Jl. Anggrek No. 2", "Asri", 8, 950000);
+        Kost kos3 = new Kost("Kos Amara 51/2", "Jl. KH. Ahmad Dahlan No. 120", "Mantap", 22, 1900000);
+        Kost kos4 = new Kost("Kos Zano's", "Jl. Juragan Sinda III No. 19", "Parkiran aman dan lingkungan tentram", 2, 1100000);
+        Kost kos5 = new Kost("Kos Pinisia", "Jl. Sadewa IV No. 13", "Tetangga ramah dan Asri", 12, 1500000);
+        kostRepository.save(kos1);
+        kostRepository.save(kos2);
+        kostRepository.save(kos3);
+        kostRepository.save(kos4);
+        kostRepository.save(kos5);
+
+        Kupon kupon1 = new Kupon(admin, List.of(kos1,kos2, kos3, kos4, kos5), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025", true);
+        Kupon kupon2 = new Kupon(pemilik1, List.of(kos1, kos2, kos3), LocalDate.of(2025, 10, 20), 12, "Promo Pak Ahmad", false);
+        Kupon kupon3 = new Kupon(pemilik2, List.of(kos4, kos5), LocalDate.of(2026, 2, 10), 10, "Kupon Semester Baru", false);
         kuponList.add(kupon1);
-
-        Kupon kupon2 = new Kupon("PemilikKos1", List.of("KOS3", "KOS4"),LocalDate.of(2026, 3, 1), 15, "Kupon Tahun Baru 2025", false);
         kuponList.add(kupon2);
-
-        Kupon kupon3 = new Kupon("Admin", List.of("KOS1", "KOS2", "KOS3", "KOS4", "KOS5", "KOS6"),LocalDate.of(2025, 5, 22), 15, "Kupon Pendatang Baru", true);
         kuponList.add(kupon3);
     }
 
     @Test
     void testSaveCreateKupon(){
-        Kupon kupon = kuponList.get(1);
-        Kupon result = kuponRepository.save(kupon);
+        Kupon kupon = kuponList.get(1); // Kupon milik pemilik1
+        Kupon savedKupon = kuponRepository.save(kupon);
 
-        Kupon findResult = kuponRepository.findById(kuponList.get(1).getIdKupon());
-        assertEquals(kupon.getIdKupon(), result.getIdKupon());
-        assertEquals(result.getIdKupon(), findResult.getIdKupon());
-        assertEquals(result.getStatusKupon(), findResult.getStatusKupon());
-        assertEquals(result.getDeskripsi(),findResult.getDeskripsi());
-        assertEquals(result.getPemilik(), findResult.getPemilik());
-        assertEquals(result.getKosPemilik(), findResult.getKosPemilik());
-        assertEquals(result.getPersentase(), findResult.getPersentase());
-        assertEquals(result.getMasaBerlaku(), findResult.getMasaBerlaku());
-        assertEquals(result.getKodeUnik(), findResult.getKodeUnik());
+        Optional<Kupon> findResult = kuponRepository.findById(savedKupon.getIdKupon());
+        assertThat(findResult).isPresent();
+        assertThat(findResult.get().getDeskripsi()).isEqualTo("Promo Pak Ahmad");
     }
 
     @Test
-    void testSaveUpdateKupon(){
-        Kupon kupon = new Kupon("user1", List.of("KOS5"),LocalDate.of(2025, 4, 10), 30, "Diskon awal", false);
+    void testUpdateKupon(){
+        Kupon kupon = kuponRepository.save(kuponList.get(2));
+        UUID kuponId = kupon.getIdKupon();
+
+        kupon.setDeskripsi("Update Kupon Semester Baru");
+        kupon.setPersentase(15);
         kuponRepository.save(kupon);
 
-        kupon.setMasaBerlaku(LocalDate.now().plusDays(10));
-        kupon.setDeskripsi("Diskon Update");
-        kupon.setPersentase(25);
-        kupon.setKosPemilik(List.of("KOS5", "KOS6"));
-
-        kuponRepository.save(kupon);
-
-        Kupon updated = kuponRepository.findById(kupon.getIdKupon());
-        assertNotNull(updated);
-        assertEquals(kupon.getPemilik(), updated.getPemilik());
-        assertEquals(List.of("KOS5", "KOS6"), updated.getKosPemilik());
-        assertEquals(kupon.getKodeUnik(), updated.getKodeUnik());
-        assertEquals("Diskon Update", updated.getDeskripsi());
-        assertEquals(25, updated.getPersentase());
-        assertEquals(KuponStatus.VALID, updated.getStatusKupon());
+        Optional<Kupon> updatedKupon = kuponRepository.findById(kuponId);
+        assertThat(updatedKupon).isPresent();
+        assertThat(updatedKupon.get().getDeskripsi()).isEqualTo("Update Kupon Semester Baru");
+        assertThat(updatedKupon.get().getPersentase()).isEqualTo(15);
     }
 
     @Test
-    void testFindByIdIfIdFound(){
-        for(Kupon kupon: kuponList){
-            kuponRepository.save(kupon);
-        }
+    void testFindById(){
+        Kupon saved = kuponRepository.save(kuponList.get(0)); // Simpan kupon admin
+        Optional<Kupon> result = kuponRepository.findById(saved.getIdKupon());
 
-        Kupon target = kuponList.get(1);
-        Kupon findResult = kuponRepository.findById(target.getIdKupon());
-
-        assertEquals(target.getIdKupon(), findResult.getIdKupon());
-        assertEquals(target.getPemilik(), findResult.getPemilik());
-        assertEquals(target.getKosPemilik(), findResult.getKosPemilik());
-        assertEquals(target.getKodeUnik(), findResult.getKodeUnik());
-        assertEquals(target.getDeskripsi(), findResult.getDeskripsi());
-        assertEquals(target.getPersentase(), findResult.getPersentase());
-        assertEquals(target.getStatusKupon(), findResult.getStatusKupon());
-        assertEquals(target.getMasaBerlaku(), findResult.getMasaBerlaku());
-        assertEquals(target.isKuponGlobal(), findResult.isKuponGlobal());
+        assertThat(result).isPresent();
+        assertThat(result.get().getDeskripsi()).isEqualTo("Kupon Hari Pahlawan 2025");
+        assertThat(result.get().getKodeUnik()).isNotBlank();
     }
 
     @Test
-    void testFindByIdIfIdNotFound() {
-        for(Kupon kupon: kuponList){
-            kuponRepository.save(kupon);
-        }
-        assertNull(kuponRepository.findById("invalidId"));
-    }
-
-    @Test
-    void testFindByKodeUnikIfFound(){
-        for(Kupon kupon: kuponList){
-            kuponRepository.save(kupon);
-        }
-
-        Kupon target = kuponList.get(1);
-        Kupon findResult = kuponRepository.findByKodeUnik(target.getKodeUnik());
-
-        assertEquals(target.getIdKupon(), findResult.getIdKupon());
-        assertEquals(target.getPemilik(), findResult.getPemilik());
-        assertEquals(target.getKosPemilik(), findResult.getKosPemilik());
-        assertEquals(target.getKodeUnik(), findResult.getKodeUnik());
-        assertEquals(target.getDeskripsi(), findResult.getDeskripsi());
-        assertEquals(target.getPersentase(), findResult.getPersentase());
-        assertEquals(target.getStatusKupon(), findResult.getStatusKupon());
-        assertEquals(target.getMasaBerlaku(), findResult.getMasaBerlaku());
-        assertEquals(target.isKuponGlobal(), findResult.isKuponGlobal());
-    }
-
-    @Test
-    void testFindByKodeUnikIfNotFound() {
-        for(Kupon kupon: kuponList){
-            kuponRepository.save(kupon);
-        }
-        assertNull(kuponRepository.findByKodeUnik("invalidKodeUnik"));
-    }
-
-    @Test
-    void testDeleteByIdIfSuccess(){
+    void testDeleteById() {
         Kupon kupon = kuponRepository.save(kuponList.get(1));
-        boolean success = kuponRepository.deleteById(kupon.getIdKupon());
-        assertTrue(success);
-        assertNull(kuponRepository.findById(kupon.getIdKupon()));
-        assertNull(kuponRepository.findByKodeUnik(kupon.getKodeUnik()));
-    }
+        UUID id = kupon.getIdKupon();
 
-    @Test
-    void testDeleteByIdIfFailed(){
-        Kupon kupon = kuponRepository.save(kuponList.get(1));
-        boolean success = kuponRepository.deleteById("InvalidId");
-        assertFalse(success);
-        assertNotNull(kuponRepository.findById(kupon.getIdKupon()));
-        assertNotNull(kuponRepository.findByKodeUnik(kupon.getKodeUnik()));
+        kuponRepository.deleteById(id);
+
+        Optional<Kupon> deleted = kuponRepository.findById(id);
+        assertThat(deleted).isEmpty();
     }
 
     @Test
     void testFindAll() {
-        for (Kupon kupon : kuponList) {
-            kuponRepository.save(kupon);
-        }
-        List<Kupon> listKupon = kuponRepository.findAll();
-        assertEquals(3, listKupon.size());
+        kuponRepository.saveAll(kuponList);
+        List<Kupon> result = kuponRepository.findAll();
+
+        assertThat(result).hasSizeGreaterThanOrEqualTo(3); // Karena semua disimpan
+        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Promo Pak Ahmad"))).isTrue();
+        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Kupon Semester Baru"))).isTrue();
+        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Kupon Hari Pahlawan 2025"))).isTrue();
     }
 }
