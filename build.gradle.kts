@@ -51,6 +51,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+
+    // Spring Session JDBC
+    implementation("org.springframework.session:spring-session-jdbc")
 }
 
 tasks.register<Test>("unitTest") {
