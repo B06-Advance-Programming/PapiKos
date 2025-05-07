@@ -1,130 +1,206 @@
 package id.cs.ui.advprog.inthecost.service;
 
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
-import id.cs.ui.advprog.inthecost.repository.KuponRepository;
+import id.cs.ui.advprog.inthecost.model.Role;
+import id.cs.ui.advprog.inthecost.model.User;
 
+import id.cs.ui.advprog.inthecost.repository.KostRepository;
+import id.cs.ui.advprog.inthecost.repository.KuponRepository;
+import id.cs.ui.advprog.inthecost.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class KuponServiceTest {
+
+@SpringBootTest
+@Transactional
+@ComponentScan(basePackages = "id.cs.ui.advprog.inthecost")
+public class KuponServiceTest{
     @InjectMocks
     KuponServiceImpl kuponService;
 
     @Mock
-    private KuponRepository kuponRepository;
+    KuponRepository kuponRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private KostRepository kostRepository;
+
+    List<Kupon> kuponList = new ArrayList<>();
 
     @BeforeEach
-    void setUp(){
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
+        Role adminRole = new Role("Admin");
+        Role pemilikKos = new Role("Pemilik Kos");
+
+        entityManager.persist(adminRole);
+        entityManager.persist(pemilikKos);
+
+        Set<Role> role1 = new HashSet<>();
+        role1.add(adminRole);
+        Set<Role> role2 = new HashSet<>();
+        role2.add(pemilikKos);
+
+        User admin = new User("Admin", "123456", "admin@example.com", role1);
+        User pemilik1 = new User("Ahmad Suardjo", "Ahm@d321!", "ahmadss@gmail.com", role2);
+        User pemilik2 = new User("Janice Lim", "J@N1C3005", "janicelim@gmail.com", role2);
+        userRepository.save(admin);
+        userRepository.save(pemilik1);
+        userRepository.save(pemilik2);
+
+        Kost kos1 = new Kost("Kos Alamanda", "Jl. Melati No. 1", "Nyaman", 10, 1000000);
+        Kost kos2 = new Kost("Kos Griya Asri", "Jl. Anggrek No. 2", "Asri", 8, 950000);
+        Kost kos3 = new Kost("Kos Amara 51/2", "Jl. KH. Ahmad Dahlan No. 120", "Mantap", 22, 1900000);
+        Kost kos4 = new Kost("Kos Zano's", "Jl. Juragan Sinda III No. 19", "Parkiran aman dan lingkungan tentram", 2, 1100000);
+        Kost kos5 = new Kost("Kos Pinisia", "Jl. Sadewa IV No. 13", "Tetangga ramah dan Asri", 12, 1500000);
+        kostRepository.save(kos1);
+        kostRepository.save(kos2);
+        kostRepository.save(kos3);
+        kostRepository.save(kos4);
+        kostRepository.save(kos5);
+
+        kuponList.add(new Kupon(admin, List.of(kos1, kos2, kos3, kos4, kos5), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025", true));
+        kuponList.add(new Kupon(pemilik1, List.of(kos1, kos2, kos3), LocalDate.of(2025, 10, 20), 12, "Promo Pak Ahmad", false));
+        kuponList.add(new Kupon(pemilik2, List.of(kos4, kos5), LocalDate.of(2026, 2, 10), 10, "Kupon Semester Baru", false));
     }
 
     @Test
-    public void testCreateKupon(){
-        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+    void testCreateKupon(){
+        Kupon selectedKupon = kuponList.get(0);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Kupon addedKupon = kuponService.createKupon(kupon);
-        assertEquals(kupon.getIdKupon(), addedKupon.getIdKupon());
-        assertEquals(kupon.getPemilik(), addedKupon.getPemilik());
-        assertEquals(kupon.getKosPemilik(), addedKupon.getKosPemilik());
-        assertEquals(kupon.getKodeUnik(), addedKupon.getKodeUnik());
-        assertEquals(kupon.getDeskripsi(), addedKupon.getDeskripsi());
-        assertEquals(kupon.getPersentase(), addedKupon.getPersentase());
-        assertEquals(kupon.getStatusKupon(), addedKupon.getStatusKupon());
-        assertEquals(kupon.getMasaBerlaku(), addedKupon.getMasaBerlaku());
-        assertEquals(kupon.isKuponGlobal(), addedKupon.isKuponGlobal());
+        Kupon inputKupon = kuponService.createKupon(selectedKupon);
+
+        assertThat(inputKupon.getIdKupon()).isEqualTo(selectedKupon.getIdKupon());
+        assertThat(inputKupon.getKodeUnik()).isEqualTo(selectedKupon.getKodeUnik());
     }
 
     @Test
-    public void testUpdateKupon(){
-        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
+    void testUpdateKuponSuccess(){
+        Kupon selectedKupon = kuponList.get(1);
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(kuponRepository.findByKodeUnik(kupon.getKodeUnik())).thenReturn(null);
-        Kupon addedKupon = kuponService.createKupon(kupon);
-        addedKupon.setPersentase(15);
-        addedKupon.setDeskripsi("New Kupon Edit");
-        addedKupon.setMasaBerlaku(LocalDate.of(2025, 10, 10));
-        addedKupon.setKosPemilik(List.of("KOS2", "KOS3"));
-        when(kuponRepository.findById(addedKupon.getIdKupon())).thenReturn(addedKupon);
-        when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Kupon editedKupon = kuponService.updateKupon(addedKupon);
-        assertEquals(addedKupon.getIdKupon(), editedKupon.getIdKupon());
-        assertEquals(addedKupon.getPemilik(), editedKupon.getPemilik());
-        assertEquals(addedKupon.getKosPemilik(), editedKupon.getKosPemilik());
-        assertEquals(addedKupon.getKodeUnik(), editedKupon.getKodeUnik());
-        assertEquals(addedKupon.getDeskripsi(), editedKupon.getDeskripsi());
-        assertEquals(addedKupon.getPersentase(), editedKupon.getPersentase());
-        assertEquals(addedKupon.getStatusKupon(), editedKupon.getStatusKupon());
-        assertEquals(addedKupon.getMasaBerlaku(), editedKupon.getMasaBerlaku());
-        assertEquals(addedKupon.isKuponGlobal(), editedKupon.isKuponGlobal());
+        Kupon inputKupon = kuponService.createKupon(selectedKupon);
+
+        when(kuponRepository.findById(inputKupon.getIdKupon())).thenReturn(Optional.of(inputKupon));
+        Kupon resultKupon = kuponService.getKuponById(inputKupon.getIdKupon());
+
+        resultKupon.setDeskripsi("Kupon Khusus Mahasiswa Universitas Indonesia");
+        resultKupon.setPersentase(25);
+        resultKupon.setMasaBerlaku(LocalDate.of(2027, 10, 22));
+        Kupon updatedKupon = kuponService.updateKupon(resultKupon);
+
+        assertThat(selectedKupon.getIdKupon()).isEqualTo(updatedKupon.getIdKupon());
+        assertThat(selectedKupon.getKodeUnik()).isEqualTo(updatedKupon.getKodeUnik());
     }
 
     @Test
-    public void testGetKuponByIdSuccess(){
-        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
-        when(kuponRepository.findById(kupon.getIdKupon())).thenReturn(kupon);
-        Kupon result = kuponService.getKuponById(kupon.getIdKupon());
-        assertEquals(kupon, result);
+    void testUpdateKuponFail() {
+        Kupon selectedKupon = kuponList.get(0);
+
+        when(kuponRepository.findById(kuponList.get(1).getIdKupon()))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> kuponService.updateKupon(kuponList.get(1)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("tidak ditemukan");
     }
 
     @Test
-    public void testGetKuponByIdFail(){
-        when(kuponRepository.findById("InvalidId")).thenReturn(null);
-        assertThrows(NoSuchElementException.class, () -> kuponService.getKuponById("InvalidId"));
+    void testGetKuponByIdSuccess() {
+        Kupon selectedKupon = kuponList.get(2);
+        UUID id = selectedKupon.getIdKupon();
+
+        when(kuponRepository.findById(id)).thenReturn(Optional.of(selectedKupon));
+
+        Kupon result = kuponService.getKuponById(id);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getIdKupon()).isEqualTo(id);
+        assertThat(result).isEqualTo(selectedKupon);
     }
 
     @Test
-    public void testGetKuponByKodeUnikSuccess(){
-        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
-        when(kuponRepository.findByKodeUnik(kupon.getKodeUnik())).thenReturn(kupon);
-        Kupon result = kuponService.getKuponByKodeUnik(kupon.getKodeUnik());
-        assertEquals(kupon, result);
+    void testGetKuponByIdFail() {
+        UUID invalidId = UUID.randomUUID();
+
+        when(kuponRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> kuponService.getKuponById(invalidId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("tidak ditemukan");
+    }
+
+
+    @Test
+    void testGetKuponByKodeUnikSuccess() {
+        Kupon selectedKupon = kuponList.get(0);
+        when(kuponRepository.findByKodeUnik(selectedKupon.getKodeUnik()))
+                .thenReturn(Optional.of(selectedKupon));
+
+        Kupon result = kuponService.getKuponByKodeUnik(selectedKupon.getKodeUnik());
+        assertThat(result).isEqualTo(selectedKupon);
     }
 
     @Test
-    public void testGetKuponByKodeUnikFail(){
-        when(kuponRepository.findByKodeUnik("InvalidKodeUnik")).thenReturn(null);
-        assertThrows(NoSuchElementException.class, () -> kuponService.getKuponByKodeUnik("InvalidKodeUnik"));
+    void testGetKuponByKodeUnikFail() {
+        String invalidKode = "INVALID123";
+        when(kuponRepository.findByKodeUnik(invalidKode))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> kuponService.getKuponByKodeUnik(invalidKode))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("tidak ditemukan");
     }
 
     @Test
     void testDeleteKuponSuccess() {
-        Kupon kupon = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
-        when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        Kupon createdKupon = kuponService.createKupon(kupon);
+        Kupon selectedKupon = kuponList.get(1);
+        UUID id = selectedKupon.getIdKupon();
 
-        when(kuponRepository.deleteById(createdKupon.getIdKupon())).thenReturn(true);
+        when(kuponRepository.existsById(id)).thenReturn(true);
+        doNothing().when(kuponRepository).deleteById(id);
 
-        assertDoesNotThrow(() -> kuponService.deleteKupon(createdKupon.getIdKupon()));
+        kuponService.deleteKupon(id);
+
+        verify(kuponRepository, times(1)).deleteById(id);
     }
 
     @Test
-    void testDeleteKuponNotFound() {
-        when(kuponRepository.deleteById("invalidId")).thenReturn(false);
+    void testDeleteKuponFail() {
+        UUID invalidId = UUID.randomUUID();
+        when(kuponRepository.existsById(invalidId)).thenReturn(false);
 
-        assertThrows(NoSuchElementException.class, () -> kuponService.deleteKupon("invalidId"));
+        assertThatThrownBy(() -> kuponService.deleteKupon(invalidId))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("tidak ditemukan");
     }
 
     @Test
     void testGetAllKupon() {
-        Kupon kupon1 = new Kupon("user1", List.of("KOS1", "KOS2"),LocalDate.of(2025, 9, 12), 10, "Kupon Test", false);
-        Kupon kupon2 = new Kupon("Admin", List.of("KOS1", "KOS2", "KOS3", "KOS4"),LocalDate.of(2026, 10, 22), 20, "Admin Kupon Test", true);
-        List<Kupon> list = List.of(kupon1, kupon2);
-
-        when(kuponRepository.findAll()).thenReturn(list);
+        when(kuponRepository.findAll()).thenReturn(kuponList);
 
         List<Kupon> result = kuponService.getAllKupon();
 
-        assertEquals(2, result.size());
+        assertThat(result).hasSize(kuponList.size());
+        assertThat(result).containsExactlyElementsOf(kuponList);
     }
 
 }

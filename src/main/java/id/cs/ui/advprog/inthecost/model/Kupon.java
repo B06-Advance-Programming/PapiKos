@@ -125,11 +125,11 @@ public class Kupon{
 
     @Override
     public String toString() {
-        String namaPemilik = pemilik != null ? pemilik.getUsername() : "null";
+        String namaPemilik = pemilik.getUsername();
         String namaKos = kosPemilik.stream()
                 .map(Kost::getNama)
                 .collect(Collectors.joining(", "));
-        String status = statusKupon != null ? statusKupon.toString() : "UNKNOWN";
+        String status = statusKupon.toString();
 
         return String.format("Kupon[%s, %s, %d%%, Hingga: %s, Status: %s, Kost: [%s]]",
                 kodeUnik,
