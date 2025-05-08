@@ -1,8 +1,9 @@
 package id.cs.ui.advprog.inthecost.service;
 
-import id.cs.ui.advprog.inthecost.model.Kos;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.InboxNotification;
 import id.cs.ui.advprog.inthecost.repository.InboxRepository;
+import id.cs.ui.advprog.inthecost.repository.WishlistRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,26 +16,28 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NotificationServiceTest {
 
     private InboxRepository inboxRepositoryMock;
+    private WishlistRepository wishlistRepositoryMock;
     private NotificationService notificationService;
 
     @BeforeEach
     void setUp() {
         inboxRepositoryMock = mock(InboxRepository.class);
-        notificationService = new NotificationService(inboxRepositoryMock);
+        wishlistRepositoryMock = mock(WishlistRepository.class);
+        notificationService = new NotificationService(inboxRepositoryMock, wishlistRepositoryMock);
     }
 
     @Test
     void testNotifyUsersCreatesInboxForEachUser() {
-        Kos kos = mock(Kos.class);
-        when(kos.getKosName()).thenReturn("Kos Lavender");
+        Kost kost = new Kost("Kos Lavender", "Jl. Lavender", "Deskripsi Kos Lavender", 1, 1000000);
 
-        // Simulasi user yang wishlist kos ini
+        // Simulate users who have wishlisted this Kost
         Set<String> userIds = Set.of("user1", "user2", "user3");
-        when(kos.getWishlistedBy()).thenReturn(userIds);
+        when(wishlistRepositoryMock.findUserIdsByKostId(kost.getKostID())).thenReturn(userIds);
+        when(inboxRepositoryMock.existsByUserIdAndMessage(anyString(), anyString())).thenReturn(false);
 
-        notificationService.notifyUsers(kos);
+        notificationService.notifyUsers(kost);
 
-        // Verifikasi bahwa notifikasi dibuat untuk setiap user
+        // Verify that notifications are created for each user
         for (String userId : userIds) {
             verify(inboxRepositoryMock, times(1)).save(
                     argThat(notification ->
@@ -46,13 +49,15 @@ public class NotificationServiceTest {
     }
 
     @Test
-    void testNotifySkipsIfKosHasNoWishlist() {
-        Kos kos = mock(Kos.class);
-        when(kos.getKosName()).thenReturn("Kos Tak Diminati");
-        when(kos.getWishlistedBy()).thenReturn(Set.of());
+    void testNotifySkipsIfKostHasNoWishlist() {
+        Kost kost = new Kost("Kos Tak Diminati", "Jl. Tak Diminati", "Deskripsi Kos Tak Diminati", 1, 1000000);
 
-        notificationService.notifyUsers(kos);
+        // Simulate no users wishlisting this Kost
+        when(wishlistRepositoryMock.findUserIdsByKostId(kost.getKostID())).thenReturn(Set.of());
 
+        notificationService.notifyUsers(kost);
+
+        // Verify no interactions with the inbox repository
         verifyNoInteractions(inboxRepositoryMock);
     }
 
@@ -73,12 +78,14 @@ public class NotificationServiceTest {
 
     @Test
     void testNotifyUsersHandlesNullWishlist() {
-        Kos kos = mock(Kos.class);
-        when(kos.getKosName()).thenReturn("Kos Null Wishlist");
-        when(kos.getWishlistedBy()).thenReturn(null);
+        Kost kost = new Kost("Kos Null Wishlist", "Jl. Null", "Deskripsi Kos Null Wishlist", 1, 1000000);
 
-        notificationService.notifyUsers(kos);
+        // Simulate null wishlist
+        when(wishlistRepositoryMock.findUserIdsByKostId(kost.getKostID())).thenReturn(null);
 
+        notificationService.notifyUsers(kost);
+
+        // Verify no interactions with the inbox repository
         verifyNoInteractions(inboxRepositoryMock);
     }
 }

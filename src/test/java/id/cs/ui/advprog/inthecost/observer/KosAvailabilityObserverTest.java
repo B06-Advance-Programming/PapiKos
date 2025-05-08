@@ -1,14 +1,15 @@
 package id.cs.ui.advprog.inthecost.observer;
 
-import id.cs.ui.advprog.inthecost.model.Kos;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.mockito.Mockito.*;
 
 public class KosAvailabilityObserverTest {
 
-    private Kos kos;
+    private Kost kost;
     private WishlistObserver observer;
     private NotificationService notificationService;
 
@@ -17,34 +18,35 @@ public class KosAvailabilityObserverTest {
         notificationService = mock(NotificationService.class);
         observer = new WishlistObserver(notificationService);
 
-        kos = new Kos("Kos Asri", 2); // 2 kamar awal
-        kos.addObserver(observer);
+        kost = new Kost("Kos Asri", "Jl. Asri", "Deskripsi Kos Asri", 2, 1000000); // 2 kamar awal
+        kost.addObserver(observer);
     }
 
     @Test
     void testNotificationSentWhenRoomAvailable() {
         // Kos penuh dulu
-        kos.setAvailableRooms(0);
+        kost.setJumlahKamar(0);
 
         // Lalu ada kamar kosong 1
-        kos.setAvailableRooms(1);
+        kost.setJumlahKamar(1);
 
         // Notifikasi seharusnya dikirim
-        verify(notificationService, times(1)).notifyUsers(kos);
+        verify(notificationService, times(1)).notifyUsers(kost);
     }
 
     @Test
     void testNoNotificationWhenRoomStillUnavailable() {
-        kos.setAvailableRooms(0);
-        kos.setAvailableRooms(0);
+        kost.setJumlahKamar(0);
+        kost.setJumlahKamar(0);
 
-        verify(notificationService, never()).notifyUsers(kos);
+        // Tidak ada perubahan, jadi tidak ada notifikasi
+        verify(notificationService, never()).notifyUsers(kost);
     }
 
     @Test
     void testNoNotificationIfNotOnWishlist() {
-        // Kos diubah jadi 1 kamar, tapi tidak ada user wishlisting → bisa kamu sesuaikan di sistem kamu
-        kos.setAvailableRooms(1);
+        // Kos diubah jadi 1 kamar, tapi tidak ada user wishlisting
+        kost.setJumlahKamar(1);
 
         // Seharusnya tidak ada notifikasi
         verify(notificationService, never()).notifyUsers(any());

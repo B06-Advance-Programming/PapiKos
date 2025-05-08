@@ -1,18 +1,19 @@
 package id.cs.ui.advprog.inthecost.model;
+
 import id.cs.ui.advprog.inthecost.exception.*;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import id.cs.ui.advprog.inthecost.observer.Observer;
+import id.cs.ui.advprog.inthecost.observer.Subject;
+import jakarta.persistence.*;
 import lombok.Getter;
-import jakarta.persistence.Column;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Entity
 @Table(name = "kost")
-public class Kost {
+public class Kost implements Subject {
     @Id
     @Column(name = "kost_id")
     private UUID kostID;
@@ -32,14 +33,16 @@ public class Kost {
     @Column(name = "harga_per_bulan")
     private int hargaPerBulan;
 
-    // manual set each times
+    @Transient // Mark as non-persistent
+    private final Set<Observer> observers = new HashSet<>();
+
+    private int previousJumlahKamar = -1;
+
     public Kost() {
         kostID = UUID.randomUUID();
     }
 
-    // constructor based
     public Kost(String nama, String alamat, String deskripsi, int jumlahKamar, int hargaPerBulan) {
-        // handle null atau kosong
         if (nama == null || nama.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
         }
@@ -49,8 +52,6 @@ public class Kost {
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
         }
-
-        // handle integer value yang tidak diperbolehkan
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
         }
@@ -58,43 +59,72 @@ public class Kost {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
         }
 
-        kostID = UUID.randomUUID();
+        this.kostID = UUID.randomUUID();
         this.nama = nama;
         this.alamat = alamat;
         this.deskripsi = deskripsi;
         this.jumlahKamar = jumlahKamar;
         this.hargaPerBulan = hargaPerBulan;
+        this.previousJumlahKamar = jumlahKamar;
     }
 
-    // cek manual saat set
     public void setNama(String nama) {
         if (nama == null || nama.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
         }
         this.nama = nama;
     }
+
     public void setAlamat(String alamat) {
         if (alamat == null || alamat.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
         }
         this.alamat = alamat;
     }
+
     public void setDeskripsi(String deskripsi) {
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
         }
         this.deskripsi = deskripsi;
     }
+
     public void setJumlahKamar(int jumlahKamar) {
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
         }
-        this.jumlahKamar = jumlahKamar;
+
+        // Only notify observers if the number of rooms changes from 0 to a positive value
+        if (this.jumlahKamar == 0 && jumlahKamar > 0) {
+            this.previousJumlahKamar = this.jumlahKamar;
+            this.jumlahKamar = jumlahKamar;
+            notifyObservers();
+        } else {
+            this.jumlahKamar = jumlahKamar;
+        }
     }
+
     public void setHargaPerBulan(int hargaPerBulan) {
         if (hargaPerBulan <= 0) {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
         }
         this.hargaPerBulan = hargaPerBulan;
+    }
+
+    @Override
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(this);
+        }
     }
 }

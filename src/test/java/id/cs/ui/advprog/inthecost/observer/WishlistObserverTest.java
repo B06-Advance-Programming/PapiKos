@@ -1,6 +1,6 @@
 package id.cs.ui.advprog.inthecost.observer;
 
-import id.cs.ui.advprog.inthecost.model.Kos;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,26 +19,26 @@ public class WishlistObserverTest {
     }
 
     @Test
-    void testNotifyUsersCalledWhenKosHasAvailableRooms() {
-        Kos kos = new Kos("Kos Sakura", 1); // ada kamar
-        wishlistObserver.update(kos);
+    void testNotifyUsersCalledWhenKostHasAvailableRooms() {
+        Kost kost = new Kost("Kos Sakura", "Jl. Sakura", "Deskripsi Kos Sakura", 1, 1000000); // ada kamar
+        wishlistObserver.update(kost);
 
-        verify(notificationServiceMock, times(1)).notifyUsers(kos);
+        verify(notificationServiceMock, times(1)).notifyUsers(kost);
     }
 
     @Test
-    void testNotifyUsersNotCalledWhenKosHasNoAvailableRooms() {
-        Kos kos = new Kos("Kos Melati", 0); // gak ada kamar
-        wishlistObserver.update(kos);
+    void testNotifyUsersNotCalledWhenKostHasNoAvailableRooms() {
+        Kost kost = new Kost("Kos Melati", "Jl. Melati", "Deskripsi Kos Melati", 0, 1000000); // gak ada kamar
+        wishlistObserver.update(kost);
 
         verify(notificationServiceMock, never()).notifyUsers(any());
     }
 
     @Test
-    void testUpdateDoesNothingIfSubjectIsNotKos() {
-        Object notKos = new Object(); // bisa juga mock class lain
+    void testUpdateDoesNothingIfSubjectIsNotKost() {
+        Object notKost = new Object(); // bisa juga mock class lain
 
-        wishlistObserver.update(notKos);
+        wishlistObserver.update(notKost);
 
         // Pastikan notification gak dipanggil sama sekali
         verifyNoInteractions(notificationServiceMock);
