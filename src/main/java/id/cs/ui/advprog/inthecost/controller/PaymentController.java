@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -143,8 +144,8 @@ public class PaymentController {
     public ResponseEntity<?> getFilteredTransactionHistory(
             @PathVariable String userId,
             @RequestParam(required = false) PaymentTypeEnum paymentType,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDateTime,
             @RequestHeader(value = "X-Session-Token", required = false) String sessionToken) {
 
         UUID uuidUserId;
@@ -158,7 +159,7 @@ public class PaymentController {
             return ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa");
         }
 
-        List<Payment> filtered = paymentService.getFilteredTransactionHistory(uuidUserId, paymentType, startDate, endDate);
+        List<Payment> filtered = paymentService.getFilteredTransactionHistory(uuidUserId, paymentType, startDateTime, endDateTime);
 
         return ResponseEntity.ok(filtered);
     }

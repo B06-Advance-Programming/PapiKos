@@ -3,7 +3,7 @@ package id.cs.ui.advprog.inthecost.service;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import id.cs.ui.advprog.inthecost.model.Payment;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,10 +16,10 @@ public interface PaymentService {
     List<Payment> getTransactionHistory(UUID userId);
 
     List<Payment> getFilteredTransactionHistory(UUID userId, PaymentTypeEnum paymentType,
-                                                LocalDate startDate, LocalDate endDate);
+                                                LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     List<Payment> getOwnerTransactionHistory(UUID ownerId);
 
     List<Payment> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType,
-                                                     LocalDate startDate, LocalDate endDate);
+                                                     LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

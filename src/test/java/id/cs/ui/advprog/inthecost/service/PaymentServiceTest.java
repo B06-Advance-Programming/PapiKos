@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -85,9 +85,9 @@ public class PaymentServiceTest {
         // Arrange
         UUID userId = UUID.randomUUID();
         List<Payment> userPayments = new ArrayList<>();
-        userPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
+        userPayments.add(createPayment(1L, 100000.0, LocalDateTime.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
-        userPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
+        userPayments.add(createPayment(2L, 200000.0, LocalDateTime.now().minusDays(1),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
 
         when(paymentRepository.findByUserId(userId)).thenReturn(userPayments);
@@ -104,29 +104,30 @@ public class PaymentServiceTest {
     void getFilteredTransactionHistory_shouldFilterByDateRange() {
         // Arrange
         UUID userId = UUID.randomUUID();
-        LocalDate startDate = LocalDate.now().minusDays(5);
-        LocalDate endDate = LocalDate.now();
+        LocalDateTime startDateTime = LocalDateTime.now().minusDays(5);
+        LocalDateTime endDateTime = LocalDateTime.now();
 
         List<Payment> allUserPayments = new ArrayList<>();
         // Included (inside date range)
-        allUserPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
+        allUserPayments.add(createPayment(1L, 100000.0, LocalDateTime.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
-        allUserPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
+        allUserPayments.add(createPayment(2L, 200000.0, LocalDateTime.now().minusDays(1),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
         // Excluded (outside date range)
-        allUserPayments.add(createPayment(3L, 150000.0, LocalDate.now().minusDays(10),
+        allUserPayments.add(createPayment(3L, 150000.0, LocalDateTime.now().minusDays(10),
                 PaymentTypeEnum.TOP_UP, "Old top up", PaymentStatusEnum.SUCCESS, userId, null, null));
 
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
         // Act
         List<Payment> result = paymentService.getFilteredTransactionHistory(
-                userId, null, startDate, endDate);
+                userId, null, startDateTime, endDateTime);
 
         // Assert
         assertEquals(2, result.size());
         for (Payment payment : result) {
-            assertTrue(!payment.getDate().isBefore(startDate) && !payment.getDate().isAfter(endDate));
+            assertTrue(!payment.getTransactionDateTime().isBefore(startDateTime) &&
+                    !payment.getTransactionDateTime().isAfter(endDateTime));
         }
         verify(paymentRepository).findByUserId(userId);
     }
@@ -137,10 +138,10 @@ public class PaymentServiceTest {
         UUID userId = UUID.randomUUID();
         List<Payment> allUserPayments = new ArrayList<>();
         // Included (TOP_UP)
-        allUserPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
+        allUserPayments.add(createPayment(1L, 100000.0, LocalDateTime.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
         // Excluded (KOST_PAYMENT)
-        allUserPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
+        allUserPayments.add(createPayment(2L, 200000.0, LocalDateTime.now().minusDays(1),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
 
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
@@ -159,31 +160,31 @@ public class PaymentServiceTest {
     void getFilteredTransactionHistory_shouldFilterByPaymentTypeAndDateRange() {
         // Arrange
         UUID userId = UUID.randomUUID();
-        LocalDate startDate = LocalDate.now().minusDays(5);
-        LocalDate endDate = LocalDate.now();
+        LocalDateTime startDateTime = LocalDateTime.now().minusDays(5);
+        LocalDateTime endDateTime = LocalDateTime.now();
 
         List<Payment> allUserPayments = new ArrayList<>();
         // Included (TOP_UP and within date range)
-        allUserPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
+        allUserPayments.add(createPayment(1L, 100000.0, LocalDateTime.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
         // Excluded (KOST_PAYMENT)
-        allUserPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
+        allUserPayments.add(createPayment(2L, 200000.0, LocalDateTime.now().minusDays(1),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
         // Excluded (outside date range)
-        allUserPayments.add(createPayment(3L, 150000.0, LocalDate.now().minusDays(10),
+        allUserPayments.add(createPayment(3L, 150000.0, LocalDateTime.now().minusDays(10),
                 PaymentTypeEnum.TOP_UP, "Old top up", PaymentStatusEnum.SUCCESS, userId, null, null));
 
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
         // Act
         List<Payment> result = paymentService.getFilteredTransactionHistory(
-                userId, PaymentTypeEnum.TOP_UP, startDate, endDate);
+                userId, PaymentTypeEnum.TOP_UP, startDateTime, endDateTime);
 
         // Assert
         assertEquals(1, result.size());
         assertEquals(PaymentTypeEnum.TOP_UP, result.get(0).getPaymentType());
-        LocalDate paymentDate = result.get(0).getDate();
-        assertTrue(!paymentDate.isBefore(startDate) && !paymentDate.isAfter(endDate));
+        LocalDateTime paymentDateTime = result.get(0).getTransactionDateTime();
+        assertTrue(!paymentDateTime.isBefore(startDateTime) && !paymentDateTime.isAfter(endDateTime));
         verify(paymentRepository).findByUserId(userId);
     }
 
@@ -192,10 +193,10 @@ public class PaymentServiceTest {
         // Arrange
         UUID ownerId = UUID.randomUUID();
         List<Payment> ownerPayments = new ArrayList<>();
-        ownerPayments.add(createPayment(1L, 200000.0, LocalDate.now().minusDays(2),
+        ownerPayments.add(createPayment(1L, 200000.0, LocalDateTime.now().minusDays(2),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment from user 1", PaymentStatusEnum.SUCCESS,
                 UUID.randomUUID(), ownerId, UUID.randomUUID()));
-        ownerPayments.add(createPayment(2L, 300000.0, LocalDate.now().minusDays(1),
+        ownerPayments.add(createPayment(2L, 300000.0, LocalDateTime.now().minusDays(1),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment from user 3", PaymentStatusEnum.SUCCESS,
                 UUID.randomUUID(), ownerId, UUID.randomUUID()));
 
@@ -213,14 +214,14 @@ public class PaymentServiceTest {
     void getFilteredOwnerTransactionHistory_shouldFilterByDateRange() {
         // Arrange
         UUID ownerId = UUID.randomUUID();
-        LocalDate startDate = LocalDate.now().minusDays(3);
-        LocalDate endDate = LocalDate.now();
+        LocalDateTime startDateTime = LocalDateTime.now().minusDays(3);
+        LocalDateTime endDateTime = LocalDateTime.now();
 
         List<Payment> allOwnerPayments = new ArrayList<>();
-        allOwnerPayments.add(createPayment(1L, 200000.0, LocalDate.now().minusDays(2),
+        allOwnerPayments.add(createPayment(1L, 200000.0, LocalDateTime.now().minusDays(2),
                 PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS,
                 UUID.randomUUID(), ownerId, UUID.randomUUID()));
-        allOwnerPayments.add(createPayment(2L, 300000.0, LocalDate.now().minusDays(5),
+        allOwnerPayments.add(createPayment(2L, 300000.0, LocalDateTime.now().minusDays(5),
                 PaymentTypeEnum.KOST_PAYMENT, "Old kost payment", PaymentStatusEnum.SUCCESS,
                 UUID.randomUUID(), ownerId, UUID.randomUUID()));
 
@@ -228,19 +229,19 @@ public class PaymentServiceTest {
 
         // Act
         List<Payment> result = paymentService.getFilteredOwnerTransactionHistory(
-                ownerId, null, startDate, endDate);
+                ownerId, null, startDateTime, endDateTime);
 
         // Assert
         assertEquals(1, result.size());
         verify(paymentRepository).findByOwnerId(ownerId);
     }
 
-    private Payment createPayment(Long id, Double amount, LocalDate date, PaymentTypeEnum paymentType,
+    private Payment createPayment(Long id, Double amount, LocalDateTime transactionDateTime, PaymentTypeEnum paymentType,
                                   String description, PaymentStatusEnum paymentStatus,
                                   UUID userId, UUID ownerId, UUID kostId) {
         Payment payment = Payment.builder()
                 .amount(amount)
-                .date(date)
+                .transactionDateTime(transactionDateTime)
                 .paymentType(paymentType)
                 .description(description)
                 .paymentStatus(paymentStatus)

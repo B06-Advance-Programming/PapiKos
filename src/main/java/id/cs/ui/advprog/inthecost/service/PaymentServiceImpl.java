@@ -7,7 +7,7 @@ import id.cs.ui.advprog.inthecost.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -25,10 +25,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment recordTopUpPayment(UUID userId, Double amount, String description) {
-        // Create payment record for top-up
         Payment payment = Payment.builder()
                 .amount(amount)
-                .date(LocalDate.now())
+                .transactionDateTime(LocalDateTime.now())
                 .paymentType(PaymentTypeEnum.TOP_UP)
                 .description(description)
                 .paymentStatus(PaymentStatusEnum.SUCCESS)
@@ -40,10 +39,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment recordKostPayment(UUID userId, UUID ownerId, UUID kostId, Double amount, String description) {
-        // Create payment record for kost payment
         Payment payment = Payment.builder()
                 .amount(amount)
-                .date(LocalDate.now())
+                .transactionDateTime(LocalDateTime.now())
                 .paymentType(PaymentTypeEnum.KOST_PAYMENT)
                 .description(description)
                 .paymentStatus(PaymentStatusEnum.SUCCESS)
@@ -62,12 +60,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getFilteredTransactionHistory(UUID userId, PaymentTypeEnum paymentType,
-                                                       LocalDate startDate, LocalDate endDate) {
-        // Get all user transactions first
+                                                       LocalDateTime startDateTime, LocalDateTime endDateTime) {
         List<Payment> userTransactions = paymentRepository.findByUserId(userId);
-
-        // Apply filters using extracted filter methods
-        return filterPayments(userTransactions, paymentType, startDate, endDate);
+        return filterPayments(userTransactions, paymentType, startDateTime, endDateTime);
     }
 
     @Override
@@ -77,26 +72,24 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<Payment> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType,
-                                                            LocalDate startDate, LocalDate endDate) {
-        // Get all owner transactions first
+                                                            LocalDateTime startDateTime, LocalDateTime endDateTime) {
         List<Payment> ownerTransactions = paymentRepository.findByOwnerId(ownerId);
-
-        // Apply filters using extracted filter methods
-        return filterPayments(ownerTransactions, paymentType, startDate, endDate);
+        return filterPayments(ownerTransactions, paymentType, startDateTime, endDateTime);
     }
 
     private List<Payment> filterPayments(List<Payment> payments,
                                          PaymentTypeEnum paymentType,
-                                         LocalDate startDate,
-                                         LocalDate endDate) {
+                                         LocalDateTime startDateTime,
+                                         LocalDateTime endDateTime) {
         Predicate<Payment> typeFilter = payment ->
                 paymentType == null || payment.getPaymentType() == paymentType;
 
-        Predicate<Payment> dateFilter = payment ->
-                (startDate == null && endDate == null) ||
-                        (payment.getDate() != null &&
-                                !payment.getDate().isBefore(startDate) &&
-                                !payment.getDate().isAfter(endDate));
+        Predicate<Payment> dateFilter = payment -> {
+            LocalDateTime dt = payment.getTransactionDateTime();
+            boolean afterOrEqualStart = (startDateTime == null) || !dt.isBefore(startDateTime);
+            boolean beforeOrEqualEnd = (endDateTime == null) || !dt.isAfter(endDateTime);
+            return afterOrEqualStart && beforeOrEqualEnd;
+        };
 
         return payments.stream()
                 .filter(typeFilter)

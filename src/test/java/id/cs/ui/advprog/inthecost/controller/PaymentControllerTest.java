@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +40,8 @@ public class PaymentControllerTest {
 
         UUID userId = UUID.fromString(userIdStr);
 
+        LocalDateTime now = LocalDateTime.now();
+
         Payment expectedPayment = Payment.builder()
                 .id(1L)
                 .userId(userId)
@@ -47,7 +49,7 @@ public class PaymentControllerTest {
                 .description("Top Up via bank")
                 .paymentType(PaymentTypeEnum.TOP_UP)
                 .paymentStatus(PaymentStatusEnum.SUCCESS)
-                .date(LocalDate.now())
+                .transactionDateTime(now)
                 .build();
 
         when(paymentService.recordTopUpPayment(userId, 150000.0, "Top Up via bank"))
@@ -88,6 +90,8 @@ public class PaymentControllerTest {
 
         double discountedAmount = req.getAmount() - req.getDiscountPrice(); // 450000.0
 
+        LocalDateTime now = LocalDateTime.now();
+
         Payment expectedPayment = Payment.builder()
                 .id(2L)
                 .userId(userId)
@@ -97,7 +101,7 @@ public class PaymentControllerTest {
                 .description("Monthly Kost Payment")
                 .paymentType(PaymentTypeEnum.KOST_PAYMENT)
                 .paymentStatus(PaymentStatusEnum.SUCCESS)
-                .date(LocalDate.now())
+                .transactionDateTime(now)
                 .build();
 
         when(paymentService.recordKostPayment(userId, ownerId, kostId, discountedAmount, "Monthly Kost Payment"))
@@ -125,7 +129,7 @@ public class PaymentControllerTest {
                         .amount(100000.0)
                         .paymentType(PaymentTypeEnum.TOP_UP)
                         .paymentStatus(PaymentStatusEnum.SUCCESS)
-                        .date(LocalDate.now())
+                        .transactionDateTime(LocalDateTime.now())
                         .build()
         );
 
@@ -145,8 +149,8 @@ public class PaymentControllerTest {
         // Arrange
         UUID userId = UUID.randomUUID();
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
-        LocalDate startDate = LocalDate.of(2024, 1, 1);
-        LocalDate endDate = LocalDate.of(2024, 12, 31);
+        LocalDateTime startDateTime = LocalDateTime.of(2024, 1, 1, 0, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2024, 12, 31, 23, 59);
 
         List<Payment> filteredPayments = Arrays.asList(
                 Payment.builder()
@@ -155,15 +159,15 @@ public class PaymentControllerTest {
                         .amount(120000.0)
                         .paymentType(paymentType)
                         .paymentStatus(PaymentStatusEnum.SUCCESS)
-                        .date(LocalDate.of(2024, 5, 10))
+                        .transactionDateTime(LocalDateTime.of(2024, 5, 10, 14, 30))
                         .build()
         );
 
-        when(paymentService.getFilteredTransactionHistory(userId, paymentType, startDate, endDate))
+        when(paymentService.getFilteredTransactionHistory(userId, paymentType, startDateTime, endDateTime))
                 .thenReturn(filteredPayments);
 
         // Act
-        var response = paymentController.getFilteredTransactionHistory(userId.toString(), paymentType, startDate, endDate, null);
+        var response = paymentController.getFilteredTransactionHistory(userId.toString(), paymentType, startDateTime, endDateTime, null);
 
         // Assert
         assertNotNull(response);

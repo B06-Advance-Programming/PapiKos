@@ -2,19 +2,19 @@ package id.cs.ui.advprog.inthecost.model;
 
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -25,14 +25,15 @@ import java.util.UUID;
 @Table(name = "payment")
 public class Payment {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // <-- add this
     @Column(name = "payment_id")
     private Long id;
 
     @Column(name = "amount")
     private Double amount;
 
-    @Column(name = "date")
-    private LocalDate date;
+    @Column(name = "transaction_date_time")
+    private LocalDateTime transactionDateTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_type")
@@ -54,7 +55,7 @@ public class Payment {
     @Column(name = "kost_id", columnDefinition = "uuid")
     private UUID kostId;
 
-    // Setter methods to maintain compatibility with existing code
+    // Setters (if you want, but usually use @Builder or constructor)
     public void setId(Long id) {
         this.id = id;
     }
@@ -63,8 +64,8 @@ public class Payment {
         this.amount = amount;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setTransactionDateTime(LocalDateTime transactionDateTime) {
+        this.transactionDateTime = transactionDateTime;
     }
 
     public void setPaymentType(PaymentTypeEnum paymentType) {

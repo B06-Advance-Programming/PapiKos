@@ -4,7 +4,7 @@ import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +18,7 @@ public class PaymentTest {
         // Arrange
         Long id = 1L;
         Double amount = 100000.0;
-        LocalDate date = LocalDate.of(2023, 5, 15);
+        LocalDateTime date = LocalDateTime.of(2023, 6, 15, 0, 0);
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         String description = "Top up saldo";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
@@ -28,7 +28,7 @@ public class PaymentTest {
         payment = Payment.builder()
                 .id(id)
                 .amount(amount)
-                .date(date)
+                .transactionDateTime(date)
                 .paymentType(paymentType)
                 .description(description)
                 .paymentStatus(paymentStatus)
@@ -38,7 +38,7 @@ public class PaymentTest {
         // Assert
         assertEquals(id, payment.getId());
         assertEquals(amount, payment.getAmount());
-        assertEquals(date, payment.getDate());
+        assertEquals(date, payment.getTransactionDateTime());
         assertEquals(paymentType, payment.getPaymentType());
         assertEquals(description, payment.getDescription());
         assertEquals(paymentStatus, payment.getPaymentStatus());
@@ -50,7 +50,7 @@ public class PaymentTest {
         // Arrange
         Long id = 2L;
         Double amount = 500000.0;
-        LocalDate date = LocalDate.of(2023, 5, 15);
+        LocalDateTime date = LocalDateTime.of(2023, 6, 15, 0, 0);
         PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT;
         String description = "Pembayaran kos bulan Mei";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
@@ -62,7 +62,7 @@ public class PaymentTest {
         payment = Payment.builder()
                 .id(id)
                 .amount(amount)
-                .date(date)
+                .transactionDateTime(date)
                 .paymentType(paymentType)
                 .description(description)
                 .paymentStatus(paymentStatus)
@@ -74,7 +74,7 @@ public class PaymentTest {
         // Assert
         assertEquals(id, payment.getId());
         assertEquals(amount, payment.getAmount());
-        assertEquals(date, payment.getDate());
+        assertEquals(date, payment.getTransactionDateTime());
         assertEquals(paymentType, payment.getPaymentType());
         assertEquals(description, payment.getDescription());
         assertEquals(paymentStatus, payment.getPaymentStatus());
@@ -89,7 +89,7 @@ public class PaymentTest {
         payment = new Payment();
         Long id = 3L;
         Double amount = 750000.0;
-        LocalDate date = LocalDate.of(2023, 6, 15);
+        LocalDateTime date = LocalDateTime.of(2023, 6, 15, 0, 0);
         PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT;
         String description = "Pembayaran kos bulan Juni";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.PENDING;
@@ -100,7 +100,7 @@ public class PaymentTest {
         // Act
         payment.setId(id);
         payment.setAmount(amount);
-        payment.setDate(date);
+        payment.setTransactionDateTime(date);
         payment.setPaymentType(paymentType);
         payment.setDescription(description);
         payment.setPaymentStatus(paymentStatus);
@@ -111,7 +111,7 @@ public class PaymentTest {
         // Assert
         assertEquals(id, payment.getId());
         assertEquals(amount, payment.getAmount());
-        assertEquals(date, payment.getDate());
+        assertEquals(date, payment.getTransactionDateTime());
         assertEquals(paymentType, payment.getPaymentType());
         assertEquals(description, payment.getDescription());
         assertEquals(paymentStatus, payment.getPaymentStatus());
@@ -128,7 +128,7 @@ public class PaymentTest {
         // Assert
         assertNull(payment.getId());
         assertNull(payment.getAmount());
-        assertNull(payment.getDate());
+        assertNull(payment.getTransactionDateTime());
         assertNull(payment.getPaymentType());
         assertNull(payment.getDescription());
         assertNull(payment.getPaymentStatus());
@@ -160,7 +160,7 @@ public class PaymentTest {
         // Arrange
         Long id = 4L;
         Double amount = 250000.0;
-        LocalDate date = LocalDate.now();
+        LocalDateTime date = LocalDateTime.now();
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         String description = "Top up via bank transfer";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
@@ -170,7 +170,7 @@ public class PaymentTest {
         payment = Payment.builder()
                 .id(id)
                 .amount(amount)
-                .date(date)
+                .transactionDateTime(date)
                 .paymentType(paymentType)
                 .description(description)
                 .paymentStatus(paymentStatus)
@@ -180,7 +180,7 @@ public class PaymentTest {
         // Assert
         assertEquals(id, payment.getId());
         assertEquals(amount, payment.getAmount());
-        assertEquals(date, payment.getDate());
+        assertEquals(date, payment.getTransactionDateTime());
         assertEquals(paymentType, payment.getPaymentType());
         assertEquals(description, payment.getDescription());
         assertEquals(paymentStatus, payment.getPaymentStatus());
