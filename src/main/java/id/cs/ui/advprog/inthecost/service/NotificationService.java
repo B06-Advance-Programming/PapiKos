@@ -2,13 +2,16 @@ package id.cs.ui.advprog.inthecost.service;
 
 import id.cs.ui.advprog.inthecost.model.InboxNotification;
 import id.cs.ui.advprog.inthecost.model.Kost;
+import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.InboxRepository;
+import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +19,7 @@ public class NotificationService {
 
     private final InboxRepository inboxRepository;
     private final WishlistRepository wishlistRepository;
+    private final UserRepository userRepository;
 
     public void notifyUsers(Kost kost) {
         // Retrieve the list of users who have wishlisted this Kost
@@ -31,7 +35,12 @@ public class NotificationService {
             boolean exists = inboxRepository.existsByUserIdAndMessage(userId, message);
 
             if (!exists) {
-                InboxNotification notif = new InboxNotification(userId, message);
+                // Fetch the User object using the userId
+                User user = userRepository.findById(UUID.fromString(userId))
+                        .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+                // Create the InboxNotification with the User object
+                InboxNotification notif = new InboxNotification(user, message);
                 inboxRepository.save(notif);
             }
         }

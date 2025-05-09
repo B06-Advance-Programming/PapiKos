@@ -18,25 +18,26 @@ public class Kost implements Subject {
     @Column(name = "kost_id")
     private UUID kostID;
 
-    @Column(name = "nama")
+    @Column(name = "nama", nullable = false)
     private String nama;
 
-    @Column(name = "alamat")
+    @Column(name = "alamat", nullable = false)
     private String alamat;
 
-    @Column(name = "deskripsi")
+    @Column(name = "deskripsi", nullable = false)
     private String deskripsi;
 
-    @Column(name = "jumlah_kamar")
+    @Column(name = "jumlah_kamar", nullable = false)
     private int jumlahKamar;
 
-    @Column(name = "harga_per_bulan")
+    @Column(name = "harga_per_bulan", nullable = false)
     private int hargaPerBulan;
 
     @Transient // Mark as non-persistent
     private final Set<Observer> observers = new HashSet<>();
 
-    private int previousJumlahKamar = -1;
+    @Transient
+    private boolean enableObservers = true; // Flag to enable/disable observer notifications
 
     public Kost() {
         kostID = UUID.randomUUID();
@@ -65,7 +66,6 @@ public class Kost implements Subject {
         this.deskripsi = deskripsi;
         this.jumlahKamar = jumlahKamar;
         this.hargaPerBulan = hargaPerBulan;
-        this.previousJumlahKamar = jumlahKamar;
     }
 
     public void setNama(String nama) {
@@ -93,14 +93,12 @@ public class Kost implements Subject {
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
         }
-
-        // Only notify observers if the number of rooms changes from 0 to a positive value
-        if (this.jumlahKamar == 0 && jumlahKamar > 0) {
-            this.previousJumlahKamar = this.jumlahKamar;
-            this.jumlahKamar = jumlahKamar;
+    
+        int oldValue = this.jumlahKamar;
+        this.jumlahKamar = jumlahKamar;
+    
+        if (enableObservers && oldValue == 0 && jumlahKamar > 0) {
             notifyObservers();
-        } else {
-            this.jumlahKamar = jumlahKamar;
         }
     }
 
@@ -126,5 +124,15 @@ public class Kost implements Subject {
         for (Observer observer : observers) {
             observer.update(this);
         }
+    }
+
+    // Disable observer notifications (useful for tests)
+    public void disableObservers() {
+        this.enableObservers = false;
+    }
+
+    // Enable observer notifications
+    public void enableObservers() {
+        this.enableObservers = true;
     }
 }

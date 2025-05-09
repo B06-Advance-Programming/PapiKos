@@ -2,13 +2,16 @@ package id.cs.ui.advprog.inthecost.service;
 
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.InboxNotification;
+import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.InboxRepository;
+import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.WishlistRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,13 +20,15 @@ public class NotificationServiceTest {
 
     private InboxRepository inboxRepositoryMock;
     private WishlistRepository wishlistRepositoryMock;
+    private UserRepository userRepositoryMock;
     private NotificationService notificationService;
 
     @BeforeEach
     void setUp() {
         inboxRepositoryMock = mock(InboxRepository.class);
         wishlistRepositoryMock = mock(WishlistRepository.class);
-        notificationService = new NotificationService(inboxRepositoryMock, wishlistRepositoryMock);
+        userRepositoryMock = mock(UserRepository.class);
+        notificationService = new NotificationService(inboxRepositoryMock, wishlistRepositoryMock, userRepositoryMock);
     }
 
     @Test
@@ -33,6 +38,13 @@ public class NotificationServiceTest {
         // Simulate users who have wishlisted this Kost
         Set<String> userIds = Set.of("user1", "user2", "user3");
         when(wishlistRepositoryMock.findUserIdsByKostId(kost.getKostID())).thenReturn(userIds);
+
+        for (String userId : userIds) {
+            User user = new User();
+            user.setId(UUID.fromString(userId));
+            when(userRepositoryMock.findById(UUID.fromString(userId))).thenReturn(java.util.Optional.of(user));
+        }
+
         when(inboxRepositoryMock.existsByUserIdAndMessage(anyString(), anyString())).thenReturn(false);
 
         notificationService.notifyUsers(kost);
@@ -41,7 +53,7 @@ public class NotificationServiceTest {
         for (String userId : userIds) {
             verify(inboxRepositoryMock, times(1)).save(
                     argThat(notification ->
-                            notification.getUserId().equals(userId) &&
+                            notification.getUser().getId().toString().equals(userId) &&
                                     notification.getMessage().contains("Kos Lavender")
                     )
             );
@@ -63,14 +75,17 @@ public class NotificationServiceTest {
 
     @Test
     void testGetInboxReturnsUserNotifications() {
-        String userId = "user1";
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername("user1");
+
         List<InboxNotification> mockList = List.of(
-                new InboxNotification(userId, "Kamar tersedia di Kos Sakura")
+                new InboxNotification(user, "Kamar tersedia di Kos Sakura")
         );
 
-        when(inboxRepositoryMock.findByUserId(userId)).thenReturn(mockList);
+        when(inboxRepositoryMock.findByUserId(user.getId().toString())).thenReturn(mockList);
 
-        List<InboxNotification> result = notificationService.getInbox(userId);
+        List<InboxNotification> result = notificationService.getInbox(user.getId().toString());
 
         assertEquals(1, result.size());
         assertEquals("Kamar tersedia di Kos Sakura", result.get(0).getMessage());

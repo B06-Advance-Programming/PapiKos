@@ -3,6 +3,7 @@ package id.cs.ui.advprog.inthecost.model;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,19 +11,27 @@ public class InboxNotificationTest {
 
     @Test
     void testCreateNotification() {
-        InboxNotification notif = new InboxNotification("user1", "Kamar tersedia di Kos Mawar");
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername("user1");
 
-        assertEquals("user1", notif.getUserId());
+        InboxNotification notif = new InboxNotification(user, "Kamar tersedia di Kos Mawar");
+
+        assertEquals(user, notif.getUser());
         assertEquals("Kamar tersedia di Kos Mawar", notif.getMessage());
         assertNotNull(notif.getCreatedAt());
     }
 
     @Test
     void testEqualsAndHashCode() {
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername("user1");
+
         LocalDateTime now = LocalDateTime.now();
 
-        InboxNotification notif1 = new InboxNotification("user1", "Tes", now);
-        InboxNotification notif2 = new InboxNotification("user1", "Tes", now);
+        InboxNotification notif1 = new InboxNotification(user, "Tes", now);
+        InboxNotification notif2 = new InboxNotification(user, "Tes", now);
 
         assertEquals(notif1, notif2);
         assertEquals(notif1.hashCode(), notif2.hashCode());
@@ -30,13 +39,21 @@ public class InboxNotificationTest {
 
     @Test
     void testToStringIsNotNull() {
-        InboxNotification notif = new InboxNotification("user2", "Notif contoh");
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername("user2");
+
+        InboxNotification notif = new InboxNotification(user, "Notif contoh");
         assertNotNull(notif.toString());
     }
 
     @Test
     void testDefaultCreatedAt() {
-        InboxNotification notif = new InboxNotification("user3", "Default timestamp test");
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername("user3");
+
+        InboxNotification notif = new InboxNotification(user, "Default timestamp test");
         assertNotNull(notif.getCreatedAt());
         assertTrue(notif.getCreatedAt().isBefore(LocalDateTime.now().plusSeconds(1)));
     }
