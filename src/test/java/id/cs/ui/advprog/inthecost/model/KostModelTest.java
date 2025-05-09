@@ -1,5 +1,5 @@
 package id.cs.ui.advprog.inthecost.model;
-import id.cs.ui.advprog.inthecost.Exception.*;
+import id.cs.ui.advprog.inthecost.exception.*;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

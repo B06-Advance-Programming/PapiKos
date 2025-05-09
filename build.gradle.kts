@@ -37,13 +37,23 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // Spring Boot Starter for JPA
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // PostgreSQL JDBC Driver
+    implementation("org.postgresql:postgresql")
+    // Test dependencies
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // untuk user
     implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // Spring Session JDBC
+    implementation("org.springframework.session:spring-session-jdbc")
 }
 
 tasks.register<Test>("unitTest") {

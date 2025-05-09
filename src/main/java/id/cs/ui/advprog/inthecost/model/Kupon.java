@@ -20,7 +20,7 @@ import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
 @Setter
 @Entity
 @Table(name = "kupon")
-public class Kupon{
+public class Kupon {
 
     @Setter(AccessLevel.NONE)
     @Id
@@ -50,9 +50,6 @@ public class Kupon{
     @Enumerated(EnumType.STRING)
     private KuponStatus statusKupon;
 
-    @Column(name = "kupon_global", nullable = false)
-    private boolean kuponGlobal;
-
     @ManyToMany
     @JoinTable(
             name = "kupon_kost",
@@ -66,16 +63,14 @@ public class Kupon{
     public Kupon() {
     }
 
-    public Kupon(User pemilik, List<Kost> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi, boolean kuponGlobal) {
+    public Kupon(User pemilik, List<Kost> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi) {
         validateInput(pemilik, masaBerlaku, persentase, deskripsi);
-        this.idKupon = UUID.randomUUID();
         this.pemilik = pemilik;
         this.kodeUnik = generateKodeUnik();
         this.persentase = persentase;
         this.masaBerlaku = masaBerlaku;
         this.kosPemilik = kosPemilik;
         this.deskripsi = deskripsi;
-        this.kuponGlobal = kuponGlobal;
         refreshStatus();
     }
 

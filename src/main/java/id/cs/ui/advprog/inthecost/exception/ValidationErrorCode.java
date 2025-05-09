@@ -1,4 +1,4 @@
-package id.cs.ui.advprog.inthecost.Exception;
+package id.cs.ui.advprog.inthecost.exception;
 
 public enum ValidationErrorCode {
     NULL_VALUE("err_0", "Field tidak boleh nulll"),

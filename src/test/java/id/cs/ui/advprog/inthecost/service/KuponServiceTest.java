@@ -78,9 +78,9 @@ public class KuponServiceTest{
         kostRepository.save(kos4);
         kostRepository.save(kos5);
 
-        kuponList.add(new Kupon(admin, List.of(kos1, kos2, kos3, kos4, kos5), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025", true));
-        kuponList.add(new Kupon(pemilik1, List.of(kos1, kos2, kos3), LocalDate.of(2025, 10, 20), 12, "Promo Pak Ahmad", false));
-        kuponList.add(new Kupon(pemilik2, List.of(kos4, kos5), LocalDate.of(2026, 2, 10), 10, "Kupon Semester Baru", false));
+        kuponList.add(new Kupon(admin, List.of(kos1, kos2, kos3, kos4, kos5), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025"));
+        kuponList.add(new Kupon(pemilik1, List.of(kos1, kos2, kos3), LocalDate.of(2025, 10, 20), 12, "Promo Pak Ahmad"));
+        kuponList.add(new Kupon(pemilik2, List.of(kos4, kos5), LocalDate.of(2026, 2, 10), 10, "Kupon Semester Baru"));
     }
 
     @Test

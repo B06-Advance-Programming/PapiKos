@@ -28,7 +28,6 @@ public class KuponServiceImpl implements KuponService {
             updated.setPersentase(kupon.getPersentase());
             updated.setMasaBerlaku(kupon.getMasaBerlaku());
             updated.setDeskripsi(kupon.getDeskripsi());
-            updated.setKuponGlobal(kupon.isKuponGlobal());
             updated.setKosPemilik(kupon.getKosPemilik());
             return kuponRepository.save(updated);
         } else {
