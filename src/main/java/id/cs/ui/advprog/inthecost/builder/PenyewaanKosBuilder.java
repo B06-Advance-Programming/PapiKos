@@ -5,9 +5,9 @@ import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class PenyewaanKosBuilder {
-    private Long id;
     private String namaLengkap;
     private String nomorTelepon;
     private LocalDate tanggalCheckIn;
@@ -17,11 +17,6 @@ public class PenyewaanKosBuilder {
 
     public static PenyewaanKosBuilder builder() {
         return new PenyewaanKosBuilder();
-    }
-
-    public PenyewaanKosBuilder id(Long id) {
-        this.id = id;
-        return this;
     }
 
     public PenyewaanKosBuilder namaLengkap(String namaLengkap) {
@@ -56,7 +51,7 @@ public class PenyewaanKosBuilder {
 
     public PenyewaanKos build() {
         PenyewaanKos penyewaan = new PenyewaanKos();
-        penyewaan.setId(this.id);
+        penyewaan.setId(UUID.randomUUID());
         penyewaan.setNamaLengkap(this.namaLengkap);
         penyewaan.setNomorTelepon(this.nomorTelepon);
         penyewaan.setTanggalCheckIn(this.tanggalCheckIn);
