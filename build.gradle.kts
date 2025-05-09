@@ -45,12 +45,15 @@ dependencies {
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    // untuk user
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+
+    // untuk user
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // Spring Session JDBC
+    implementation("org.springframework.session:spring-session-jdbc")
 }
 
 tasks.register<Test>("unitTest") {
@@ -68,4 +71,12 @@ tasks.test{
 
 tasks.jacocoTestReport{
     dependsOn(tasks.test)
+}
+
+tasks.bootJar {
+    archiveClassifier.set("")
+}
+
+tasks.jar {
+    enabled = false
 }

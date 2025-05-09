@@ -69,15 +69,15 @@ public class UserRepositoryTest {
         // Uji apakah bisa menemukan pengguna berdasarkan username
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
+        User user = new User("john_doe", "password123", "johnbukandoe@example.com", roles);
 
         userRepository.save(user);
 
-        Optional<User> foundUser = userRepository.findByEmail("john@example.com");
+        Optional<User> foundUser = userRepository.findByEmail("johnbukandoe@example.com");
 
         assertThat(foundUser).isPresent(); // Pastikan user ditemukan
         assertThat(foundUser.get().getUsername()).isEqualTo("john_doe");
-        assertThat(foundUser.get().getEmail()).isEqualTo("john@example.com");
+        assertThat(foundUser.get().getEmail()).isEqualTo("johnbukandoe@example.com");
         assertThat(foundUser.get().getRoles()).contains(userRole); // Pastikan role yang terkait ada
     }
 
@@ -94,7 +94,7 @@ public class UserRepositoryTest {
         // Uji apakah user dapat dihapus
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
+        User user = new User("john_doe", "password123", "johdihapuskasiann@example.com", roles);
 
         User savedUser = userRepository.save(user);
 
@@ -131,7 +131,7 @@ public class UserRepositoryTest {
         // Uji apakah role dapat dikaitkan dengan user
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
+        User user = new User("john_doe", "password123", "johdioawundn@example.com", roles);
 
         User savedUser = userRepository.save(user);
 
