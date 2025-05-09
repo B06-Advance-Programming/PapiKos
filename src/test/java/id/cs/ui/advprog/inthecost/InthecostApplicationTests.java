@@ -10,4 +10,9 @@ class InthecostApplicationTests {
     void contextLoads() {
     }
 
+    @Test
+    void mainMethodTest(){
+        InthecostApplication.main(new String[]{});
+    }
+
 }
