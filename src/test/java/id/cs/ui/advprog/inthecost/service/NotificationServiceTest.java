@@ -35,8 +35,12 @@ public class NotificationServiceTest {
     void testNotifyUsersCreatesInboxForEachUser() {
         Kost kost = new Kost("Kos Lavender", "Jl. Lavender", "Deskripsi Kos Lavender", 1, 1000000);
 
-        // Simulate users who have wishlisted this Kost
-        Set<String> userIds = Set.of("user1", "user2", "user3");
+        // Simulate users who have wishlisted this Kost with valid UUIDs
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+        UUID userId3 = UUID.randomUUID();
+        Set<String> userIds = Set.of(userId1.toString(), userId2.toString(), userId3.toString());
+
         when(wishlistRepositoryMock.findUserIdsByKostId(kost.getKostID())).thenReturn(userIds);
 
         for (String userId : userIds) {
