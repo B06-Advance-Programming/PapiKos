@@ -30,13 +30,16 @@ public class NotificationService {
         }
 
         for (String userId : wishlistedUsers) {
+            // Convert userId to UUID
+            UUID userUUID = UUID.fromString(userId);
+
             // Check if a similar notification already exists to avoid duplicates
             String message = "Kamar tersedia di " + kost.getNama();
-            boolean exists = inboxRepository.existsByUserIdAndMessage(userId, message);
+            boolean exists = inboxRepository.existsByUserIdAndMessage(userUUID, message);
 
             if (!exists) {
                 // Fetch the User object using the userId
-                User user = userRepository.findById(UUID.fromString(userId))
+                User user = userRepository.findById(userUUID)
                         .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
                 // Create the InboxNotification with the User object
@@ -47,6 +50,8 @@ public class NotificationService {
     }
 
     public List<InboxNotification> getInbox(String userId) {
-        return inboxRepository.findByUserId(userId);
+        // Convert userId to UUID
+        UUID userUUID = UUID.fromString(userId);
+        return inboxRepository.findByUserId(userUUID);
     }
 }

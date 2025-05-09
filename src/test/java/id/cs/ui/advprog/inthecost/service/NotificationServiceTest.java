@@ -44,20 +44,22 @@ public class NotificationServiceTest {
         when(wishlistRepositoryMock.findUserIdsByKostId(kost.getKostID())).thenReturn(userIds);
 
         for (String userId : userIds) {
+            UUID userUUID = UUID.fromString(userId);
             User user = new User();
-            user.setId(UUID.fromString(userId));
-            when(userRepositoryMock.findById(UUID.fromString(userId))).thenReturn(java.util.Optional.of(user));
+            user.setId(userUUID);
+            when(userRepositoryMock.findById(userUUID)).thenReturn(java.util.Optional.of(user));
         }
 
-        when(inboxRepositoryMock.existsByUserIdAndMessage(anyString(), anyString())).thenReturn(false);
+        when(inboxRepositoryMock.existsByUserIdAndMessage(any(UUID.class), anyString())).thenReturn(false);
 
         notificationService.notifyUsers(kost);
 
         // Verify that notifications are created for each user
         for (String userId : userIds) {
+            UUID userUUID = UUID.fromString(userId);
             verify(inboxRepositoryMock, times(1)).save(
                     argThat(notification ->
-                            notification.getUser().getId().toString().equals(userId) &&
+                            notification.getUser().getId().equals(userUUID) &&
                                     notification.getMessage().contains("Kos Lavender")
                     )
             );
@@ -80,16 +82,17 @@ public class NotificationServiceTest {
     @Test
     void testGetInboxReturnsUserNotifications() {
         User user = new User();
-        user.setId(UUID.randomUUID());
+        UUID userUUID = UUID.randomUUID();
+        user.setId(userUUID);
         user.setUsername("user1");
 
         List<InboxNotification> mockList = List.of(
                 new InboxNotification(user, "Kamar tersedia di Kos Sakura")
         );
 
-        when(inboxRepositoryMock.findByUserId(user.getId().toString())).thenReturn(mockList);
+        when(inboxRepositoryMock.findByUserId(userUUID)).thenReturn(mockList);
 
-        List<InboxNotification> result = notificationService.getInbox(user.getId().toString());
+        List<InboxNotification> result = notificationService.getInbox(userUUID.toString());
 
         assertEquals(1, result.size());
         assertEquals("Kamar tersedia di Kos Sakura", result.get(0).getMessage());

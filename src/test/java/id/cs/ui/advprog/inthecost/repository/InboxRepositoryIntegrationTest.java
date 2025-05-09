@@ -35,7 +35,7 @@ public class InboxRepositoryIntegrationTest {
         inboxRepository.save(notification);
 
         // Retrieve notifications for the user
-        List<InboxNotification> notifications = inboxRepository.findByUserId(user.getId().toString());
+        List<InboxNotification> notifications = inboxRepository.findByUserId(user.getId());
 
         assertNotNull(notifications);
         assertEquals(1, notifications.size());
@@ -51,7 +51,7 @@ public class InboxRepositoryIntegrationTest {
         userRepository.save(user);
 
         // Retrieve notifications for a user with no notifications
-        List<InboxNotification> notifications = inboxRepository.findByUserId(user.getId().toString());
+        List<InboxNotification> notifications = inboxRepository.findByUserId(user.getId());
 
         assertNotNull(notifications);
         assertTrue(notifications.isEmpty());
