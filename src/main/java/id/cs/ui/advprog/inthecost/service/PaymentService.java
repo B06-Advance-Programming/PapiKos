@@ -5,20 +5,21 @@ import id.cs.ui.advprog.inthecost.model.Payment;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public interface PaymentService {
 
-    Payment recordTopUpPayment(Long userId, Double amount, String description);
+    Payment recordTopUpPayment(UUID userId, Double amount, String description);
 
-    Payment recordKostPayment(Long userId, Long ownerId, Long kostId, Double amount, String description);
+    Payment recordKostPayment(UUID userId, UUID ownerId, UUID kostId, Double amount, String description);
 
-    List<Payment> getTransactionHistory(Long userId);
+    List<Payment> getTransactionHistory(UUID userId);
 
-    List<Payment> getFilteredTransactionHistory(Long userId, PaymentTypeEnum paymentType,
+    List<Payment> getFilteredTransactionHistory(UUID userId, PaymentTypeEnum paymentType,
                                                 LocalDate startDate, LocalDate endDate);
 
-    List<Payment> getOwnerTransactionHistory(Long ownerId);
-    
-    List<Payment> getFilteredOwnerTransactionHistory(Long ownerId, PaymentTypeEnum paymentType,
+    List<Payment> getOwnerTransactionHistory(UUID ownerId);
+
+    List<Payment> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType,
                                                      LocalDate startDate, LocalDate endDate);
 }

@@ -40,6 +40,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+
+    implementation ("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    // Spring Boot Starter for JPA
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // PostgreSQL JDBC Driver
+    implementation("org.postgresql:postgresql")
+    // Test dependencies
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.register<Test>("unitTest") {

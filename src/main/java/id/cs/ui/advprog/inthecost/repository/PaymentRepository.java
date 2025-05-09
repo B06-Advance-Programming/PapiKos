@@ -6,6 +6,7 @@ import id.cs.ui.advprog.inthecost.model.Payment;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface PaymentRepository {
 
@@ -17,9 +18,9 @@ public interface PaymentRepository {
 
     void delete(Payment payment);
 
-    List<Payment> findByUserId(Long userId);
+    List<Payment> findByUserId(UUID userId);
 
-    List<Payment> findByOwnerId(Long ownerId);
+    List<Payment> findByOwnerId(UUID ownerId);
 
     List<Payment> findByPaymentType(PaymentTypeEnum paymentType);
 

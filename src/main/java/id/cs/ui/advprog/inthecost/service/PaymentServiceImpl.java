@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -23,9 +24,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Payment recordTopUpPayment(Long userId, Double amount, String description) {
+    public Payment recordTopUpPayment(UUID userId, Double amount, String description) {
         // Create payment record for top-up
-        Payment payment = new Payment.PaymentBuilder()
+        Payment payment = Payment.builder()
                 .amount(amount)
                 .date(LocalDate.now())
                 .paymentType(PaymentTypeEnum.TOP_UP)
@@ -38,9 +39,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Payment recordKostPayment(Long userId, Long ownerId, Long kostId, Double amount, String description) {
+    public Payment recordKostPayment(UUID userId, UUID ownerId, UUID kostId, Double amount, String description) {
         // Create payment record for kost payment
-        Payment payment = new Payment.PaymentBuilder()
+        Payment payment = Payment.builder()
                 .amount(amount)
                 .date(LocalDate.now())
                 .paymentType(PaymentTypeEnum.KOST_PAYMENT)
@@ -55,12 +56,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<Payment> getTransactionHistory(Long userId) {
+    public List<Payment> getTransactionHistory(UUID userId) {
         return paymentRepository.findByUserId(userId);
     }
 
     @Override
-    public List<Payment> getFilteredTransactionHistory(Long userId, PaymentTypeEnum paymentType,
+    public List<Payment> getFilteredTransactionHistory(UUID userId, PaymentTypeEnum paymentType,
                                                        LocalDate startDate, LocalDate endDate) {
         // Get all user transactions first
         List<Payment> userTransactions = paymentRepository.findByUserId(userId);
@@ -70,12 +71,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<Payment> getOwnerTransactionHistory(Long ownerId) {
+    public List<Payment> getOwnerTransactionHistory(UUID ownerId) {
         return paymentRepository.findByOwnerId(ownerId);
     }
 
     @Override
-    public List<Payment> getFilteredOwnerTransactionHistory(Long ownerId, PaymentTypeEnum paymentType,
+    public List<Payment> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType,
                                                             LocalDate startDate, LocalDate endDate) {
         // Get all owner transactions first
         List<Payment> ownerTransactions = paymentRepository.findByOwnerId(ownerId);
@@ -88,7 +89,6 @@ public class PaymentServiceImpl implements PaymentService {
                                          PaymentTypeEnum paymentType,
                                          LocalDate startDate,
                                          LocalDate endDate) {
-        // Create predicates for type and date filtering
         Predicate<Payment> typeFilter = payment ->
                 paymentType == null || payment.getPaymentType() == paymentType;
 
@@ -98,7 +98,6 @@ public class PaymentServiceImpl implements PaymentService {
                                 !payment.getDate().isBefore(startDate) &&
                                 !payment.getDate().isAfter(endDate));
 
-        // Apply all filters in a chain
         return payments.stream()
                 .filter(typeFilter)
                 .filter(dateFilter)

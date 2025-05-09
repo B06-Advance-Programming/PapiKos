@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,13 +31,13 @@ public class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Any general setup
+        // Any general setup if needed
     }
 
     @Test
     void recordTopUpPayment_shouldCreateTopUpPaymentRecord() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         Double amount = 100000.0;
         String description = "Top up via bank transfer";
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -58,9 +59,9 @@ public class PaymentServiceTest {
     @Test
     void recordKostPayment_shouldCreateKostPaymentRecord() {
         // Arrange
-        Long userId = 1L;
-        Long ownerId = 2L;
-        Long kostId = 3L;
+        UUID userId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
+        UUID kostId = UUID.randomUUID();
         Double amount = 300000.0;
         String description = "Kost payment for May";
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -82,12 +83,12 @@ public class PaymentServiceTest {
     @Test
     void getTransactionHistory_shouldReturnUserTransactions() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         List<Payment> userPayments = new ArrayList<>();
         userPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
         userPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, 2L, 3L));
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
 
         when(paymentRepository.findByUserId(userId)).thenReturn(userPayments);
 
@@ -102,21 +103,20 @@ public class PaymentServiceTest {
     @Test
     void getFilteredTransactionHistory_shouldFilterByDateRange() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         LocalDate startDate = LocalDate.now().minusDays(5);
         LocalDate endDate = LocalDate.now();
 
         List<Payment> allUserPayments = new ArrayList<>();
-        // These should be included in the result (within date range)
+        // Included (inside date range)
         allUserPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
         allUserPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, 2L, 3L));
-        // This one should be filtered out (outside date range)
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
+        // Excluded (outside date range)
         allUserPayments.add(createPayment(3L, 150000.0, LocalDate.now().minusDays(10),
                 PaymentTypeEnum.TOP_UP, "Old top up", PaymentStatusEnum.SUCCESS, userId, null, null));
 
-        // We'll filter in the service, so we just return all user payments here
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
         // Act
@@ -125,12 +125,8 @@ public class PaymentServiceTest {
 
         // Assert
         assertEquals(2, result.size());
-        // Verify payments are within the date range
         for (Payment payment : result) {
-            assertTrue(
-                    !payment.getDate().isBefore(startDate) &&
-                            !payment.getDate().isAfter(endDate)
-            );
+            assertTrue(!payment.getDate().isBefore(startDate) && !payment.getDate().isAfter(endDate));
         }
         verify(paymentRepository).findByUserId(userId);
     }
@@ -138,16 +134,15 @@ public class PaymentServiceTest {
     @Test
     void getFilteredTransactionHistory_shouldFilterByPaymentType() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         List<Payment> allUserPayments = new ArrayList<>();
-        // This should be included (type = TOP_UP)
+        // Included (TOP_UP)
         allUserPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
-        // This should be filtered out (type = KOST_PAYMENT)
+        // Excluded (KOST_PAYMENT)
         allUserPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, 2L, 3L));
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
 
-        // We'll filter in the service
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
         // Act
@@ -163,18 +158,18 @@ public class PaymentServiceTest {
     @Test
     void getFilteredTransactionHistory_shouldFilterByPaymentTypeAndDateRange() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         LocalDate startDate = LocalDate.now().minusDays(5);
         LocalDate endDate = LocalDate.now();
 
         List<Payment> allUserPayments = new ArrayList<>();
-        // Should be included (TOP_UP and within date range)
+        // Included (TOP_UP and within date range)
         allUserPayments.add(createPayment(1L, 100000.0, LocalDate.now().minusDays(2),
                 PaymentTypeEnum.TOP_UP, "Top up", PaymentStatusEnum.SUCCESS, userId, null, null));
-        // Should be filtered out (KOST_PAYMENT)
+        // Excluded (KOST_PAYMENT)
         allUserPayments.add(createPayment(2L, 200000.0, LocalDate.now().minusDays(1),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, 2L, 3L));
-        // Should be filtered out (outside date range)
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, userId, UUID.randomUUID(), UUID.randomUUID()));
+        // Excluded (outside date range)
         allUserPayments.add(createPayment(3L, 150000.0, LocalDate.now().minusDays(10),
                 PaymentTypeEnum.TOP_UP, "Old top up", PaymentStatusEnum.SUCCESS, userId, null, null));
 
@@ -187,7 +182,6 @@ public class PaymentServiceTest {
         // Assert
         assertEquals(1, result.size());
         assertEquals(PaymentTypeEnum.TOP_UP, result.get(0).getPaymentType());
-        // Verify within date range
         LocalDate paymentDate = result.get(0).getDate();
         assertTrue(!paymentDate.isBefore(startDate) && !paymentDate.isAfter(endDate));
         verify(paymentRepository).findByUserId(userId);
@@ -196,12 +190,14 @@ public class PaymentServiceTest {
     @Test
     void getOwnerTransactionHistory_shouldReturnOwnerTransactions() {
         // Arrange
-        Long ownerId = 2L;
+        UUID ownerId = UUID.randomUUID();
         List<Payment> ownerPayments = new ArrayList<>();
         ownerPayments.add(createPayment(1L, 200000.0, LocalDate.now().minusDays(2),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment from user 1", PaymentStatusEnum.SUCCESS, 1L, ownerId, 3L));
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment from user 1", PaymentStatusEnum.SUCCESS,
+                UUID.randomUUID(), ownerId, UUID.randomUUID()));
         ownerPayments.add(createPayment(2L, 300000.0, LocalDate.now().minusDays(1),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment from user 3", PaymentStatusEnum.SUCCESS, 3L, ownerId, 4L));
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment from user 3", PaymentStatusEnum.SUCCESS,
+                UUID.randomUUID(), ownerId, UUID.randomUUID()));
 
         when(paymentRepository.findByOwnerId(ownerId)).thenReturn(ownerPayments);
 
@@ -216,17 +212,17 @@ public class PaymentServiceTest {
     @Test
     void getFilteredOwnerTransactionHistory_shouldFilterByDateRange() {
         // Arrange
-        Long ownerId = 2L;
+        UUID ownerId = UUID.randomUUID();
         LocalDate startDate = LocalDate.now().minusDays(3);
         LocalDate endDate = LocalDate.now();
 
         List<Payment> allOwnerPayments = new ArrayList<>();
-        // Should be included (within date range)
         allOwnerPayments.add(createPayment(1L, 200000.0, LocalDate.now().minusDays(2),
-                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS, 1L, ownerId, 3L));
-        // Should be filtered out (outside date range)
+                PaymentTypeEnum.KOST_PAYMENT, "Kost payment", PaymentStatusEnum.SUCCESS,
+                UUID.randomUUID(), ownerId, UUID.randomUUID()));
         allOwnerPayments.add(createPayment(2L, 300000.0, LocalDate.now().minusDays(5),
-                PaymentTypeEnum.KOST_PAYMENT, "Old kost payment", PaymentStatusEnum.SUCCESS, 3L, ownerId, 4L));
+                PaymentTypeEnum.KOST_PAYMENT, "Old kost payment", PaymentStatusEnum.SUCCESS,
+                UUID.randomUUID(), ownerId, UUID.randomUUID()));
 
         when(paymentRepository.findByOwnerId(ownerId)).thenReturn(allOwnerPayments);
 
@@ -241,8 +237,8 @@ public class PaymentServiceTest {
 
     private Payment createPayment(Long id, Double amount, LocalDate date, PaymentTypeEnum paymentType,
                                   String description, PaymentStatusEnum paymentStatus,
-                                  Long userId, Long ownerId, Long kostId) {
-        Payment payment = new Payment.PaymentBuilder()
+                                  UUID userId, UUID ownerId, UUID kostId) {
+        Payment payment = Payment.builder()
                 .amount(amount)
                 .date(date)
                 .paymentType(paymentType)

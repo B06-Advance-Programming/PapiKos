@@ -41,14 +41,14 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public List<Payment> findByUserId(Long userId) {
+    public List<Payment> findByUserId(UUID userId) {
         return payments.values().stream()
                 .filter(payment -> Objects.equals(payment.getUserId(), userId))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Payment> findByOwnerId(Long ownerId) {
+    public List<Payment> findByOwnerId(UUID ownerId) {
         return payments.values().stream()
                 .filter(payment -> Objects.equals(payment.getOwnerId(), ownerId))
                 .collect(Collectors.toList());

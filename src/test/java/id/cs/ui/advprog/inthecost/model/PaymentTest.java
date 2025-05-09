@@ -1,23 +1,17 @@
 package id.cs.ui.advprog.inthecost.model;
 
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentTest {
 
     private Payment payment;
-    private Payment.PaymentBuilder paymentBuilder;
-
-    @BeforeEach
-    void setUp() {
-        paymentBuilder = new Payment.PaymentBuilder();
-    }
 
     @Test
     void testPaymentBuilderAndGetters() {
@@ -25,13 +19,13 @@ public class PaymentTest {
         Long id = 1L;
         Double amount = 100000.0;
         LocalDate date = LocalDate.of(2023, 5, 15);
-        PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP; // Change here
+        PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         String description = "Top up saldo";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
 
         // Act
-        payment = paymentBuilder
+        payment = Payment.builder()
                 .id(id)
                 .amount(amount)
                 .date(date)
@@ -57,15 +51,15 @@ public class PaymentTest {
         Long id = 2L;
         Double amount = 500000.0;
         LocalDate date = LocalDate.of(2023, 5, 15);
-        PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT; // Change here
+        PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT;
         String description = "Pembayaran kos bulan Mei";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
-        Long userId = 1L;
-        Long ownerId = 2L;
-        Long kostId = 3L;
+        UUID userId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
+        UUID kostId = UUID.randomUUID();
 
         // Act
-        payment = paymentBuilder
+        payment = Payment.builder()
                 .id(id)
                 .amount(amount)
                 .date(date)
@@ -96,12 +90,12 @@ public class PaymentTest {
         Long id = 3L;
         Double amount = 750000.0;
         LocalDate date = LocalDate.of(2023, 6, 15);
-        PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT; // Change here
+        PaymentTypeEnum paymentType = PaymentTypeEnum.KOST_PAYMENT;
         String description = "Pembayaran kos bulan Juni";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.PENDING;
-        Long userId = 1L;
-        Long ownerId = 2L;
-        Long kostId = 3L;
+        UUID userId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
+        UUID kostId = UUID.randomUUID();
 
         // Act
         payment.setId(id);
@@ -170,10 +164,10 @@ public class PaymentTest {
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         String description = "Top up via bank transfer";
         PaymentStatusEnum paymentStatus = PaymentStatusEnum.SUCCESS;
-        Long userId = 5L;
+        UUID userId = UUID.randomUUID();
 
         // Act
-        payment = paymentBuilder
+        payment = Payment.builder()
                 .id(id)
                 .amount(amount)
                 .date(date)

@@ -14,6 +14,7 @@ import org.mockito.*;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class PaymentControllerTest {
 
@@ -32,13 +33,16 @@ public class PaymentControllerTest {
     void testTopUp() {
         // Arrange
         PaymentController.TopUpRequest req = new PaymentController.TopUpRequest();
-        req.setUserId(1L);
+        String userIdStr = UUID.randomUUID().toString();
+        req.setUserId(userIdStr);
         req.setAmount(150000.0);
         req.setDescription("Top Up via bank");
 
-        Payment expectedPayment = new Payment.PaymentBuilder()
+        UUID userId = UUID.fromString(userIdStr);
+
+        Payment expectedPayment = Payment.builder()
                 .id(1L)
-                .userId(1L)
+                .userId(userId)
                 .amount(150000.0)
                 .description("Top Up via bank")
                 .paymentType(PaymentTypeEnum.TOP_UP)
@@ -46,7 +50,7 @@ public class PaymentControllerTest {
                 .date(LocalDate.now())
                 .build();
 
-        when(paymentService.recordTopUpPayment(1L, 150000.0, "Top Up via bank"))
+        when(paymentService.recordTopUpPayment(userId, 150000.0, "Top Up via bank"))
                 .thenReturn(expectedPayment);
 
         String testHeaderValue = "true";
@@ -64,23 +68,31 @@ public class PaymentControllerTest {
     void testKostPayment_withDiscount() {
         // Arrange
         PaymentController.KostPaymentRequest req = new PaymentController.KostPaymentRequest();
-        req.setUserId(2L);
-        req.setOwnerId(20L);
-        req.setKostId(5L);
+
+        String userIdStr = UUID.randomUUID().toString();
+        String ownerIdStr = UUID.randomUUID().toString();
+        String kostIdStr = UUID.randomUUID().toString();
+
+        req.setUserId(userIdStr);
+        req.setOwnerId(ownerIdStr);
+        req.setKostId(kostIdStr);
         req.setAmount(500000.0);
         req.setDescription("Monthly Kost Payment");
-        // New discount/coupon related fields
         req.setCouponCode("DISCOUNT2025");
         req.setCouponQuantity(1);
         req.setDiscountPrice(50000.0);  // discount 50k
 
+        UUID userId = UUID.fromString(userIdStr);
+        UUID ownerId = UUID.fromString(ownerIdStr);
+        UUID kostId = UUID.fromString(kostIdStr);
+
         double discountedAmount = req.getAmount() - req.getDiscountPrice(); // 450000.0
 
-        Payment expectedPayment = new Payment.PaymentBuilder()
+        Payment expectedPayment = Payment.builder()
                 .id(2L)
-                .userId(2L)
-                .ownerId(20L)
-                .kostId(5L)
+                .userId(userId)
+                .ownerId(ownerId)
+                .kostId(kostId)
                 .amount(discountedAmount)
                 .description("Monthly Kost Payment")
                 .paymentType(PaymentTypeEnum.KOST_PAYMENT)
@@ -88,8 +100,7 @@ public class PaymentControllerTest {
                 .date(LocalDate.now())
                 .build();
 
-        // The mock expects the discounted amount passed
-        when(paymentService.recordKostPayment(2L, 20L, 5L, discountedAmount, "Monthly Kost Payment"))
+        when(paymentService.recordKostPayment(userId, ownerId, kostId, discountedAmount, "Monthly Kost Payment"))
                 .thenReturn(expectedPayment);
 
         String testHeaderValue = "true";
@@ -106,9 +117,9 @@ public class PaymentControllerTest {
     @Test
     void testGetTransactionHistory() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         List<Payment> payments = Arrays.asList(
-                new Payment.PaymentBuilder()
+                Payment.builder()
                         .id(10L)
                         .userId(userId)
                         .amount(100000.0)
@@ -121,7 +132,7 @@ public class PaymentControllerTest {
         when(paymentService.getTransactionHistory(userId)).thenReturn(payments);
 
         // Act
-        var response = paymentController.getTransactionHistory(userId, null);
+        var response = paymentController.getTransactionHistory(userId.toString(), null);
 
         // Assert
         assertNotNull(response);
@@ -132,13 +143,13 @@ public class PaymentControllerTest {
     @Test
     void testGetFilteredTransactionHistory() {
         // Arrange
-        Long userId = 1L;
+        UUID userId = UUID.randomUUID();
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         LocalDate startDate = LocalDate.of(2024, 1, 1);
         LocalDate endDate = LocalDate.of(2024, 12, 31);
 
         List<Payment> filteredPayments = Arrays.asList(
-                new Payment.PaymentBuilder()
+                Payment.builder()
                         .id(11L)
                         .userId(userId)
                         .amount(120000.0)
@@ -152,7 +163,7 @@ public class PaymentControllerTest {
                 .thenReturn(filteredPayments);
 
         // Act
-        var response = paymentController.getFilteredTransactionHistory(userId, paymentType, startDate, endDate, null);
+        var response = paymentController.getFilteredTransactionHistory(userId.toString(), paymentType, startDate, endDate, null);
 
         // Assert
         assertNotNull(response);

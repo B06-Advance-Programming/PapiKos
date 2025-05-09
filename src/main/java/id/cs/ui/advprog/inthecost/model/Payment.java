@@ -2,74 +2,59 @@ package id.cs.ui.advprog.inthecost.model;
 
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import java.time.LocalDate;
+import java.util.UUID;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "payment")
 public class Payment {
+    @Id
+    @Column(name = "payment_id")
     private Long id;
+
+    @Column(name = "amount")
     private Double amount;
+
+    @Column(name = "date")
     private LocalDate date;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_type")
     private PaymentTypeEnum paymentType;
+
+    @Column(name = "description")
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
     private PaymentStatusEnum paymentStatus;
-    private Long userId;
-    private Long ownerId;
-    private Long kostId;
 
-    // No-args constructor
-    public Payment() {
-    }
+    @Column(name = "user_id", columnDefinition = "uuid")
+    private UUID userId;
 
-    // Private constructor used by the builder
-    private Payment(PaymentBuilder builder) {
-        this.id = builder.id;
-        this.amount = builder.amount;
-        this.date = builder.date;
-        this.paymentType = builder.paymentType;
-        this.description = builder.description;
-        this.paymentStatus = builder.paymentStatus;
-        this.userId = builder.userId;
-        this.ownerId = builder.ownerId;
-        this.kostId = builder.kostId;
-    }
+    @Column(name = "owner_id", columnDefinition = "uuid")
+    private UUID ownerId;
 
-    // Getters
-    public Long getId() {
-        return id;
-    }
+    @Column(name = "kost_id", columnDefinition = "uuid")
+    private UUID kostId;
 
-    public Double getAmount() {
-        return amount;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public PaymentTypeEnum getPaymentType() {
-        return paymentType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public PaymentStatusEnum getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-    public Long getKostId() {
-        return kostId;
-    }
-
-    // Setters
+    // Setter methods to maintain compatibility with existing code
     public void setId(Long id) {
         this.id = id;
     }
@@ -94,77 +79,15 @@ public class Payment {
         this.paymentStatus = paymentStatus;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 
-    public void setOwnerId(Long ownerId) {
+    public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
     }
 
-    public void setKostId(Long kostId) {
+    public void setKostId(UUID kostId) {
         this.kostId = kostId;
-    }
-
-    // Builder class
-    public static class PaymentBuilder {
-        private Long id;
-        private Double amount;
-        private LocalDate date;
-        private PaymentTypeEnum paymentType;
-        private String description;
-        private PaymentStatusEnum paymentStatus;
-        private Long userId;
-        private Long ownerId;
-        private Long kostId;
-
-        public PaymentBuilder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public PaymentBuilder amount(Double amount) {
-            this.amount = amount;
-            return this;
-        }
-
-        public PaymentBuilder date(LocalDate date) {
-            this.date = date;
-            return this;
-        }
-
-        public PaymentBuilder paymentType(PaymentTypeEnum paymentType) {
-            this.paymentType = paymentType;
-            return this;
-        }
-
-        public PaymentBuilder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public PaymentBuilder paymentStatus(PaymentStatusEnum paymentStatus) {
-            this.paymentStatus = paymentStatus;
-            return this;
-        }
-
-        public PaymentBuilder userId(Long userId) {
-            this.userId = userId;
-            return this;
-        }
-
-        public PaymentBuilder ownerId(Long ownerId) {
-            this.ownerId = ownerId;
-            return this;
-        }
-
-        public PaymentBuilder kostId(Long kostId) {
-            this.kostId = kostId;
-            return this;
-        }
-
-        public Payment build() {
-            return new Payment(this);
-        }
     }
 }
