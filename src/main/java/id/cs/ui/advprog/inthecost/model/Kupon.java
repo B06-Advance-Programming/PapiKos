@@ -24,6 +24,7 @@ public class Kupon{
 
     @Setter(AccessLevel.NONE)
     @Id
+    @GeneratedValue
     @Column(name = "id_kupon", nullable = false, columnDefinition = "uuid")
     private UUID idKupon;
 
@@ -138,5 +139,20 @@ public class Kupon{
                 masaBerlaku.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
                 status,
                 namaKos);
+    }
+
+    @PrePersist
+    private void prePersist() {
+        if (kodeUnik == null) {
+            kodeUnik = generateKodeUnik();
+        }
+        if (statusKupon == null) {
+            refreshStatus();
+        }
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        refreshStatus(); // misal ingin selalu memastikan status up-to-date
     }
 }
