@@ -18,19 +18,19 @@ public class Kost implements Subject {
     @Column(name = "kost_id")
     private UUID kostID;
 
-    @Column(name = "nama", nullable = false)
+    @Column(name = "nama")
     private String nama;
 
-    @Column(name = "alamat", nullable = false)
+    @Column(name = "alamat")
     private String alamat;
 
-    @Column(name = "deskripsi", nullable = false)
+    @Column(name = "deskripsi")
     private String deskripsi;
 
-    @Column(name = "jumlah_kamar", nullable = false)
+    @Column(name = "jumlah_kamar")
     private int jumlahKamar;
 
-    @Column(name = "harga_per_bulan", nullable = false)
+    @Column(name = "harga_per_bulan")
     private int hargaPerBulan;
 
     @Transient // Mark as non-persistent
