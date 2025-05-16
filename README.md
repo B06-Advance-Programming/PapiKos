@@ -9,4 +9,11 @@
 ## Container Diagram
 ![Container Diagram](./image/containerdiagram.png)
 
+# Future Architecture
+
+## Context Diagram
+![Context Diagram](./image/contextdiagram.png)
+
+## Container Diagram
+![Container Diagram](./image/containerdiagramfuture.jpg)
 
