@@ -56,17 +56,27 @@ public class KostModelTest {
     public void testHargaPerBulanHarusPositif() {
         // Menguji setHargaPerBulan dengan nilai negatif
         ValidationException exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, -500000);
+        });
+        assertEquals(ValidationErrorCode.NEGATIVE_VALUE, exception.getError());
+
+        exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
             kost.setHargaPerBulan(-1000);  // Set harga per bulan negatif
         });
-        assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.NEGATIVE_VALUE, exception.getError());
 
         // Menguji setHargaPerBulan dengan nilai 0
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 90, 00000);
+        });
+        assertEquals(ValidationErrorCode.ZERO_VALUE, exception.getError());
+
         exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
             kost.setHargaPerBulan(0);  // Set harga per bulan 0
         });
-        assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.ZERO_VALUE, exception.getError());
     }
 
     // 5. Test Jumlah kamar tidak boleh negatif
@@ -77,7 +87,27 @@ public class KostModelTest {
             Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", 10, 600000);
             kost.setJumlahKamar(-5);  // Set jumlah kamar negatif
         });
-        assertEquals(ValidationErrorCode.NEGATIVE_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.NEGATIVE_VALUE, exception.getError());
+
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", -10, 600000);
+        });
+        assertEquals(ValidationErrorCode.NEGATIVE_VALUE, exception.getError());
+    }
+
+    @Test
+    public void testJumlahKamarTidakBolehNol() {
+        // Menguji setJumlahKamar dengan nilai negatif
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", 10, 600000);
+            kost.setJumlahKamar(0);  // Set jumlah kamar nol
+        });
+        assertEquals(ValidationErrorCode.ZERO_VALUE, exception.getError());
+
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", 0, 600000);
+        });
+        assertEquals(ValidationErrorCode.ZERO_VALUE, exception.getError());
     }
 
     // 6. Test Deskripsi tidak boleh kosong
@@ -85,17 +115,29 @@ public class KostModelTest {
     public void testDeskripsiTidakBolehKosong() {
         // Menguji setDeskripsi dengan deskripsi kosong
         ValidationException exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "", 5, 450000);
+            Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "JANGAN DINULL IN", 5, 450000);
             kost.setDeskripsi("");  // Set deskripsi kosong
         });
-        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.EMPTY_VALUE, exception.getError());
+
+        // Menguji setDeskripsi dengan deskripsi null
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "JANGAN DINULL IN", 5, 450000);
+            kost.setDeskripsi(null);  // Set deskripsi null
+        });
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
+
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "", 5, 450000);
+        });
+        assertEquals(ValidationErrorCode.EMPTY_VALUE, exception.getError());
 
         // Menguji setDeskripsi dengan deskripsi null
         exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", null, 5, 450000);
             kost.setDeskripsi(null);  // Set deskripsi null
         });
-        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
     }
 
     // 7. Test KosID auto-generate berbeda untuk setiap instance
@@ -107,6 +149,20 @@ public class KostModelTest {
         assertNotEquals(kost1.getKostID(), kost2.getKostID(), "KosID harus unik untuk setiap instance");
     }
 
+    @Test
+    public void testNamaTidakBolehKosongAtauNull() {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("", "Jl. Merah No. 15", "JANGAN DINULL IN", 5, 450000);
+        });
+        assertEquals(ValidationErrorCode.EMPTY_VALUE, exception.getError());
+
+        // Menguji setDeskripsi dengan deskripsi null
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost(null, "Jl. Merah No. 15", "JANGAN DINULL IN", 5, 450000);
+            kost.setDeskripsi(null);  // Set deskripsi null
+        });
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
+    }
     // 8. Test untuk nama tidak boleh kosong
     @Test
     public void testNamaTidakBolehKosong() {
@@ -115,14 +171,14 @@ public class KostModelTest {
             Kost kost = new Kost();
             kost.setNama("");  // Set nama kosong
         });
-        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.EMPTY_VALUE, exception.getError());
 
         // Memeriksa jika nama null melempar exception
         exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost();
             kost.setNama(null);  // Set nama null
         });
-        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
     }
 
     // Test untuk alamat tidak boleh kosong
@@ -133,13 +189,26 @@ public class KostModelTest {
             Kost kost = new Kost();
             kost.setAlamat("");  // Set alamat kosong
         });
-        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.EMPTY_VALUE, exception.getError());
 
         // Memeriksa jika alamat null melempar exception
         exception = assertThrows(ValidationException.class, () -> {
             Kost kost = new Kost();
             kost.setAlamat(null);  // Set alamat null
         });
-        assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
+
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Merah", "", "JANGAN DINULL IN", 5, 450000);
+            kost.setDeskripsi("");  // Set deskripsi kosong
+        });
+        assertEquals(ValidationErrorCode.EMPTY_VALUE, exception.getError());
+
+        // Menguji setDeskripsi dengan deskripsi null
+        exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = new Kost("Kos Merah", null, "JANGAN DINULL IN", 5, 450000);
+            kost.setDeskripsi(null);  // Set deskripsi null
+        });
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
     }
 }

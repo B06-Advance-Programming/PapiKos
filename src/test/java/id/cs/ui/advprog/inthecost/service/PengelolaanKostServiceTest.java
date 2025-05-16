@@ -43,7 +43,18 @@ public class PengelolaanKostServiceTest {
 
         List<Kost> allKost = kostRepository.findAll();
         assertEquals(1, allKost.size());
-        assertEquals("Kost Asri", allKost.get(0).getNama());
+        assertEquals("Kost Asri", allKost.getFirst().getNama());
+    }
+
+    @Test
+    // alamatnya null
+    public void testAddKostError() {
+        ValidationException exception = assertThrows(ValidationException.class, () -> {
+            Kost kost = createSampleKost();
+            kost.setAlamat(null);
+            pengelolaanKost.addKost(kost);
+        });
+        assertEquals(ValidationErrorCode.NULL_VALUE, exception.getError());
     }
 
     @Test
@@ -92,6 +103,6 @@ public class PengelolaanKostServiceTest {
                 ValidationException.class,
                 () -> pengelolaanKost.updateKostByID(invalidId, updated)
         );
-        assertEquals(ValidationErrorCode.INVALID_ID.getCode(), exception.getErrorCode());
+        assertEquals(ValidationErrorCode.INVALID_ID, exception.getError());
     }
 }
