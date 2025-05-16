@@ -40,3 +40,10 @@ Secara keseluruhan, mitigasi risiko teknis dalam aplikasi memerlukan kombinasi a
 
 ### Wishlist Code Diagram
 ![Wishlist Code Diagram](./image/wishlistCodeDiagram.png)
+
+## 2306241726 - Alwie Attar Elfandra
+### Wishlist Component Diagram
+![Wishlist Component Diagram](./image/PenyewaanKosComponent.jpg)
+
+### Wishlist Code Diagram
+![Wishlist Code Diagram](./image/CodePenyKos.jpg)
