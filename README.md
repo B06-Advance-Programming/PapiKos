@@ -57,7 +57,7 @@ Secara keseluruhan, mitigasi risiko teknis dalam aplikasi memerlukan kombinasi a
 
 ## 2306152393 - Arzaka Raffan
 ### Kupon Component Diagram
-![Kupon Component Diagram](./image/FixKupon.png)
+![Kupon Component Diagram](./image/templateComponent.drawio.png)
 
 ### Kupon Code Diagram
-![Kupon Code Diagram](./image/templateComponent.drawio.png)
+![Kupon Code Diagram](./image/FixKupon.png)
