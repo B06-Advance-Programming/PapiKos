@@ -47,3 +47,10 @@ Secara keseluruhan, mitigasi risiko teknis dalam aplikasi memerlukan kombinasi a
 
 ### Wishlist Code Diagram
 ![Wishlist Code Diagram](./image/CodePenyKos.jpg)
+
+## 2306152166 - Brian Altan
+### Payment Component Diagram
+![Payment Component Diagram](./image/PaymentComponentDiagram.png)
+
+### Payment Code Diagram
+![Payment Code Diagram](./image/PaymentCodeDiagram.png)
