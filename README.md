@@ -1,4 +1,4 @@
-![component bismillah drawio](https://github.com/user-attachments/assets/572ab291-e786-4f8b-92a1-cefe9d74cf3b)# Dokumentasi Diagram PapiKos
+# Dokumentasi Diagram PapiKos
 
 ## Context Diagram
 ![Context Diagram](./image/contextdiagram.png)
