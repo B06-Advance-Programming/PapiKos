@@ -1,4 +1,4 @@
-# Dokumentasi Diagram PapiKos
+![component bismillah drawio](https://github.com/user-attachments/assets/572ab291-e786-4f8b-92a1-cefe9d74cf3b)# Dokumentasi Diagram PapiKos
 
 ## Context Diagram
 ![Context Diagram](./image/contextdiagram.png)
@@ -26,3 +26,10 @@ Dari sisi performa, risiko muncul saat aplikasi harus menangani data dalam jumla
 Risiko skalabilitas juga patut diperhatikan, terutama jika aplikasi dirancang hanya untuk menangani beban rendah. Ketika jumlah pengguna meningkat, sistem bisa gagal merespons dengan cepat atau bahkan mengalami crash. Untuk menghindarinya, aplikasi perlu dirancang agar dapat diskalakan secara horizontal, misalnya dengan menggunakan container (Docker) dan layanan orkestrasi seperti Kubernetes. Selain itu, arsitektur microservices dapat diterapkan agar setiap bagian aplikasi dapat diskalakan secara independen sesuai kebutuhan. Pengguna arsitektur independen (microservices) juga membuat kami dapat mengimplementasikan paradigma asinkron, dimana frontend akan tetap berjalan dengan baik meskipun seluruh backend kami sedang memproses request yang lain.
 
 Secara keseluruhan, mitigasi risiko teknis dalam aplikasi memerlukan kombinasi antara desain arsitektur yang tangguh, pengamanan data, dan optimalisasi performa. Langkah-langkah ini tidak hanya mencegah gangguan teknis di kemudian hari, tetapi juga memastikan aplikasi tetap andal, cepat, dan aman dalam skenario penggunaan maksimal.
+
+# Individu
+## 2306275935 - Alpha Sutha Media
+### Component Diagram
+![component bismillah drawio](https://github.com/user-attachments/assets/3458e5d7-e1cf-41f7-9b2e-2aaac2e1bfe9)
+### Code Diagram
+![code](https://github.com/user-attachments/assets/962cbdd4-bec0-46cc-ac09-7475a4fa3290)
