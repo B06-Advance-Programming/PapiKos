@@ -1,27 +1,20 @@
 package id.cs.ui.advprog.inthecost.exception;
+import lombok.Getter;
 
+import java.util.NoSuchElementException;
+
+@Getter
 public enum ValidationErrorCode {
-    NULL_VALUE("err_0", "Field tidak boleh nulll"),
-    EMPTY_VALUE("err_1", "Field tidak boleh empty"),
-    NULL_OR_EMPTY_VALUE("err_2", "Field tidak boleh null atau kosong."),
-    NEGATIVE_VALUE("err_3", "Field tidak boleh bernilai negatif."),
-    ZERO_VALUE("err_4", "Field tidak boleh bernilai 0."),
-    ZERO_OR_NEGATIVE_VALUE("err_5", "Field harus bernilai positif"),
-    INVALID_ID("err_6", "ID atau key tidak ditemukan.");
+    NULL_VALUE("err_0", new NullPointerException("Field tidak boleh null")),
+    EMPTY_VALUE("err_1", new IllegalArgumentException("Field tidak boleh empty")),
+    NEGATIVE_VALUE("err_2", new IllegalArgumentException("Field tidak boleh bernilai nol")),
+    ZERO_VALUE("err_3", new IllegalArgumentException("Field tidak boleh bernilai nol")),
+    INVALID_ID("err_4", new NoSuchElementException("ID atau key tidak ditemukan"));
 
     private final String code;
-    private final String message;
+    private final RuntimeException exception;
 
-    ValidationErrorCode(String code, String message) {
+    ValidationErrorCode(String code, RuntimeException exception) {
         this.code = code;
-        this.message = message;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-}
+        this.exception = exception;
+    }}

@@ -54,6 +54,8 @@ dependencies {
 
     // Spring Session JDBC
     implementation("org.springframework.session:spring-session-jdbc")
+
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 tasks.register<Test>("unitTest") {

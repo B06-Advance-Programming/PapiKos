@@ -4,16 +4,16 @@ import lombok.Getter;
 
 @Getter
 public class ValidationException extends RuntimeException {
-    private final String errorCode;
-    private final String errorMessage;
+    private final ValidationErrorCode error;
+    private final String message;
 
-    public ValidationException(ValidationErrorCode errorCode) {
-        this.errorMessage = errorCode.getMessage();
-        this.errorCode = errorCode.getCode();
+    public ValidationException(ValidationErrorCode error) {
+        this.error = error;
+        this.message = this.error.getException().getMessage();
     }
 
-    public ValidationException(ValidationErrorCode errorCode, String errorMessage) {
-        this.errorMessage = errorMessage;
-        this.errorCode = errorCode.getCode();
+    public ValidationException(ValidationErrorCode error, String message) {
+        this.error = error;
+        this.message = message;
     }
 }
