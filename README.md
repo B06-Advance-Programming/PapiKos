@@ -33,3 +33,10 @@ Secara keseluruhan, mitigasi risiko teknis dalam aplikasi memerlukan kombinasi a
 ![component bismillah drawio](https://github.com/user-attachments/assets/3458e5d7-e1cf-41f7-9b2e-2aaac2e1bfe9)
 ### Code Diagram
 ![code](https://github.com/user-attachments/assets/962cbdd4-bec0-46cc-ac09-7475a4fa3290)
+
+## 2306275903 - Rayhan Syahdira Putra
+### Wishlist Component Diagram
+![Wishlist Component Diagram](./image/WishlistComponentDiagram.png)
+
+### Wishlist Code Diagram
+![Wishlist Code Diagram](./image/wishlistCodeDiagram.png)
