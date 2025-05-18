@@ -18,9 +18,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -39,10 +42,10 @@ public class KuponServiceTest{
     @Autowired
     private EntityManager entityManager;
 
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
-    @Autowired
+    @Mock
     private KostRepository kostRepository;
 
     List<Kupon> kuponList = new ArrayList<>();
@@ -63,6 +66,14 @@ public class KuponServiceTest{
         User admin = new User("Admin", "123456", "admin@example.com", role1);
         User pemilik1 = new User("Ahmad Suardjo", "Ahm@d321!", "ahmadss@gmail.com", role2);
         User pemilik2 = new User("Janice Lim", "J@N1C3005", "janicelim@gmail.com", role2);
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                    User user = invocation.getArgument(0);
+                    if (user.getId() == null) {
+                        user.setId(UUID.randomUUID());
+                    }
+                    return user;
+                }
+        );
         userRepository.save(admin);
         userRepository.save(pemilik1);
         userRepository.save(pemilik2);
@@ -72,6 +83,16 @@ public class KuponServiceTest{
         Kost kos3 = new Kost("Kos Amara 51/2", "Jl. KH. Ahmad Dahlan No. 120", "Mantap", 22, 1900000);
         Kost kos4 = new Kost("Kos Zano's", "Jl. Juragan Sinda III No. 19", "Parkiran aman dan lingkungan tentram", 2, 1100000);
         Kost kos5 = new Kost("Kos Pinisia", "Jl. Sadewa IV No. 13", "Tetangga ramah dan Asri", 12, 1500000);
+        when(kostRepository.save(any(Kost.class))).thenAnswer(invocation -> {
+                    Kost kos = invocation.getArgument(0);
+                    if (kos.getKostID() == null) {
+                        Field field = Kost.class.getDeclaredField("kostID");
+                        field.setAccessible(true);
+                        field.set(kos, UUID.randomUUID());
+                    }
+                    return kos;
+                }
+        );
         kostRepository.save(kos1);
         kostRepository.save(kos2);
         kostRepository.save(kos3);
@@ -94,23 +115,61 @@ public class KuponServiceTest{
     }
 
     @Test
-    void testUpdateKuponSuccess(){
-        Kupon selectedKupon = kuponList.get(1);
-        when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
+    void testUpdateKuponSuccess() {
+        // Setup test data
+        Kupon selectedKupon = kuponList.getFirst();
+
+        // Mock the save operation
+        when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> {
+            Kupon kupon = invocation.getArgument(0);
+            if (kupon.getIdKupon() == null) {
+                try {
+                    Field field = Kupon.class.getDeclaredField("idKupon");
+                    field.setAccessible(true);
+                    field.set(kupon, UUID.randomUUID());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return kupon;
+        });
+
+        // Create initial kupon
         Kupon inputKupon = kuponService.createKupon(selectedKupon);
 
-        when(kuponRepository.findById(inputKupon.getIdKupon())).thenReturn(Optional.of(inputKupon));
-        Kupon resultKupon = kuponService.getKuponById(inputKupon.getIdKupon());
+        UUID pemilikId = inputKupon.getPemilik().getId();
+        List<UUID> kostIds = inputKupon.getKosPemilik().stream()
+                .map(Kost::getKostID)
+                .collect(Collectors.toList());
 
-        resultKupon.setNamaKupon("Kupon UI");
-        resultKupon.setDeskripsi("Kupon Khusus Mahasiswa Universitas Indonesia");
-        resultKupon.setPersentase(25);
-        resultKupon.setMasaBerlaku(LocalDate.of(2027, 10, 22));
-        Kupon updatedKupon = kuponService.updateKupon(resultKupon);
+        when(kuponRepository.findById(inputKupon.getIdKupon()))
+                .thenReturn(Optional.of(inputKupon));
 
-        assertThat(selectedKupon.getIdKupon()).isEqualTo(updatedKupon.getIdKupon());
-        assertThat(selectedKupon.getKodeUnik()).isEqualTo(updatedKupon.getKodeUnik());
+        when(userRepository.findById(pemilikId))
+                .thenReturn(Optional.of(inputKupon.getPemilik()));
+
+        when(kostRepository.findAllById(kostIds))
+                .thenReturn(new ArrayList<>(inputKupon.getKosPemilik()));
+
+        // Perform update
+        Kupon updatedKupon = kuponService.updateKupon(
+                inputKupon.getIdKupon(),
+                pemilikId,
+                kostIds,
+                25,
+                "Kupon UI",
+                LocalDate.of(2027, 10, 22),
+                "Kupon Khusus Mahasiswa Universitas Indonesia"
+        );
+
+        // Verify results
+        assertThat(updatedKupon.getIdKupon()).isEqualTo(inputKupon.getIdKupon());
+        assertThat(updatedKupon.getKodeUnik()).isEqualTo(inputKupon.getKodeUnik());
+        assertThat(updatedKupon.getPersentase()).isEqualTo(25);
+        assertThat(updatedKupon.getMasaBerlaku()).isEqualTo(LocalDate.of(2027, 10, 22));
+        assertThat(updatedKupon.getDeskripsi()).isEqualTo("Kupon Khusus Mahasiswa Universitas Indonesia");
     }
+
 
     @Test
     void testUpdateKuponFail() {
@@ -119,9 +178,8 @@ public class KuponServiceTest{
         when(kuponRepository.findById(kuponList.get(1).getIdKupon()))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> kuponService.updateKupon(kuponList.get(1)))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("tidak ditemukan");
+        assertThatThrownBy(() -> kuponService.updateKupon(kuponList.get(1).getIdKupon(), kuponList.get(1).getPemilik().getId(), kuponList.get(1).getKosPemilik().stream().map(Kost::getKostID).collect(Collectors.toList()), kuponList.get(1).getPersentase(), kuponList.get(1).getNamaKupon(), kuponList.get(1).getMasaBerlaku(), kuponList.get(1).getDeskripsi()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

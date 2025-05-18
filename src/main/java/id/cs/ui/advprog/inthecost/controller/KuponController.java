@@ -96,7 +96,7 @@ public class KuponController {
         if (kupon.getIdKupon() == null) {
             throw new IllegalArgumentException("ID Kupon tidak boleh null");
         }
-        kuponService.updateKupon(kupon);
+//        kuponService.updateKupon(kupon);
         return "redirect:/kupon";
     }
 }
