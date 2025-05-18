@@ -1,5 +1,7 @@
 package id.cs.ui.advprog.inthecost.controller;
 
+import id.cs.ui.advprog.inthecost.dto.KuponRequest;
+import id.cs.ui.advprog.inthecost.dto.KuponResponse;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.model.Role;
@@ -109,7 +111,7 @@ public class KuponControllerTest {
     }
     @Test
     void testCreateKupon(){
-        KuponController.KuponRequest kuponRequest = new KuponController.KuponRequest();
+        KuponRequest kuponRequest = new KuponRequest();
 
         kuponRequest.setPemilik(admin.getId());
         kuponRequest.setKosPemilik(List.of(kos1.getKostID()));
@@ -141,7 +143,7 @@ public class KuponControllerTest {
 
     @Test
     void testUpdateKupon() {
-        KuponController.KuponRequest createRequest = new KuponController.KuponRequest();
+        KuponRequest createRequest = new KuponRequest();
         createRequest.setPemilik(admin.getId());
         createRequest.setKosPemilik(List.of(kos1.getKostID()));
         createRequest.setPersentase(10);
@@ -165,7 +167,7 @@ public class KuponControllerTest {
 
         kuponController.createKupon(createRequest);
 
-        KuponController.KuponRequest editRequest = new KuponController.KuponRequest();
+        KuponRequest editRequest = new KuponRequest();
         editRequest.setPemilik(admin.getId());
         editRequest.setKosPemilik(List.of(kos1.getKostID()));
         editRequest.setPersentase(15);
@@ -196,7 +198,7 @@ public class KuponControllerTest {
 
     @Test
     void testDeleteKupon(){
-        KuponController.KuponRequest createRequest = new KuponController.KuponRequest();
+        KuponRequest createRequest = new KuponRequest();
         createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
 
         Kupon dummyData = new Kupon(
@@ -223,7 +225,7 @@ public class KuponControllerTest {
 
     @Test
     void testGetKuponById(){
-        KuponController.KuponRequest createRequest = new KuponController.KuponRequest();
+        KuponRequest createRequest = new KuponRequest();
         createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
 
         Kupon dummyData = new Kupon(
@@ -251,7 +253,7 @@ public class KuponControllerTest {
 
     @Test
     void testGetAllKupon(){
-        KuponController.KuponRequest createRequest = new KuponController.KuponRequest();
+        KuponRequest createRequest = new KuponRequest();
         createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller 1");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
 
         Kupon dummyData = new Kupon(
@@ -269,7 +271,7 @@ public class KuponControllerTest {
 
         kuponController.createKupon(createRequest);
 
-        KuponController.KuponRequest createRequest1 = new KuponController.KuponRequest();
+        KuponRequest createRequest1 = new KuponRequest();
         createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller 2");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
 
         Kupon dummyData1 = new Kupon(
@@ -285,16 +287,16 @@ public class KuponControllerTest {
         kuponController.createKupon(createRequest1);
         when(kuponService.getAllKupon()).thenReturn(List.of(dummyData, dummyData1));
 
-        ResponseEntity<List<KuponController.KuponResponse>> response = kuponController.getAllKupon();
+        ResponseEntity<List<KuponResponse>> response = kuponController.getAllKupon();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().size());
 
-        KuponController.KuponResponse response1 = response.getBody().get(0);
+        KuponResponse response1 = response.getBody().get(0);
         assertEquals("Kupon Test Controller 1", response1.getNamaKupon());
 
-        KuponController.KuponResponse response2 = response.getBody().get(1);
+        KuponResponse response2 = response.getBody().get(1);
         assertEquals("Kupon Test Controller 2", response2.getNamaKupon());
     }
 }
