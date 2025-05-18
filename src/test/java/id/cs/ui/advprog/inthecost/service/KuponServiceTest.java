@@ -78,14 +78,14 @@ public class KuponServiceTest{
         kostRepository.save(kos4);
         kostRepository.save(kos5);
 
-        kuponList.add(new Kupon(admin, List.of(kos1, kos2, kos3, kos4, kos5), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025"));
-        kuponList.add(new Kupon(pemilik1, List.of(kos1, kos2, kos3), LocalDate.of(2025, 10, 20), 12, "Promo Pak Ahmad"));
-        kuponList.add(new Kupon(pemilik2, List.of(kos4, kos5), LocalDate.of(2026, 2, 10), 10, "Kupon Semester Baru"));
+        kuponList.add(new Kupon(admin, List.of(kos1, kos2, kos3, kos4, kos5), "Kupon Pahlawan",LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025"));
+        kuponList.add(new Kupon(pemilik1, List.of(kos1, kos2, kos3), "Kupon Ahmad",LocalDate.of(2025, 10, 20), 12, "Promo Pak Ahmad"));
+        kuponList.add(new Kupon(pemilik2, List.of(kos4, kos5), "Kupon Maba",LocalDate.of(2026, 2, 10), 10, "Kupon Semester Baru"));
     }
 
     @Test
     void testCreateKupon(){
-        Kupon selectedKupon = kuponList.get(0);
+        Kupon selectedKupon = kuponList.getFirst();
         when(kuponRepository.save(any(Kupon.class))).thenAnswer(invocation -> invocation.getArgument(0));
         Kupon inputKupon = kuponService.createKupon(selectedKupon);
 
@@ -102,6 +102,7 @@ public class KuponServiceTest{
         when(kuponRepository.findById(inputKupon.getIdKupon())).thenReturn(Optional.of(inputKupon));
         Kupon resultKupon = kuponService.getKuponById(inputKupon.getIdKupon());
 
+        resultKupon.setNamaKupon("Kupon UI");
         resultKupon.setDeskripsi("Kupon Khusus Mahasiswa Universitas Indonesia");
         resultKupon.setPersentase(25);
         resultKupon.setMasaBerlaku(LocalDate.of(2027, 10, 22));
@@ -151,7 +152,7 @@ public class KuponServiceTest{
 
     @Test
     void testGetKuponByKodeUnikSuccess() {
-        Kupon selectedKupon = kuponList.get(0);
+        Kupon selectedKupon = kuponList.getFirst();
         when(kuponRepository.findByKodeUnik(selectedKupon.getKodeUnik()))
                 .thenReturn(Optional.of(selectedKupon));
 

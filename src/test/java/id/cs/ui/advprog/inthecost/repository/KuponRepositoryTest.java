@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -53,8 +52,8 @@ public class KuponRepositoryTest {
 
         Kost kos1 = kostRepository.save(kos);
 
-        Kupon kupon1 = new Kupon(savedUser, new ArrayList<>(List.of(kos1)), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025");
-        Kupon kupon2 = new Kupon(savedUser, new ArrayList<>(List.of(kos1)), LocalDate.of(2026, 10, 22), 8, "Kupon Semester Baru");
+        Kupon kupon1 = new Kupon(savedUser, new ArrayList<>(List.of(kos1)), "Kupon Pahlawan",LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025");
+        Kupon kupon2 = new Kupon(savedUser, new ArrayList<>(List.of(kos1)), "Kupon Maba",LocalDate.of(2026, 10, 22), 8, "Kupon Semester Baru");
         kuponList.add(kupon1);
         kuponList.add(kupon2);
     }
