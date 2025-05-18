@@ -21,12 +21,14 @@ import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
 @Entity
 @Table(name = "kupon")
 public class Kupon {
-
     @Setter(AccessLevel.NONE)
     @Id
     @GeneratedValue
     @Column(name = "id_kupon", nullable = false, columnDefinition = "uuid")
     private UUID idKupon;
+
+    @Column(name = "nama_kupon", nullable=false)
+    private String namaKupon;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pemilik", nullable = false)
@@ -63,8 +65,9 @@ public class Kupon {
     public Kupon() {
     }
 
-    public Kupon(User pemilik, List<Kost> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi) {
+    public Kupon(User pemilik, List<Kost> kosPemilik,String namaKupon, LocalDate masaBerlaku, int persentase, String deskripsi) {
         validateInput(pemilik, masaBerlaku, persentase, deskripsi);
+        this.namaKupon = namaKupon;
         this.pemilik = pemilik;
         this.kodeUnik = generateKodeUnik();
         this.persentase = persentase;
@@ -148,6 +151,6 @@ public class Kupon {
 
     @PreUpdate
     private void preUpdate() {
-        refreshStatus(); // misal ingin selalu memastikan status up-to-date
+        refreshStatus();
     }
 }
