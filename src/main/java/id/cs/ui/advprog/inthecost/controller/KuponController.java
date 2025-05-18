@@ -5,12 +5,17 @@ import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.service.KuponServiceImpl;
+import id.cs.ui.advprog.inthecost.repository.UserRepository;
+import id.cs.ui.advprog.inthecost.repository.KostRepository;
+
+import id.cs.ui.advprog.inthecost.dto.KuponRequest;
+import id.cs.ui.advprog.inthecost.dto.KuponResponse;
+
 import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import id.cs.ui.advprog.inthecost.repository.UserRepository;
-import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/api/kupon")
@@ -38,7 +42,6 @@ public class KuponController{
         logCurrentUser();
 
         List<Kupon> kupons = kuponService.getAllKupon();
-
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -64,11 +67,11 @@ public class KuponController{
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteKupon(@PathVariable UUID id) {
-        try{
-            Kupon kupon = kuponService.getKuponById(id);
+        try {
+            kuponService.getKuponById(id);
             kuponService.deleteKupon(id);
             return ResponseEntity.noContent().build();
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -88,7 +91,6 @@ public class KuponController{
                     request.getDeskripsi()
             );
             Kupon updatedKupon = kuponService.getKuponById(id);
-
             return ResponseEntity.ok(mapToResponse(updatedKupon));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -103,15 +105,17 @@ public class KuponController{
     public ResponseEntity<KuponResponse> createKupon(@RequestBody KuponRequest request) {
         logCurrentUser();
 
-        if (request.getPersentase() < 0 || request.getPersentase() > 100 || request.getPemilik() == null || request.getKosPemilik() == null || request.getKosPemilik().isEmpty()) {
+        if (request.getPersentase() < 0 || request.getPersentase() > 100
+                || request.getPemilik() == null
+                || request.getKosPemilik() == null || request.getKosPemilik().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        User user = null;
-        try{
-            User userTry = userRepository.findById(request.getPemilik())
+
+        User user;
+        try {
+            user = userRepository.findById(request.getPemilik())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-            user = userTry;
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().build();
         }
 
@@ -120,50 +124,17 @@ public class KuponController{
             return ResponseEntity.badRequest().build();
         }
 
-        Kupon kupon = new Kupon(user, kostList, request.getNamaKupon(),request.getMasaBerlaku(), request.getPersentase(), request.getDeskripsi());
+        Kupon kupon = new Kupon(
+                user,
+                kostList,
+                request.getNamaKupon(),
+                request.getMasaBerlaku(),
+                request.getPersentase(),
+                request.getDeskripsi()
+        );
+
         Kupon savedKupon = kuponService.createKupon(kupon);
-
         return ResponseEntity.ok(mapToResponse(savedKupon));
-    }
-
-    //Kupon Response DTO
-    public static class KuponResponse{
-        private UUID idKupon;
-        private String pemilik;
-        private String kodeUnik;
-        private int persentase;
-        private String namaKupon;
-        private LocalDate masaBerlaku;
-        private String deskripsi;
-        private String statusKupon;
-        private List<String> kosPemilik;
-
-        public UUID getIdKupon() {return idKupon;}
-        public void setIdKupon(UUID idKupon) {this.idKupon = idKupon;}
-
-        public String getKodeUnik() {return kodeUnik;}
-        public void setKodeUnik(String kodeUnik) {this.kodeUnik = kodeUnik;}
-
-        public int getPersentase() {return persentase;}
-        public void setPersentase(int persentase) {this.persentase = persentase;}
-
-        public String getNamaKupon() {return namaKupon;}
-        public void setNamaKupon(String namaKupon) {this.namaKupon = namaKupon;}
-
-        public LocalDate getMasaBerlaku() {return masaBerlaku;}
-        public void setMasaBerlaku(LocalDate masaBerlaku) {this.masaBerlaku = masaBerlaku;}
-
-        public String getDeskripsi() {return deskripsi;}
-        public void setDeskripsi(String deskripsi) {this.deskripsi = deskripsi;}
-
-        public String getStatusKupon() {return statusKupon;}
-        public void setStatusKupon(String statusKupon) {this.statusKupon = statusKupon;}
-
-        public String getPemilik() {return pemilik;}
-        public void setPemilik(String pemilik) {this.pemilik = pemilik;}
-
-        public List<String> getKosPemilik() {return kosPemilik;}
-        public void setKosPemilik(List<String> kosPemilik) {this.kosPemilik = kosPemilik;}
     }
 
     private KuponResponse mapToResponse(Kupon kupon) {
@@ -176,41 +147,12 @@ public class KuponController{
         response.setDeskripsi(kupon.getDeskripsi());
         response.setStatusKupon(kupon.getStatusKupon().getValue());
         response.setPemilik(kupon.getPemilik().getUsername());
-        response.setKosPemilik(kupon.getKosPemilik().stream()
-                .map(Kost::getNama)
-                .toList());
+        response.setKosPemilik(
+                kupon.getKosPemilik().stream()
+                        .map(Kost::getNama)
+                        .toList()
+        );
         return response;
-    }
-
-    //Kupon Request DTO
-    public static class KuponRequest{
-        private UUID pemilik;
-        private List<UUID> kosPemilik;
-        private String namaKupon;
-
-        @JsonFormat(pattern = "yyyy-MM-dd")
-        private LocalDate masaBerlaku;
-
-        private int persentase;
-        private String deskripsi;
-
-        public UUID getPemilik() { return pemilik; }
-        public void setPemilik(UUID pemilik) { this.pemilik = pemilik; }
-
-        public List<UUID> getKosPemilik(){return kosPemilik;}
-        public void setKosPemilik(List<UUID> kosPemilik){this.kosPemilik = kosPemilik;}
-
-        public String getNamaKupon(){return namaKupon;}
-        public void setNamaKupon(String namaKupon){this.namaKupon = namaKupon;}
-
-        public LocalDate getMasaBerlaku(){return masaBerlaku;}
-        public void setMasaBerlaku(LocalDate masaBerlaku){this.masaBerlaku = masaBerlaku;}
-
-        public int getPersentase(){return persentase;}
-        public void setPersentase(int persentase){this.persentase = persentase;}
-
-        public String getDeskripsi(){return deskripsi;}
-        public void setDeskripsi(String deskripsi){this.deskripsi = deskripsi;}
     }
 
     private void logCurrentUser() {
