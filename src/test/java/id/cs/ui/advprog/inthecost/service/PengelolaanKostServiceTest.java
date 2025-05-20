@@ -38,16 +38,22 @@ public class PengelolaanKostServiceTest {
 
     @Test
     public void testAddKost() {
+        List<Kost> allKost = kostRepository.findAll();
+        int currentSize = allKost.size();
+
         Kost kost = createSampleKost();
         pengelolaanKost.addKost(kost);
 
-        List<Kost> allKost = kostRepository.findAll();
-        assertEquals(1, allKost.size());
-        assertEquals("Kost Asri", allKost.get(0).getNama());
+        allKost = kostRepository.findAll();
+        assertEquals(currentSize+1, allKost.size());
+        assertEquals("Kost Asri", allKost.get(currentSize).getNama());
     }
 
     @Test
     public void testGetAllKost() {
+        List<Kost> kostList = pengelolaanKost.getAllKost();
+        int currentSize = kostList.size();
+
         Kost kost1 = createSampleKost();
         Kost kost2 = createSampleKost();
         kost2.setNama("Kost Harmoni");
@@ -55,8 +61,8 @@ public class PengelolaanKostServiceTest {
         kostRepository.save(kost1);
         kostRepository.save(kost2);
 
-        List<Kost> kostList = pengelolaanKost.getAllKost();
-        assertEquals(2, kostList.size());
+        kostList = pengelolaanKost.getAllKost();
+        assertEquals(currentSize+2, kostList.size());
     }
 
     @Test
