@@ -4,32 +4,22 @@ import id.cs.ui.advprog.inthecost.dto.KuponRequest;
 import id.cs.ui.advprog.inthecost.dto.KuponResponse;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
-import id.cs.ui.advprog.inthecost.model.Role;
-import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
-import id.cs.ui.advprog.inthecost.repository.KuponRepository;
-import id.cs.ui.advprog.inthecost.repository.UserRepository;
-import id.cs.ui.advprog.inthecost.service.KuponService;
 import id.cs.ui.advprog.inthecost.service.KuponServiceImpl;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,47 +35,17 @@ public class KuponControllerTest {
     @InjectMocks
     KuponController kuponController;
 
-    @Autowired
-    private EntityManager entityManager;
-
-    @Mock
-    private UserRepository userRepository;
-
     @Mock
     private KostRepository kostRepository;
 
     @Mock
     private KuponServiceImpl kuponService;
 
-    @Mock
-    private KuponRepository kuponRepository;
-
-    public User admin;
-
     public Kost kos1;
-    @Autowired
-    private ResourceLoader resourceLoader;
 
     @BeforeEach
     void setUp(){
         MockitoAnnotations.openMocks(this);
-
-        Role adminRole = new Role("Admin");
-        entityManager.persist(adminRole);
-
-        Set<Role> role1 = new HashSet<>();
-        role1.add(adminRole);
-
-        admin = new User("Admin", "123456", "admin@example.com", role1);
-        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-                    User user = invocation.getArgument(0);
-                    if (user.getId() == null) {
-                        user.setId(UUID.randomUUID());
-                    }
-                    return user;
-                }
-        );
-        userRepository.save(admin);
 
         kos1 = new Kost("Kos Alamanda", "Jl. Melati No. 1", "Nyaman", 10, 1000000);
         when(kostRepository.save(any(Kost.class))).thenAnswer(invocation -> {
@@ -113,23 +73,22 @@ public class KuponControllerTest {
     void testCreateKupon(){
         KuponRequest kuponRequest = new KuponRequest();
 
-        kuponRequest.setPemilik(admin.getId());
         kuponRequest.setKosPemilik(List.of(kos1.getKostID()));
         kuponRequest.setPersentase(10);
         kuponRequest.setNamaKupon("Kupon Test Controller");
         kuponRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));
         kuponRequest.setDeskripsi("Test Kupon For Controller Test");
+        kuponRequest.setQuantity(5);
 
         Kupon dummyKupon = new Kupon(
-                admin,
                 List.of(kos1),
                 kuponRequest.getNamaKupon(),
                 kuponRequest.getMasaBerlaku(),
                 kuponRequest.getPersentase(),
-                kuponRequest.getDeskripsi()
+                kuponRequest.getDeskripsi(),
+                kuponRequest.getQuantity()
         );
 
-        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
         when(kostRepository.findAllById(kuponRequest.getKosPemilik())).thenReturn(List.of(kos1));
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyKupon);
 
@@ -144,50 +103,49 @@ public class KuponControllerTest {
     @Test
     void testUpdateKupon() {
         KuponRequest createRequest = new KuponRequest();
-        createRequest.setPemilik(admin.getId());
         createRequest.setKosPemilik(List.of(kos1.getKostID()));
         createRequest.setPersentase(10);
         createRequest.setNamaKupon("Kupon Test Controller");
         createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));
         createRequest.setDeskripsi("Test Kupon For Controller Test");
+        createRequest.setQuantity(10);
 
         Kupon dummyCreate = new Kupon(
-                admin,
                 List.of(kos1),
                 createRequest.getNamaKupon(),
                 createRequest.getMasaBerlaku(),
                 createRequest.getPersentase(),
-                createRequest.getDeskripsi()
+                createRequest.getDeskripsi(),
+                createRequest.getQuantity()
         );
         injectId(dummyCreate, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
 
-        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
         when(kostRepository.findAllById(createRequest.getKosPemilik())).thenReturn(List.of(kos1));
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyCreate);
 
         kuponController.createKupon(createRequest);
 
         KuponRequest editRequest = new KuponRequest();
-        editRequest.setPemilik(admin.getId());
         editRequest.setKosPemilik(List.of(kos1.getKostID()));
         editRequest.setPersentase(15);
         editRequest.setNamaKupon("Kupon Test Controller Baru");
         editRequest.setMasaBerlaku(LocalDate.of(2027, 7, 12));
         editRequest.setDeskripsi("Test Kupon For Controller Test");
+        editRequest.setQuantity(3);
 
         Kupon dummyUpdate = new Kupon(
-                admin,
                 List.of(kos1),
                 editRequest.getNamaKupon(),
                 editRequest.getMasaBerlaku(),
                 editRequest.getPersentase(),
-                editRequest.getDeskripsi()
+                editRequest.getDeskripsi(),
+                editRequest.getQuantity()
         );
         injectId(dummyUpdate, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
 
         when(kuponService.getKuponById(dummyUpdate.getIdKupon())).thenReturn(dummyUpdate);
-        when(kuponService.updateKupon(dummyUpdate.getIdKupon(), dummyUpdate.getPemilik().getId(), dummyUpdate.getKosPemilik().stream().map(Kost::getKostID).collect(Collectors.toList()), dummyUpdate.getPersentase(), dummyUpdate.getNamaKupon(),
-                dummyUpdate.getMasaBerlaku(), dummyUpdate.getDeskripsi())).thenReturn(dummyUpdate);
+        when(kuponService.updateKupon(dummyUpdate.getIdKupon(), dummyUpdate.getKosPemilik().stream().map(Kost::getKostID).collect(Collectors.toList()), dummyUpdate.getPersentase(), dummyUpdate.getNamaKupon(),
+                dummyUpdate.getMasaBerlaku(), dummyUpdate.getDeskripsi(), dummyUpdate.getQuantity())).thenReturn(dummyUpdate);
 
         var response = kuponController.updateKupon(dummyUpdate.getIdKupon(), editRequest);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -199,19 +157,18 @@ public class KuponControllerTest {
     @Test
     void testDeleteKupon(){
         KuponRequest createRequest = new KuponRequest();
-        createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
+        createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");createRequest.setQuantity(5);
 
         Kupon dummyData = new Kupon(
-                admin,
                 List.of(kos1),
                 createRequest.getNamaKupon(),
                 createRequest.getMasaBerlaku(),
                 createRequest.getPersentase(),
-                createRequest.getDeskripsi()
+                createRequest.getDeskripsi(),
+                createRequest.getQuantity()
         );
         injectId(dummyData, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
 
-        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
         when(kostRepository.findAllById(createRequest.getKosPemilik())).thenReturn(List.of(kos1));
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyData);
 
@@ -226,18 +183,17 @@ public class KuponControllerTest {
     @Test
     void testGetKuponById(){
         KuponRequest createRequest = new KuponRequest();
-        createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
+        createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");createRequest.setQuantity(5);
 
         Kupon dummyData = new Kupon(
-                admin,
                 List.of(kos1),
                 createRequest.getNamaKupon(),
                 createRequest.getMasaBerlaku(),
                 createRequest.getPersentase(),
-                createRequest.getDeskripsi()
+                createRequest.getDeskripsi(),
+                createRequest.getQuantity()
         );
         injectId(dummyData, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
-        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
         when(kostRepository.findAllById(createRequest.getKosPemilik())).thenReturn(List.of(kos1));
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyData);
 
@@ -254,33 +210,32 @@ public class KuponControllerTest {
     @Test
     void testGetAllKupon(){
         KuponRequest createRequest = new KuponRequest();
-        createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller 1");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
+        createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");createRequest.setQuantity(5);
 
         Kupon dummyData = new Kupon(
-                admin,
                 List.of(kos1),
                 createRequest.getNamaKupon(),
                 createRequest.getMasaBerlaku(),
                 createRequest.getPersentase(),
-                createRequest.getDeskripsi()
+                createRequest.getDeskripsi(),
+                createRequest.getQuantity()
         );
         injectId(dummyData, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
-        when(userRepository.findById(admin.getId())).thenReturn(java.util.Optional.of(admin));
         when(kostRepository.findAllById(createRequest.getKosPemilik())).thenReturn(List.of(kos1));
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyData);
 
         kuponController.createKupon(createRequest);
 
         KuponRequest createRequest1 = new KuponRequest();
-        createRequest.setPemilik(admin.getId());createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller 2");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");
+        createRequest.setKosPemilik(List.of(kos1.getKostID()));createRequest.setPersentase(10);createRequest.setNamaKupon("Kupon Test Controller");createRequest.setMasaBerlaku(LocalDate.of(2026, 7, 12));createRequest.setDeskripsi("Test Kupon For Controller Test");createRequest.setQuantity(5);
 
         Kupon dummyData1 = new Kupon(
-                admin,
                 List.of(kos1),
                 createRequest.getNamaKupon(),
                 createRequest.getMasaBerlaku(),
                 createRequest.getPersentase(),
-                createRequest.getDeskripsi()
+                createRequest.getDeskripsi(),
+                createRequest.getQuantity()
         );
         injectId(dummyData1, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69ea9"));
 
@@ -294,9 +249,9 @@ public class KuponControllerTest {
         assertEquals(2, response.getBody().size());
 
         KuponResponse response1 = response.getBody().get(0);
-        assertEquals("Kupon Test Controller 1", response1.getNamaKupon());
+        assertEquals("Kupon Test Controller", response1.getNamaKupon());
 
         KuponResponse response2 = response.getBody().get(1);
-        assertEquals("Kupon Test Controller 2", response2.getNamaKupon());
+        assertEquals("Kupon Test Controller", response2.getNamaKupon());
     }
 }

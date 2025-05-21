@@ -9,18 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 public class KuponTest {
     Kupon kupon;
     @BeforeEach
     void setUp(){
-        User pemilik = mock(User.class);
-        when(pemilik.getUsername()).thenReturn("Admin");
-
         Kost kos1 = mock(Kost.class);
         when(kos1.getNama()).thenReturn("Kos Alamanda");
 
@@ -32,16 +26,14 @@ public class KuponTest {
         LocalDate masaBerlaku = LocalDate.of(2026, 10, 10);
         String deskripsi = "Kupon Lebaran Idul Fitri 2026 Diskon 10%";
         List<Kost> kosPemilik = List.of(kos1, kos2);
+        int quantity = 2;
 
-        this.kupon = new Kupon(pemilik, kosPemilik, nama,masaBerlaku, persentase, deskripsi);
+        this.kupon = new Kupon(kosPemilik, nama, masaBerlaku, persentase, deskripsi, quantity);
     }
 
 
     @Test
     void testKuponNotNull() {assertNotNull(kupon);}
-
-    @Test
-    void testGetPemilikKupon(){assertEquals("Admin", this.kupon.getPemilik().getUsername());}
 
     @Test
     void testGetKosPemilikKupon(){assertEquals(List.of("Kos Alamanda", "Kos Griya Asri"), this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());}
@@ -59,14 +51,10 @@ public class KuponTest {
     void testGetDeskripsiKupon(){assertEquals("Kupon Lebaran Idul Fitri 2026 Diskon 10%", this.kupon.getDeskripsi());}
 
     @Test
-    void testKodeUnikKuponNotNull(){assertNotNull(this.kupon.getKodeUnik());}
+    void testGetQuantityKupon(){assertEquals(2, this.kupon.getQuantity());}
 
     @Test
-    void testPemilikNull(){
-        assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon(null, List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon", LocalDate.of(2026, 10, 10),10, "Kupon Lebaran Idul Fitri 2026");
-        });
-    }
+    void testKodeUnikKuponNotNull(){assertNotNull(this.kupon.getKodeUnik());}
 
     @Test
     void testUpdateKosPemilik(){
@@ -92,30 +80,30 @@ public class KuponTest {
     @Test
     void testMasaBerlakuNull(){
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon(mock(User.class), List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon" ,null, 10, "Kupon Lebaran Idul Fitri 2026");
+            Kupon newKupon = new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon" ,null, 10, "Kupon Lebaran Idul Fitri 2026", 6);
         });
     }
 
     @Test
     void testPersentaseInvalid(){
         assertThrows(IllegalArgumentException.class, () -> {
-            Kupon newKupon = new Kupon(mock(User.class), List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), -30, "Kupon Lebaran Idul Fitri 2026");
+            Kupon newKupon = new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), -30, "Kupon Lebaran Idul Fitri 2026", 6);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            Kupon newKupon = new Kupon(mock(User.class), List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 0, "Kupon Lebaran Idul Fitri 2026");
+            Kupon newKupon = new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 0, "Kupon Lebaran Idul Fitri 2026", 6);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            Kupon newKupon = new Kupon(mock(User.class), List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 129, "Kupon Lebaran Idul Fitri 2026");
+            Kupon newKupon = new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 129, "Kupon Lebaran Idul Fitri 2026", 6);
         });
     }
 
     @Test
     void testDeskripsiNull(){
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon(mock(User.class), List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 10, null);
+            Kupon newKupon = new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 10, null, 6);
         });
         assertThrows(IllegalArgumentException.class, ()->{
-            Kupon newKupon = new Kupon(mock(User.class), List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 10, "");
+            Kupon newKupon = new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 10, "", 6);
         });
     }
 
@@ -164,9 +152,9 @@ public class KuponTest {
     @Test
     void testKuponToString(){
         String kodeUnik = kupon.getKodeUnik();
-        kupon.refreshStatus();  // Pastikan statusKupon tidak null
+        kupon.refreshStatus();
         assertEquals(String.format(
-                        "Kupon[%s, Admin, 10%%, Hingga: 10 October 2026, Status: VALID, Kost: [Kos Alamanda, Kos Griya Asri]]",
+                        "Kupon[Nama Kupon: Kupon Idul Fitri, %s, 10%%, Hingga: 10 October 2026, Status: VALID, Quantity: 2, Kost: [Kos Alamanda, Kos Griya Asri]]",
                         kodeUnik),
                 kupon.toString());
     }
