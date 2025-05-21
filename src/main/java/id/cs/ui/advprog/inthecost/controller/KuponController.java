@@ -1,9 +1,7 @@
 package id.cs.ui.advprog.inthecost.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
-import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.service.KuponServiceImpl;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
@@ -83,12 +81,12 @@ public class KuponController{
         try {
             kuponService.updateKupon(
                     id,
-                    request.getPemilik(),
                     request.getKosPemilik(),
                     request.getPersentase(),
                     request.getNamaKupon(),
                     request.getMasaBerlaku(),
-                    request.getDeskripsi()
+                    request.getDeskripsi(),
+                    request.getQuantity()
             );
             Kupon updatedKupon = kuponService.getKuponById(id);
             return ResponseEntity.ok(mapToResponse(updatedKupon));
@@ -106,17 +104,8 @@ public class KuponController{
         logCurrentUser();
 
         if (request.getPersentase() < 0 || request.getPersentase() > 100
-                || request.getPemilik() == null
                 || request.getKosPemilik() == null || request.getKosPemilik().isEmpty()) {
             return ResponseEntity.badRequest().build();
-        }
-
-        User user;
-        try {
-            user = userRepository.findById(request.getPemilik())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.internalServerError().build();
         }
 
         List<Kost> kostList = kostRepository.findAllById(request.getKosPemilik());
@@ -125,12 +114,12 @@ public class KuponController{
         }
 
         Kupon kupon = new Kupon(
-                user,
                 kostList,
                 request.getNamaKupon(),
                 request.getMasaBerlaku(),
                 request.getPersentase(),
-                request.getDeskripsi()
+                request.getDeskripsi(),
+                request.getQuantity()
         );
 
         Kupon savedKupon = kuponService.createKupon(kupon);
@@ -146,7 +135,7 @@ public class KuponController{
         response.setMasaBerlaku(kupon.getMasaBerlaku());
         response.setDeskripsi(kupon.getDeskripsi());
         response.setStatusKupon(kupon.getStatusKupon().getValue());
-        response.setPemilik(kupon.getPemilik().getUsername());
+        response.setQuantity(kupon.getQuantity());
         response.setKosPemilik(
                 kupon.getKosPemilik().stream()
                         .map(Kost::getNama)

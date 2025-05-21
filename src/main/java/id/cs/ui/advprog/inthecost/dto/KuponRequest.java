@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class KuponRequest {
-    private UUID pemilik;
     private List<UUID> kosPemilik;
     private String namaKupon;
 
@@ -15,9 +14,7 @@ public class KuponRequest {
 
     private int persentase;
     private String deskripsi;
-
-    public UUID getPemilik() { return pemilik; }
-    public void setPemilik(UUID pemilik) { this.pemilik = pemilik; }
+    private int quantity;
 
     public List<UUID> getKosPemilik() { return kosPemilik; }
     public void setKosPemilik(List<UUID> kosPemilik) { this.kosPemilik = kosPemilik; }
@@ -33,4 +30,7 @@ public class KuponRequest {
 
     public String getDeskripsi() { return deskripsi; }
     public void setDeskripsi(String deskripsi) { this.deskripsi = deskripsi; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

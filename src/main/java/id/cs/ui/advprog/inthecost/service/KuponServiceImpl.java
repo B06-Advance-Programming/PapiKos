@@ -1,7 +1,6 @@
 package id.cs.ui.advprog.inthecost.service;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
-import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.KuponRepository;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,13 +30,10 @@ public class KuponServiceImpl implements KuponService {
         return kuponRepository.save(kupon);
     }
 
-    public Kupon updateKupon(UUID idKupon, UUID pemilikId, List<UUID> kostIds, int persentase, String namaKupon,
-                             LocalDate masaBerlaku, String deskripsi) {
+    public Kupon updateKupon(UUID idKupon, List<UUID> kostIds, int persentase, String namaKupon,
+                             LocalDate masaBerlaku, String deskripsi, int quantity) {
         if (idKupon == null) {
             throw new IllegalArgumentException("Kupon ID cannot be null");
-        }
-        if (pemilikId == null) {
-            throw new IllegalArgumentException("Pemilik ID cannot be null");
         }
         if (kostIds == null || kostIds.isEmpty()) {
             throw new IllegalArgumentException("Kost IDs cannot be null or empty");
@@ -54,20 +51,17 @@ public class KuponServiceImpl implements KuponService {
         Kupon kupon = kuponRepository.findById(idKupon)
                 .orElseThrow(() -> new EntityNotFoundException("Kupon not found with ID: " + idKupon));
 
-        User pemilik = userRepository.findById(pemilikId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + pemilikId));
-
         List<Kost> kosList = kostRepository.findAllById(kostIds);
         if (kosList.size() != kostIds.size()) {
             throw new EntityNotFoundException("Some Kost not found with");
         }
 
-        kupon.setPemilik(pemilik);
         kupon.setKosPemilik(kosList);
         kupon.setPersentase(persentase);
         kupon.setNamaKupon(namaKupon);
         kupon.setMasaBerlaku(masaBerlaku);
         kupon.setDeskripsi(deskripsi.trim());
+        kupon.setQuantity(quantity);
 
         return kuponRepository.save(kupon);
     }
@@ -96,5 +90,22 @@ public class KuponServiceImpl implements KuponService {
     @Override
     public List<Kupon> getAllKupon() {
         return kuponRepository.findAll();
+    }
+
+    @Override
+    public List<Kupon> getKuponByKost(Kost kos){
+        List<Kupon> result = new ArrayList<>();
+        List<Kupon> allKupon = getAllKupon();
+        for(Kupon kupon: allKupon){
+            if(kupon.getKosPemilik().contains(kos)){
+                result.add(kupon);
+            }
+        }
+
+        if(result.isEmpty()){
+            return null;
+        }else {
+            return result;
+        }
     }
 }

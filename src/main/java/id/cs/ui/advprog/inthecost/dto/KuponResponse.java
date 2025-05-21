@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public class KuponResponse {
     private UUID idKupon;
-    private String pemilik;
     private String kodeUnik;
     private int persentase;
     private String namaKupon;
@@ -14,12 +13,10 @@ public class KuponResponse {
     private String deskripsi;
     private String statusKupon;
     private List<String> kosPemilik;
+    private int quantity;
 
     public UUID getIdKupon() { return idKupon; }
     public void setIdKupon(UUID idKupon) { this.idKupon = idKupon; }
-
-    public String getPemilik() { return pemilik; }
-    public void setPemilik(String pemilik) { this.pemilik = pemilik; }
 
     public String getKodeUnik() { return kodeUnik; }
     public void setKodeUnik(String kodeUnik) { this.kodeUnik = kodeUnik; }
@@ -41,4 +38,7 @@ public class KuponResponse {
 
     public List<String> getKosPemilik() { return kosPemilik; }
     public void setKosPemilik(List<String> kosPemilik) { this.kosPemilik = kosPemilik; }
+
+    public int getQuantity(){return quantity; }
+    public void setQuantity(int quantity){this.quantity = quantity;}
 }
