@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("java")
+    id("org.sonarqube") version "6.2.0.5505"
 }
 
 group = "id.cs.ui.advprog"
@@ -79,4 +80,12 @@ tasks.bootJar {
 
 tasks.jar {
     enabled = false
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "B06-Advance-Programming_PapiKos")
+        property("sonar.organization", "b06adpro")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
