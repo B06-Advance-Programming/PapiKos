@@ -1,5 +1,7 @@
 package id.cs.ui.advprog.inthecost.dto;
 
+import id.cs.ui.advprog.inthecost.enums.KuponStatus;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

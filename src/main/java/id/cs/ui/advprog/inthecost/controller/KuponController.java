@@ -18,19 +18,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/kupon")
 public class KuponController{
     @Autowired
     private KuponServiceImpl kuponService;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private KostRepository kostRepository;
