@@ -27,7 +27,8 @@ public class WishlistControllerTest {
     @Test
     void testGetWishlistForUser() throws Exception {
         UUID userId = UUID.randomUUID();
-        Kost sample = new Kost("Kos A", "Jl. A", "Desc A", 5, 500000);
+        UUID ownerId = UUID.randomUUID(); // Add ownerId for the updated constructor
+        Kost sample = new Kost("Kos A", "Jl. A", "Desc A", 5, 500000, ownerId); // Updated constructor
         when(wishlistService.getWishlistByUserId(userId)).thenReturn(List.of(sample));
 
         mockMvc.perform(get("/api/wishlist/{userId}", userId))

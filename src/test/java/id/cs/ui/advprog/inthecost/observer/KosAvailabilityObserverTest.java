@@ -5,6 +5,8 @@ import id.cs.ui.advprog.inthecost.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.mockito.Mockito.*;
 
 public class KosAvailabilityObserverTest {
@@ -18,7 +20,8 @@ public class KosAvailabilityObserverTest {
         notificationService = mock(NotificationService.class);
         observer = new WishlistObserver(notificationService);
 
-        kost = new Kost("Kos Asri", "Jl. Asri", "Deskripsi Kos Asri", 2, 1000000); // 2 kamar awal
+        UUID ownerId = UUID.randomUUID(); // Add ownerId for the updated constructor
+        kost = new Kost("Kos Asri", "Jl. Asri", "Deskripsi Kos Asri", 2, 1000000, ownerId); // Updated constructor
         kost.addObserver(observer);
     }
 

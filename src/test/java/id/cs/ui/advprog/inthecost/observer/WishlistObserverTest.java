@@ -5,6 +5,8 @@ import id.cs.ui.advprog.inthecost.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.mockito.Mockito.*;
 
 public class WishlistObserverTest {
@@ -20,7 +22,8 @@ public class WishlistObserverTest {
 
     @Test
     void testNotifyUsersCalledWhenKostHasAvailableRooms() {
-        Kost kost = new Kost("Kos Sakura", "Jl. Sakura", "Deskripsi Kos Sakura", 1, 1000000); // ada kamar
+        UUID ownerId = UUID.randomUUID(); // Add ownerId for the updated constructor
+        Kost kost = new Kost("Kos Sakura", "Jl. Sakura", "Deskripsi Kos Sakura", 1, 1000000, ownerId); // Updated constructor
         wishlistObserver.update(kost);
 
         verify(notificationServiceMock, times(1)).notifyUsers(kost);
@@ -28,7 +31,8 @@ public class WishlistObserverTest {
 
     @Test
     void testNotifyUsersNotCalledWhenKostHasNoAvailableRooms() {
-        Kost kost = new Kost("Kos Melati", "Jl. Melati", "Deskripsi Kos Melati", 0, 1000000); // gak ada kamar
+        UUID ownerId = UUID.randomUUID(); // Add ownerId for the updated constructor
+        Kost kost = new Kost("Kos Melati", "Jl. Melati", "Deskripsi Kos Melati", 0, 1000000, ownerId); // Updated constructor
         wishlistObserver.update(kost);
 
         verify(notificationServiceMock, never()).notifyUsers(any());
