@@ -55,4 +55,10 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
     public List<PenyewaanKos> findAll() {
         return repository.findAll();
     }
+
+    @Override
+    public boolean hasPendingPenyewaan(UUID userId, UUID kostId) {
+        List<PenyewaanKos> pendingList = repository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
+        return !pendingList.isEmpty();
+    }
 }

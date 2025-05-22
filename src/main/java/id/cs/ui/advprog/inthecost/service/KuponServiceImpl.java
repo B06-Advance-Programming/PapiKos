@@ -1,16 +1,15 @@
 package id.cs.ui.advprog.inthecost.service;
+
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.KuponRepository;
-import id.cs.ui.advprog.inthecost.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,50 +19,54 @@ public class KuponServiceImpl implements KuponService {
     KuponRepository kuponRepository;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
     KostRepository kostRepository;
 
     @Override
-    public Kupon createKupon(Kupon kupon){
+    public Kupon createKupon(Kupon kupon) {
         return kuponRepository.save(kupon);
     }
 
-    public Kupon updateKupon(UUID idKupon, List<UUID> kostIds, int persentase, String namaKupon,
-                             LocalDate masaBerlaku, String deskripsi, int quantity) {
-        if (idKupon == null) {
-            throw new IllegalArgumentException("Kupon ID cannot be null");
+    @Override
+    public Kupon updateKupon(Kupon kupon) {
+        Optional<Kupon> existingKupon = kuponRepository.findById(kupon.getIdKupon());
+        if (existingKupon.isPresent()) {
+            Kupon updated = existingKupon.get();
+            updated.setPersentase(kupon.getPersentase());
+            updated.setMasaBerlaku(kupon.getMasaBerlaku());
+            updated.setDeskripsi(kupon.getDeskripsi());
+            updated.setKosPemilik(kupon.getKosPemilik());
+            updated.setNamaKupon(kupon.getNamaKupon());
+            updated.setQuantity(kupon.getQuantity());
+            return kuponRepository.save(updated);
+        } else {
+            throw new IllegalArgumentException("Kupon dengan ID " + kupon.getIdKupon() + " tidak ditemukan.");
         }
-        if (kostIds == null || kostIds.isEmpty()) {
-            throw new IllegalArgumentException("Kost IDs cannot be null or empty");
-        }
-        if (persentase <= 0 || persentase > 100) {
-            throw new IllegalArgumentException("Persentase must be between 1 and 100");
-        }
-        if (masaBerlaku == null || masaBerlaku.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Masa berlaku cannot be in the past");
-        }
-        if (deskripsi == null || deskripsi.trim().isEmpty()) {
-            throw new IllegalArgumentException("Deskripsi cannot be empty");
-        }
+    }
 
-        Kupon kupon = kuponRepository.findById(idKupon)
-                .orElseThrow(() -> new EntityNotFoundException("Kupon not found with ID: " + idKupon));
-
-        List<Kost> kosList = kostRepository.findAllById(kostIds);
-        if (kosList.size() != kostIds.size()) {
-            throw new EntityNotFoundException("Some Kost not found with");
+    @Override
+    public Kupon updateKupon(
+            UUID idKupon,
+            List<UUID> kostIdList,
+            int persentase,
+            String namaKupon,
+            LocalDate masaBerlaku,
+            String deskripsi,
+            int quantity
+    ) {
+        Optional<Kupon> existingKupon = kuponRepository.findById(idKupon);
+        if (existingKupon.isPresent()) {
+            Kupon updated = existingKupon.get();
+            List<Kost> kosts = kostRepository.findAllById(kostIdList);
+            updated.setKosPemilik(kosts);
+            updated.setPersentase(persentase);
+            updated.setNamaKupon(namaKupon);
+            updated.setMasaBerlaku(masaBerlaku);
+            updated.setDeskripsi(deskripsi);
+            updated.setQuantity(quantity);
+            return kuponRepository.save(updated);
+        } else {
+            throw new IllegalArgumentException("Kupon dengan ID " + idKupon + " tidak ditemukan.");
         }
-
-        kupon.setKosPemilik(kosList);
-        kupon.setPersentase(persentase);
-        kupon.setNamaKupon(namaKupon);
-        kupon.setMasaBerlaku(masaBerlaku);
-        kupon.setDeskripsi(deskripsi.trim());
-        kupon.setQuantity(quantity);
-
-        return kuponRepository.save(kupon);
     }
 
     @Override
@@ -90,22 +93,5 @@ public class KuponServiceImpl implements KuponService {
     @Override
     public List<Kupon> getAllKupon() {
         return kuponRepository.findAll();
-    }
-
-    @Override
-    public List<Kupon> getKuponByKost(Kost kos){
-        List<Kupon> result = new ArrayList<>();
-        List<Kupon> allKupon = getAllKupon();
-        for(Kupon kupon: allKupon){
-            if(kupon.getKosPemilik().contains(kos)){
-                result.add(kupon);
-            }
-        }
-
-        if(result.isEmpty()){
-            return null;
-        }else {
-            return result;
-        }
     }
 }

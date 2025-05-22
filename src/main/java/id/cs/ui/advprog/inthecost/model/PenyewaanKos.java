@@ -42,7 +42,6 @@ public class PenyewaanKos {
     @Column(name = "status")
     private StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
 
-    // NEW added field userId, map to user_id column (UUID type)
     @Column(name = "user_id", columnDefinition = "uuid")
     private UUID userId;
 

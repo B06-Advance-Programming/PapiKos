@@ -140,7 +140,7 @@ public class Kupon {
         String status = statusKupon != null ? statusKupon.toString() : "UNKNOWN";
 
         return String.format(
-                "Kupon[Nama Kupon: %s, %s, %s%%, Hingga: %s, Status: %s, Quantity: %d, Kost: [%s]]",
+                "Kupon[NamaKupon: %s, %s, %s%%, Hingga: %s, Status: %s, Quantity: %d, Kost: [%s]]",
                 namaKupon,
                 kodeUnik,
                 persentase,

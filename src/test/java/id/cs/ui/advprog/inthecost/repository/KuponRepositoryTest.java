@@ -35,18 +35,23 @@ public class KuponRepositoryTest {
 
     @BeforeEach
     void setUp(){
-        Kost kos;
-        kos = new Kost();
+        // Create and save User owner
+        User owner = new User("owneruser", "password", "owneruser@example.com", new HashSet<>());
+        owner = userRepository.save(owner);
+
+        Kost kos = new Kost();
         kos.setNama("Kos Mawar");
         kos.setAlamat("Jl. Melati No. 2");
         kos.setDeskripsi("Kos nyaman");
         kos.setJumlahKamar(5);
         kos.setHargaPerBulan(1200000);
+        kos.setOwnerId(owner.getId());  // Set the ownerId BEFORE saving
 
         Kost kos1 = kostRepository.save(kos);
 
-        Kupon kupon1 = new Kupon(new ArrayList<>(List.of(kos1)), "Kupon Pahlawan",LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025", 6);
-        Kupon kupon2 = new Kupon(new ArrayList<>(List.of(kos1)), "Kupon Maba",LocalDate.of(2026, 10, 22), 8, "Kupon Semester Baru", 2);
+        Kupon kupon1 = new Kupon(new ArrayList<>(List.of(kos1)), "Kupon Pahlawan", LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025", 6);
+        Kupon kupon2 = new Kupon(new ArrayList<>(List.of(kos1)), "Kupon Maba", LocalDate.of(2026, 10, 22), 8, "Kupon Semester Baru", 2);
+
         kuponList.add(kupon1);
         kuponList.add(kupon2);
     }

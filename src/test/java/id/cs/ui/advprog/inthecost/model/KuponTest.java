@@ -4,8 +4,10 @@ import id.cs.ui.advprog.inthecost.enums.KuponStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.*;
 
 public class KuponTest {
     Kupon kupon;
+
     @BeforeEach
     void setUp(){
         Kost kos1 = mock(Kost.class);
@@ -31,12 +34,13 @@ public class KuponTest {
         this.kupon = new Kupon(kosPemilik, nama, masaBerlaku, persentase, deskripsi, quantity);
     }
 
-
     @Test
     void testKuponNotNull() {assertNotNull(kupon);}
 
     @Test
-    void testGetKosPemilikKupon(){assertEquals(List.of("Kos Alamanda", "Kos Griya Asri"), this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());}
+    void testGetKosPemilikKupon(){
+        assertEquals(List.of("Kos Alamanda", "Kos Griya Asri"), this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());
+    }
 
     @Test
     void testGetPersentase(){assertEquals(10, this.kupon.getPersentase());}
@@ -138,7 +142,6 @@ public class KuponTest {
 
     @Test
     void testStatusKuponValid(){
-        System.out.println(kupon.getStatusKupon());
         kupon.refreshStatus();
         assertEquals(KuponStatus.VALID, kupon.getStatusKupon());
     }
@@ -154,8 +157,76 @@ public class KuponTest {
         String kodeUnik = kupon.getKodeUnik();
         kupon.refreshStatus();
         assertEquals(String.format(
-                        "Kupon[Nama Kupon: Kupon Idul Fitri, %s, 10%%, Hingga: 10 October 2026, Status: VALID, Quantity: 2, Kost: [Kos Alamanda, Kos Griya Asri]]",
+                        "Kupon[NamaKupon: Kupon Idul Fitri, %s, 10%%, Hingga: 10 October 2026, Status: VALID, Quantity: 2, Kost: [Kos Alamanda, Kos Griya Asri]]",
                         kodeUnik),
                 kupon.toString());
+    }
+
+    // ====== EXTRA TESTS FOR FULL CODE COVERAGE ========
+
+    @Test
+    void testDefaultConstructor() {
+        Kupon defaultKupon = new Kupon();
+        assertNotNull(defaultKupon);
+        assertEquals(1, defaultKupon.getQuantity());
+    }
+
+    @Test
+    void testDecreaseQuantityByOne() {
+        kupon.setQuantity(1);
+        kupon.decreaseQuantityByOne();
+        assertEquals(0, kupon.getQuantity());
+        // Should remain at 0 if called again
+        kupon.decreaseQuantityByOne();
+        assertEquals(0, kupon.getQuantity());
+    }
+
+    @Test
+    void testSetKosPemilikNullOrEmpty() {
+        kupon.setKosPemilik(new ArrayList<>());
+        assertTrue(kupon.getKosPemilik().isEmpty());
+    }
+
+    @Test
+    void testPrePersistGeneratesKodeUnikAndStatus() throws Exception {
+        Kupon newKupon = new Kupon(List.of(mock(Kost.class)), "PrePersist", LocalDate.now().plusMonths(1), 10, "desc", 1);
+
+        // Nullify kodeUnik and statusKupon using reflection
+        var kodeUnikField = Kupon.class.getDeclaredField("kodeUnik");
+        kodeUnikField.setAccessible(true);
+        kodeUnikField.set(newKupon, null);
+
+        var statusField = Kupon.class.getDeclaredField("statusKupon");
+        statusField.setAccessible(true);
+        statusField.set(newKupon, null);
+
+        Method prePersist = Kupon.class.getDeclaredMethod("prePersist");
+        prePersist.setAccessible(true);
+        prePersist.invoke(newKupon);
+
+        assertNotNull(newKupon.getKodeUnik());
+        assertNotNull(newKupon.getStatusKupon());
+    }
+
+    @Test
+    void testPrePersistNegativeQuantity() throws Exception {
+        Kupon newKupon = new Kupon(List.of(mock(Kost.class)), "PrePersist", LocalDate.now().plusMonths(1), 10, "desc", 1);
+        newKupon.setQuantity(-5);
+
+        Method prePersist = Kupon.class.getDeclaredMethod("prePersist");
+        prePersist.setAccessible(true);
+        prePersist.invoke(newKupon);
+
+        assertEquals(1, newKupon.getQuantity());
+    }
+
+    @Test
+    void testPreUpdateRefreshStatus() throws Exception {
+        Kupon k = new Kupon(List.of(mock(Kost.class)), "UpdateTest", LocalDate.now().plusMonths(1), 10, "desc", 1);
+        Method preUpdate = Kupon.class.getDeclaredMethod("preUpdate");
+        preUpdate.setAccessible(true);
+        k.setMasaBerlaku(LocalDate.now().minusDays(1));
+        preUpdate.invoke(k);
+        assertNotNull(k.getStatusKupon());
     }
 }
