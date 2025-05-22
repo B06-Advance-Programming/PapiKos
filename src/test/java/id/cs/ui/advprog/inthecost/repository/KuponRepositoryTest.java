@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -36,25 +35,23 @@ public class KuponRepositoryTest {
 
     @BeforeEach
     void setUp(){
-        Role userRole = new Role("USER");
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
-        User user = new User("alice", "password123", "alice@example.com", roles);
+        // Create and save User owner
+        User owner = new User("owneruser", "password", "owneruser@example.com", new HashSet<>());
+        owner = userRepository.save(owner);
 
-        User savedUser = userRepository.save(user);
-
-        Kost kos;
-        kos = new Kost();
+        Kost kos = new Kost();
         kos.setNama("Kos Mawar");
         kos.setAlamat("Jl. Melati No. 2");
         kos.setDeskripsi("Kos nyaman");
         kos.setJumlahKamar(5);
         kos.setHargaPerBulan(1200000);
+        kos.setOwnerId(owner.getId());  // Set the ownerId BEFORE saving
 
         Kost kos1 = kostRepository.save(kos);
 
-        Kupon kupon1 = new Kupon(savedUser, new ArrayList<>(List.of(kos1)), LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025");
-        Kupon kupon2 = new Kupon(savedUser, new ArrayList<>(List.of(kos1)), LocalDate.of(2026, 10, 22), 8, "Kupon Semester Baru");
+        Kupon kupon1 = new Kupon(new ArrayList<>(List.of(kos1)), "Kupon Pahlawan", LocalDate.of(2026, 10, 15), 7, "Kupon Hari Pahlawan 2025", 6);
+        Kupon kupon2 = new Kupon(new ArrayList<>(List.of(kos1)), "Kupon Maba", LocalDate.of(2026, 10, 22), 8, "Kupon Semester Baru", 2);
+
         kuponList.add(kupon1);
         kuponList.add(kupon2);
     }

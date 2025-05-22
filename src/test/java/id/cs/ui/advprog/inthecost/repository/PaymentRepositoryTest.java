@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.repository;
 
+import id.cs.ui.advprog.inthecost.builder.PaymentBuilder;
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import id.cs.ui.advprog.inthecost.model.Payment;
@@ -151,7 +152,7 @@ public class PaymentRepositoryTest {
     private Payment createPayment(Double amount, LocalDateTime transactionDateTime, PaymentTypeEnum paymentType,
                                   String description, PaymentStatusEnum paymentStatus,
                                   UUID userId, UUID ownerId, UUID kostId) {
-        return Payment.builder()
+        return new PaymentBuilder()
                 .amount(amount)
                 .transactionDateTime(transactionDateTime)
                 .paymentType(paymentType)

@@ -3,13 +3,14 @@ package id.cs.ui.advprog.inthecost.controller;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import id.cs.ui.advprog.inthecost.model.Payment;
 import id.cs.ui.advprog.inthecost.service.PaymentService;
+import id.cs.ui.advprog.inthecost.service.PenyewaanKosService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,30 +19,29 @@ import java.util.UUID;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final PenyewaanKosService penyewaanKosService;
 
     @Autowired
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, PenyewaanKosService penyewaanKosService) {
         this.paymentService = paymentService;
+        this.penyewaanKosService = penyewaanKosService;
     }
 
-    // Change validation to accept UUID
+    // Mock validation of user session
     private boolean validateUserSession(UUID userId) {
         System.out.println("Validate session for userId=" + userId + " (mockup always true)");
         return true;
     }
 
+    // Mock check if kost already paid for user
     private boolean isKostAlreadyPaid(UUID userId, UUID kostId) {
         System.out.println("Checking if kost is already paid userId=" + userId + ", kostId=" + kostId + " (mockup false)");
         return false;
     }
 
+    // Mock user permission to pay for kost
     private boolean isUserAllowedToPayKost(UUID userId, UUID kostId) {
         System.out.println("Validating kost ownership userId=" + userId + ", kostId=" + kostId + " (mockup true)");
-        return true;
-    }
-
-    private boolean isCouponValid(String couponCode, int quantity) {
-        System.out.println("Validating couponCode=" + couponCode + ", quantity=" + quantity + " (mockup true)");
         return true;
     }
 
@@ -92,31 +92,26 @@ public class PaymentController {
             return ResponseEntity.status(403).body("User tidak diizinkan membayar kost ini");
         }
 
+        if (!penyewaanKosService.hasPendingPenyewaan(userId, kostId)) {
+            return ResponseEntity.badRequest().body("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini");
+        }
+
         if (isKostAlreadyPaid(userId, kostId)) {
             return ResponseEntity.badRequest().body("Kost sudah dibayar untuk periode ini");
         }
 
-        if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
-            if (!isCouponValid(req.getCouponCode(), req.getCouponQuantity() != null ? req.getCouponQuantity() : 0)) {
-                return ResponseEntity.badRequest().body("Kupon tidak valid atau kuantitas habis");
+        try {
+            double amount = paymentService.getKostPrice(kostId); // Fetch the correct amount internally!
+            Payment payment;
+            if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
+                payment = paymentService.processKostPaymentWithKupon(userId, ownerId, kostId, amount, req.getCouponCode());
+            } else {
+                payment = paymentService.recordKostPayment(userId, ownerId, kostId, amount, req.getDescription());
             }
+            return ResponseEntity.ok(payment);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        double finalAmount = req.getAmount();
-        if (req.getDiscountPrice() != null && req.getDiscountPrice() > 0) {
-            finalAmount = req.getAmount() - req.getDiscountPrice();
-            if (finalAmount < 0) finalAmount = 0;
-        }
-
-        Payment payment = paymentService.recordKostPayment(
-                userId,
-                ownerId,
-                kostId,
-                finalAmount,
-                req.getDescription()
-        );
-
-        return ResponseEntity.ok(payment);
     }
 
     @GetMapping("/history/{userId}")
@@ -164,10 +159,10 @@ public class PaymentController {
         return ResponseEntity.ok(filtered);
     }
 
-    // DTOs changes:
+    // DTOs for requests
 
     public static class TopUpRequest {
-        private String userId;  // changed from Long to String
+        private String userId;
         private Double amount;
         private String description;
 
@@ -181,16 +176,13 @@ public class PaymentController {
         public void setDescription(String description) { this.description = description; }
     }
 
+    // Updated KostPaymentRequest
     public static class KostPaymentRequest {
-        private String userId;  // changed from Long to String
-        private String ownerId; // changed from Long to String
-        private String kostId;  // changed from Long to String
-        private Double amount;
+        private String userId;
+        private String ownerId;
+        private String kostId;
         private String description;
-
         private String couponCode;
-        private Integer couponQuantity;
-        private Double discountPrice;
 
         public String getUserId() { return userId; }
         public void setUserId(String userId) { this.userId = userId; }
@@ -201,24 +193,15 @@ public class PaymentController {
         public String getKostId() { return kostId; }
         public void setKostId(String kostId) { this.kostId = kostId; }
 
-        public Double getAmount() { return amount; }
-        public void setAmount(Double amount) { this.amount = amount; }
-
         public String getDescription() { return description; }
         public void setDescription(String description) { this.description = description; }
 
         public String getCouponCode() { return couponCode; }
         public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
-
-        public Integer getCouponQuantity() { return couponQuantity; }
-        public void setCouponQuantity(Integer couponQuantity) { this.couponQuantity = couponQuantity; }
-
-        public Double getDiscountPrice() { return discountPrice; }
-        public void setDiscountPrice(Double discountPrice) { this.discountPrice = discountPrice; }
     }
 
     /**
-     * buat logging aja
+     * Simple logging of request context
      */
     private void logRequestContext(String testingMode, String methodName) {
         if ("true".equalsIgnoreCase(testingMode)) {

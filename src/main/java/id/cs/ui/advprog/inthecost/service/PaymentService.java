@@ -22,4 +22,8 @@ public interface PaymentService {
 
     List<Payment> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType,
                                                      LocalDateTime startDateTime, LocalDateTime endDateTime);
+
+    Payment processKostPaymentWithKupon(UUID userId, UUID ownerId, UUID kostId, Double originalAmount, String kuponCode);
+
+    double getKostPrice(UUID kostId);
 }

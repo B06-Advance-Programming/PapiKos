@@ -3,6 +3,7 @@ package id.cs.ui.advprog.inthecost.repository;
 import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.Kost;
+import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,11 +30,19 @@ public class PenyewaanKosRepositoryTest {
     @Autowired
     private KostRepository kostRepository;
 
+    @Autowired
+    private UserRepository userRepository; // Add UserRepository autowiring
+
     private Kost kos;
 
     @BeforeEach
     public void setUp() {
+        // Create and save a User owner
+        User owner = new User("owneruser", "password", "owneruser@example.com", new HashSet<>());
+        owner = userRepository.save(owner);
+
         kos = new Kost("Kos Mawar", "Jl. Melati No. 2", "Kos nyaman", 5, 1200000);
+        kos.setOwnerId(owner.getId());   // Set mandatory ownerId
         kostRepository.save(kos);
     }
 
