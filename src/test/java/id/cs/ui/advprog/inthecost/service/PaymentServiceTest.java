@@ -1,9 +1,16 @@
 package id.cs.ui.advprog.inthecost.service;
 
+import id.cs.ui.advprog.inthecost.builder.PaymentBuilder;
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
+import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Payment;
+import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
+import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.PaymentRepository;
+import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
+import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,10 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +34,12 @@ public class PaymentServiceTest {
 
     @Mock
     private PaymentRepository paymentRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PenyewaanKosRepository penyewaanKosRepository;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
@@ -40,6 +55,12 @@ public class PaymentServiceTest {
         UUID userId = UUID.randomUUID();
         Double amount = 100000.0;
         String description = "Top up via bank transfer";
+
+        // Mock User
+        User user = new User();
+        user.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
@@ -58,18 +79,43 @@ public class PaymentServiceTest {
 
     @Test
     void recordKostPayment_shouldCreateKostPaymentRecord() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         UUID kostId = UUID.randomUUID();
         Double amount = 300000.0;
         String description = "Kost payment for May";
+
+        // Mock user with sufficient balance
+        User mockUser = new User();
+        mockUser.setId(userId);
+        mockUser.setBalance(500000.0);  // Balance more than amount to avoid failed payment
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+        // Mock owner with any balance (optional but recommended)
+        User mockOwner = new User();
+        mockOwner.setId(ownerId);
+        mockOwner.setBalance(100000.0);
+        when(userRepository.findById(ownerId)).thenReturn(Optional.of(mockOwner));
+
+        Kost mockKost = new Kost();
+        mockKost.setKostID(kostId);
+
+        PenyewaanKos pendingReservation = new PenyewaanKos();
+        pendingReservation.setId(UUID.randomUUID());
+        pendingReservation.setKos(mockKost);
+        pendingReservation.setUserId(userId);
+        pendingReservation.setStatus(StatusPenyewaan.DIAJUKAN);
+
+        when(penyewaanKosRepository.findByKos_KostIDAndUserIdAndStatus(
+                eq(kostId), eq(userId), eq(StatusPenyewaan.DIAJUKAN)))
+                .thenReturn(List.of(pendingReservation));
+
         when(paymentRepository.save(any(Payment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         Payment result = paymentService.recordKostPayment(userId, ownerId, kostId, amount, description);
 
-        // Assert
+        // Assert successful payment status
         assertEquals(PaymentTypeEnum.KOST_PAYMENT, result.getPaymentType());
         assertEquals(PaymentStatusEnum.SUCCESS, result.getPaymentStatus());
         assertEquals(amount, result.getAmount());
@@ -82,7 +128,6 @@ public class PaymentServiceTest {
 
     @Test
     void getTransactionHistory_shouldReturnUserTransactions() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         List<Payment> userPayments = new ArrayList<>();
         userPayments.add(createPayment(1L, 100000.0, LocalDateTime.now().minusDays(2),
@@ -92,17 +137,14 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findByUserId(userId)).thenReturn(userPayments);
 
-        // Act
         List<Payment> result = paymentService.getTransactionHistory(userId);
 
-        // Assert
         assertEquals(2, result.size());
         verify(paymentRepository).findByUserId(userId);
     }
 
     @Test
     void getFilteredTransactionHistory_shouldFilterByDateRange() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now().minusDays(5);
         LocalDateTime endDateTime = LocalDateTime.now();
@@ -119,11 +161,9 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
-        // Act
         List<Payment> result = paymentService.getFilteredTransactionHistory(
                 userId, null, startDateTime, endDateTime);
 
-        // Assert
         assertEquals(2, result.size());
         for (Payment payment : result) {
             assertTrue(!payment.getTransactionDateTime().isBefore(startDateTime) &&
@@ -134,7 +174,6 @@ public class PaymentServiceTest {
 
     @Test
     void getFilteredTransactionHistory_shouldFilterByPaymentType() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         List<Payment> allUserPayments = new ArrayList<>();
         // Included (TOP_UP)
@@ -146,11 +185,9 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
-        // Act
         List<Payment> result = paymentService.getFilteredTransactionHistory(
                 userId, PaymentTypeEnum.TOP_UP, null, null);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals(PaymentTypeEnum.TOP_UP, result.get(0).getPaymentType());
         verify(paymentRepository).findByUserId(userId);
@@ -158,7 +195,6 @@ public class PaymentServiceTest {
 
     @Test
     void getFilteredTransactionHistory_shouldFilterByPaymentTypeAndDateRange() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now().minusDays(5);
         LocalDateTime endDateTime = LocalDateTime.now();
@@ -176,11 +212,9 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findByUserId(userId)).thenReturn(allUserPayments);
 
-        // Act
         List<Payment> result = paymentService.getFilteredTransactionHistory(
                 userId, PaymentTypeEnum.TOP_UP, startDateTime, endDateTime);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals(PaymentTypeEnum.TOP_UP, result.get(0).getPaymentType());
         LocalDateTime paymentDateTime = result.get(0).getTransactionDateTime();
@@ -190,7 +224,6 @@ public class PaymentServiceTest {
 
     @Test
     void getOwnerTransactionHistory_shouldReturnOwnerTransactions() {
-        // Arrange
         UUID ownerId = UUID.randomUUID();
         List<Payment> ownerPayments = new ArrayList<>();
         ownerPayments.add(createPayment(1L, 200000.0, LocalDateTime.now().minusDays(2),
@@ -202,17 +235,14 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findByOwnerId(ownerId)).thenReturn(ownerPayments);
 
-        // Act
         List<Payment> result = paymentService.getOwnerTransactionHistory(ownerId);
 
-        // Assert
         assertEquals(2, result.size());
         verify(paymentRepository).findByOwnerId(ownerId);
     }
 
     @Test
     void getFilteredOwnerTransactionHistory_shouldFilterByDateRange() {
-        // Arrange
         UUID ownerId = UUID.randomUUID();
         LocalDateTime startDateTime = LocalDateTime.now().minusDays(3);
         LocalDateTime endDateTime = LocalDateTime.now();
@@ -227,11 +257,9 @@ public class PaymentServiceTest {
 
         when(paymentRepository.findByOwnerId(ownerId)).thenReturn(allOwnerPayments);
 
-        // Act
         List<Payment> result = paymentService.getFilteredOwnerTransactionHistory(
                 ownerId, null, startDateTime, endDateTime);
 
-        // Assert
         assertEquals(1, result.size());
         verify(paymentRepository).findByOwnerId(ownerId);
     }
@@ -239,7 +267,7 @@ public class PaymentServiceTest {
     private Payment createPayment(Long id, Double amount, LocalDateTime transactionDateTime, PaymentTypeEnum paymentType,
                                   String description, PaymentStatusEnum paymentStatus,
                                   UUID userId, UUID ownerId, UUID kostId) {
-        Payment payment = Payment.builder()
+        Payment payment = new PaymentBuilder()
                 .amount(amount)
                 .transactionDateTime(transactionDateTime)
                 .paymentType(paymentType)

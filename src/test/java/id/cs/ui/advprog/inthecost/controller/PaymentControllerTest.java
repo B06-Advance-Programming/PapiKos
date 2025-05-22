@@ -3,10 +3,13 @@ package id.cs.ui.advprog.inthecost.controller;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import id.cs.ui.advprog.inthecost.builder.PaymentBuilder;
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import id.cs.ui.advprog.inthecost.model.Payment;
 import id.cs.ui.advprog.inthecost.service.PaymentService;
+import id.cs.ui.advprog.inthecost.service.PenyewaanKosService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -24,6 +27,9 @@ public class PaymentControllerTest {
     @Mock
     private PaymentService paymentService;
 
+    @Mock
+    private PenyewaanKosService penyewaanKosService; // Mock tambahan untuk service yang null
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -31,7 +37,6 @@ public class PaymentControllerTest {
 
     @Test
     void testTopUp() {
-        // Arrange
         PaymentController.TopUpRequest req = new PaymentController.TopUpRequest();
         String userIdStr = UUID.randomUUID().toString();
         req.setUserId(userIdStr);
@@ -42,7 +47,7 @@ public class PaymentControllerTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        Payment expectedPayment = Payment.builder()
+        Payment expectedPayment = new PaymentBuilder()
                 .id(1L)
                 .userId(userId)
                 .amount(150000.0)
@@ -57,18 +62,15 @@ public class PaymentControllerTest {
 
         String testHeaderValue = "true";
 
-        // Act
         var response = paymentController.topUp(req, testHeaderValue);
 
-        // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(expectedPayment, response.getBody());
     }
 
     @Test
-    void testKostPayment_withDiscount() {
-        // Arrange
+    void testKostPayment_withoutCoupon() {
         PaymentController.KostPaymentRequest req = new PaymentController.KostPaymentRequest();
 
         String userIdStr = UUID.randomUUID().toString();
@@ -78,41 +80,38 @@ public class PaymentControllerTest {
         req.setUserId(userIdStr);
         req.setOwnerId(ownerIdStr);
         req.setKostId(kostIdStr);
-        req.setAmount(500000.0);
         req.setDescription("Monthly Kost Payment");
-        req.setCouponCode("DISCOUNT2025");
-        req.setCouponQuantity(1);
-        req.setDiscountPrice(50000.0);  // discount 50k
+        req.setCouponCode(null); // no coupon for this test
 
         UUID userId = UUID.fromString(userIdStr);
         UUID ownerId = UUID.fromString(ownerIdStr);
         UUID kostId = UUID.fromString(kostIdStr);
 
-        double discountedAmount = req.getAmount() - req.getDiscountPrice(); // 450000.0
-
         LocalDateTime now = LocalDateTime.now();
 
-        Payment expectedPayment = Payment.builder()
+        Payment expectedPayment = new PaymentBuilder()
                 .id(2L)
                 .userId(userId)
                 .ownerId(ownerId)
                 .kostId(kostId)
-                .amount(discountedAmount)
+                .amount(500000.0)
                 .description("Monthly Kost Payment")
                 .paymentType(PaymentTypeEnum.KOST_PAYMENT)
                 .paymentStatus(PaymentStatusEnum.SUCCESS)
                 .transactionDateTime(now)
                 .build();
 
-        when(paymentService.recordKostPayment(userId, ownerId, kostId, discountedAmount, "Monthly Kost Payment"))
+        // Mock penyewaanKosService supaya tidak null dan mengembalikan nilai benar
+        when(penyewaanKosService.hasPendingPenyewaan(userId, kostId)).thenReturn(true);
+
+        when(paymentService.getKostPrice(kostId)).thenReturn(500000.0);
+        when(paymentService.recordKostPayment(userId, ownerId, kostId, 500000.0, "Monthly Kost Payment"))
                 .thenReturn(expectedPayment);
 
         String testHeaderValue = "true";
 
-        // Act
         var response = paymentController.kostPayment(req, testHeaderValue);
 
-        // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(expectedPayment, response.getBody());
@@ -120,10 +119,9 @@ public class PaymentControllerTest {
 
     @Test
     void testGetTransactionHistory() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         List<Payment> payments = Arrays.asList(
-                Payment.builder()
+                new PaymentBuilder()
                         .id(10L)
                         .userId(userId)
                         .amount(100000.0)
@@ -135,10 +133,8 @@ public class PaymentControllerTest {
 
         when(paymentService.getTransactionHistory(userId)).thenReturn(payments);
 
-        // Act
         var response = paymentController.getTransactionHistory(userId.toString(), null);
 
-        // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(payments, response.getBody());
@@ -146,14 +142,13 @@ public class PaymentControllerTest {
 
     @Test
     void testGetFilteredTransactionHistory() {
-        // Arrange
         UUID userId = UUID.randomUUID();
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         LocalDateTime startDateTime = LocalDateTime.of(2024, 1, 1, 0, 0);
         LocalDateTime endDateTime = LocalDateTime.of(2024, 12, 31, 23, 59);
 
         List<Payment> filteredPayments = Arrays.asList(
-                Payment.builder()
+                new PaymentBuilder()
                         .id(11L)
                         .userId(userId)
                         .amount(120000.0)
@@ -166,10 +161,8 @@ public class PaymentControllerTest {
         when(paymentService.getFilteredTransactionHistory(userId, paymentType, startDateTime, endDateTime))
                 .thenReturn(filteredPayments);
 
-        // Act
         var response = paymentController.getFilteredTransactionHistory(userId.toString(), paymentType, startDateTime, endDateTime, null);
 
-        // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(filteredPayments, response.getBody());

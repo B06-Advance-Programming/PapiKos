@@ -57,14 +57,13 @@ public class KuponController {
     @PostMapping("/create")
     public String createKuponPost(@ModelAttribute("kupon") Kupon kupon,
                                   @RequestParam("pemilikId") UUID pemilikId,
-                                  @RequestParam("kosIds") List<UUID> kosIds) {  // <-- Ubah ke UUID
+                                  @RequestParam("kosIds") List<UUID> kosIds) {
 
         User pemilik = userRepository.findById(pemilikId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id"));
 
         List<Kost> kosList = kostRepository.findAllById(kosIds);
 
-        kupon.setPemilik(pemilik);
         kupon.setKosPemilik(kosList);
 
         kuponService.createKupon(kupon);
@@ -92,7 +91,7 @@ public class KuponController {
 
     @PostMapping("/edit")
     public String editKuponPost(@ModelAttribute Kupon kupon){
-        System.out.println("ID Kupon setelah submit: " + kupon.getIdKupon());  // Debugging
+        System.out.println("ID Kupon setelah submit: " + kupon.getIdKupon());
         if (kupon.getIdKupon() == null) {
             throw new IllegalArgumentException("ID Kupon tidak boleh null");
         }

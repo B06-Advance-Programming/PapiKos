@@ -28,9 +28,8 @@ public class Kupon {
     @Column(name = "id_kupon", nullable = false, columnDefinition = "uuid")
     private UUID idKupon;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pemilik", nullable = false)
-    private User pemilik;
+    @Column(name = "nama_kupon", nullable=false)
+    private String namaKupon;
 
     @Setter(AccessLevel.NONE)
     @Column(name = "kode_unik", nullable = false, length = 10, unique = true)
@@ -56,27 +55,33 @@ public class Kupon {
             joinColumns = @JoinColumn(name = "id_kupon"),
             inverseJoinColumns = @JoinColumn(name = "id_kost")
     )
+
     private List<Kost> kosPemilik = new ArrayList<>();
+
+    @Column(name = "quantity", nullable = false)
+    private int quantity;
 
     private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
 
     public Kupon() {
+        this.quantity = 1;
     }
 
-    public Kupon(User pemilik, List<Kost> kosPemilik, LocalDate masaBerlaku, int persentase, String deskripsi) {
-        validateInput(pemilik, masaBerlaku, persentase, deskripsi);
-        this.pemilik = pemilik;
+    public Kupon(List<Kost> kosPemilik, String namaKupon,LocalDate masaBerlaku, int persentase, String deskripsi, int quantity) {
+        validateInput(namaKupon, masaBerlaku, persentase, deskripsi, quantity);
         this.kodeUnik = generateKodeUnik();
         this.persentase = persentase;
+        this.namaKupon = namaKupon;
         this.masaBerlaku = masaBerlaku;
         this.kosPemilik = kosPemilik;
         this.deskripsi = deskripsi;
+        this.quantity = quantity;
         refreshStatus();
     }
 
-    private void validateInput(User pemilik, LocalDate masaBerlaku, int persentase, String deskripsi) {
-        if (pemilik == null) {
-            throw new IllegalArgumentException("Pemilik cannot be null");
+    private void validateInput(String nama, LocalDate masaBerlaku, int persentase, String deskripsi, int quantity) {
+        if (nama == null || nama.isBlank()) {
+            throw new IllegalArgumentException("Nama kupon cannot be null");
         }
         if (masaBerlaku == null) {
             throw new IllegalArgumentException("Masa berlaku cannot be null");
@@ -87,6 +92,9 @@ public class Kupon {
         if (deskripsi == null || deskripsi.isBlank()) {
             throw new IllegalArgumentException("Deskripsi cannot be null or empty");
         }
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
     }
 
     private String generateKodeUnik() {
@@ -95,6 +103,11 @@ public class Kupon {
 
     public void refreshStatus() {
         this.statusKupon = defaultStatusStrategy.evaluate(this);
+    }
+
+    public void decreaseQuantityByOne() {
+        if(this.quantity > 0)
+            this.quantity = this.quantity - 1;
     }
 
     public void setPersentase(int persentase) {
@@ -121,19 +134,21 @@ public class Kupon {
 
     @Override
     public String toString() {
-        String namaPemilik = pemilik.getUsername();
         String namaKos = kosPemilik.stream()
                 .map(Kost::getNama)
                 .collect(Collectors.joining(", "));
-        String status = statusKupon.toString();
+        String status = statusKupon != null ? statusKupon.toString() : "UNKNOWN";
 
-        return String.format("Kupon[%s, %s, %d%%, Hingga: %s, Status: %s, Kost: [%s]]",
+        return String.format(
+                "Kupon[NamaKupon: %s, %s, %s%%, Hingga: %s, Status: %s, Quantity: %d, Kost: [%s]]",
+                namaKupon,
                 kodeUnik,
-                namaPemilik,
                 persentase,
-                masaBerlaku.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
+                masaBerlaku != null ? masaBerlaku.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")) : "N/A",
                 status,
-                namaKos);
+                quantity,
+                namaKos.isEmpty() ? "Tidak ada" : namaKos
+        );
     }
 
     @PrePersist
@@ -144,10 +159,13 @@ public class Kupon {
         if (statusKupon == null) {
             refreshStatus();
         }
+        if (quantity < 0) {
+            quantity = 1;
+        }
     }
 
     @PreUpdate
     private void preUpdate() {
-        refreshStatus(); // misal ingin selalu memastikan status up-to-date
+        refreshStatus();
     }
 }
