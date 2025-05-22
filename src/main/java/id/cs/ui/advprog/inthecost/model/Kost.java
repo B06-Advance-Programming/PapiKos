@@ -1,19 +1,20 @@
 package id.cs.ui.advprog.inthecost.model;
-
 import id.cs.ui.advprog.inthecost.exception.*;
-import id.cs.ui.advprog.inthecost.observer.Observer;
-import id.cs.ui.advprog.inthecost.observer.Subject;
-import jakarta.persistence.*;
-import lombok.Getter;
 
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 import java.util.UUID;
 
 @Getter
 @Entity
 @Table(name = "kost")
-public class Kost implements Subject {
+public class Kost {
     @Id
     @Column(name = "kost_id")
     private UUID kostID;
@@ -33,17 +34,17 @@ public class Kost implements Subject {
     @Column(name = "harga_per_bulan")
     private int hargaPerBulan;
 
-    @Transient // Mark as non-persistent
-    private final Set<Observer> observers = new HashSet<>();
+    @Column(name = "owner_id")
+    private UUID ownerId;
 
-    @Transient
-    private boolean enableObservers = true; // Flag to enable/disable observer notifications
-
+    // manual set each times
     public Kost() {
         kostID = UUID.randomUUID();
     }
 
+    // constructor based
     public Kost(String nama, String alamat, String deskripsi, int jumlahKamar, int hargaPerBulan) {
+        // handle null atau kosong
         if (nama == null || nama.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
         }
@@ -53,6 +54,8 @@ public class Kost implements Subject {
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
         }
+
+        // handle integer value yang tidak diperbolehkan
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
         }
@@ -60,7 +63,7 @@ public class Kost implements Subject {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
         }
 
-        this.kostID = UUID.randomUUID();
+        kostID = UUID.randomUUID();
         this.nama = nama;
         this.alamat = alamat;
         this.deskripsi = deskripsi;
@@ -68,40 +71,64 @@ public class Kost implements Subject {
         this.hargaPerBulan = hargaPerBulan;
     }
 
+    // constructor with owner_id
+    public Kost(String nama, String alamat, String deskripsi, int jumlahKamar, int hargaPerBulan, UUID ownerId) {
+        // handle null atau kosong
+        if (nama == null || nama.trim().isEmpty()) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
+        }
+        if (alamat == null || alamat.trim().isEmpty()) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
+        }
+        if (deskripsi == null || deskripsi.trim().isEmpty()) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
+        }
+        if (ownerId == null) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Owner ID tidak boleh kosong");
+        }
+
+        // handle integer value yang tidak diperbolehkan
+        if (jumlahKamar < 0) {
+            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
+        }
+        if (hargaPerBulan <= 0) {
+            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
+        }
+
+        kostID = UUID.randomUUID();
+        this.nama = nama;
+        this.alamat = alamat;
+        this.deskripsi = deskripsi;
+        this.jumlahKamar = jumlahKamar;
+        this.hargaPerBulan = hargaPerBulan;
+        this.ownerId = ownerId;
+    }
+
+    // cek manual saat set
     public void setNama(String nama) {
         if (nama == null || nama.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
         }
         this.nama = nama;
     }
-
     public void setAlamat(String alamat) {
         if (alamat == null || alamat.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
         }
         this.alamat = alamat;
     }
-
     public void setDeskripsi(String deskripsi) {
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
         }
         this.deskripsi = deskripsi;
     }
-
     public void setJumlahKamar(int jumlahKamar) {
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
         }
-    
-        int oldValue = this.jumlahKamar;
         this.jumlahKamar = jumlahKamar;
-    
-        if (enableObservers && oldValue == 0 && jumlahKamar > 0) {
-            notifyObservers();
-        }
     }
-
     public void setHargaPerBulan(int hargaPerBulan) {
         if (hargaPerBulan <= 0) {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
@@ -109,30 +136,14 @@ public class Kost implements Subject {
         this.hargaPerBulan = hargaPerBulan;
     }
 
-    @Override
-    public void addObserver(Observer observer) {
-        observers.add(observer);
-    }
-
-    @Override
-    public void removeObserver(Observer observer) {
-        observers.remove(observer);
-    }
-
-    @Override
-    public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update(this);
+    public void setOwnerId(UUID ownerId) {
+        if (ownerId == null) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Owner ID tidak boleh kosong");
         }
+        this.ownerId = ownerId;
     }
 
-    // Disable observer notifications (useful for tests)
-    public void disableObservers() {
-        this.enableObservers = false;
-    }
-
-    // Enable observer notifications
-    public void enableObservers() {
-        this.enableObservers = true;
+    public void setKostID(UUID kostID) {
+        this.kostID = kostID;
     }
 }

@@ -1,24 +1,18 @@
 package id.cs.ui.advprog.inthecost;
 
-import id.cs.ui.advprog.inthecost.model.User;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import jakarta.annotation.PostConstruct;
-import java.util.TimeZone;
+@SpringBootTest
+class InthecostApplicationTests {
 
-@SpringBootApplication
-public class InthecostApplication {
-
-    @PostConstruct
-    public void init() {
-        // Set timezone ke Asia/Jakarta (WIB)
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Jakarta"));
-        System.out.println("Timezone set to: " + TimeZone.getDefault().getID());
+    @Test
+    void contextLoads() {
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(InthecostApplication.class, args);
-    }
+//    @Test
+//    void mainMethodTest(){
+//        InthecostApplication.main(new String[]{});
+//    }
 
 }

@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("java")
+    id("org.sonarqube") version "6.0.1.5171"
 }
 
 group = "id.cs.ui.advprog"
@@ -29,10 +30,6 @@ val junitJupiterVersion = "5.9.1"
 val mockitoVersion = "5.2.0"
 
 dependencies {
-    implementation("org.springframework.data:spring-data-commons:3.4.4")
-    implementation("io.github.cdimascio:dotenv-java:3.0.0")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql:42.6.0")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
@@ -49,12 +46,12 @@ dependencies {
     // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    // untuk user
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    
     testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+
+    // untuk user
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
     // Spring Session JDBC
     implementation("org.springframework.session:spring-session-jdbc")
@@ -75,4 +72,28 @@ tasks.test{
 
 tasks.jacocoTestReport{
     dependsOn(tasks.test)
+}
+
+tasks.bootJar {
+    archiveClassifier.set("")
+}
+
+tasks.jar {
+    enabled = false
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "InTheKost")
+        property("sonar.projectName", "InTheKost")
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
 }
