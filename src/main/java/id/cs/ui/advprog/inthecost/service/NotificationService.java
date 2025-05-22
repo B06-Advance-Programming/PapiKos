@@ -23,4 +23,32 @@ public interface NotificationService {
      * @return List of inbox notifications for the user
      */
     List<InboxNotification> getInbox(String userId);
+    
+    /**
+     * Count the number of notifications for a specific user
+     * @param userId The ID of the user as a string
+     * @return The count of notifications for the user
+     */
+    long countNotifications(String userId);
+    
+    /**
+     * Create a custom notification for a specific user
+     * @param userId The ID of the user as a string
+     * @param message The notification message
+     * @return The created notification
+     */
+    InboxNotification createNotification(String userId, String message);
+    
+    /**
+     * Delete a notification by its ID
+     * @param notificationId The ID of the notification to delete
+     */
+    void deleteNotification(Long notificationId);
+    
+    /**
+     * Get a notification by its ID
+     * @param notificationId The ID of the notification
+     * @return The notification, if found
+     */
+    InboxNotification getNotificationById(Long notificationId);
 }

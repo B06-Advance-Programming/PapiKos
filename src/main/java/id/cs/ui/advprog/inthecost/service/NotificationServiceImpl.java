@@ -69,4 +69,63 @@ public class NotificationServiceImpl implements NotificationService {
         UUID userUUID = UUID.fromString(userId);
         return inboxRepository.findByUserId(userUUID);
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public long countNotifications(String userId) {
+        UUID userUUID = UUID.fromString(userId);
+        return inboxRepository.findByUserId(userUUID).size();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public InboxNotification createNotification(String userId, String message) {
+        if (userId == null || message == null || message.trim().isEmpty()) {
+            throw new IllegalArgumentException("User ID and message cannot be null or empty");
+        }
+        
+        UUID userUUID = UUID.fromString(userId);
+        User user = userRepository.findById(userUUID)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        
+        InboxNotification notification = new InboxNotification(user, message);
+        return inboxRepository.save(notification);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteNotification(Long notificationId) {
+        if (notificationId == null) {
+            throw new IllegalArgumentException("Notification ID cannot be null");
+        }
+        
+        if (!inboxRepository.existsById(notificationId)) {
+            throw new IllegalArgumentException("Notification not found with ID: " + notificationId);
+        }
+        
+        inboxRepository.deleteById(notificationId);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public InboxNotification getNotificationById(Long notificationId) {
+        if (notificationId == null) {
+            throw new IllegalArgumentException("Notification ID cannot be null");
+        }
+        
+        return inboxRepository.findById(notificationId)
+                .orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + notificationId));
+    }
 }
