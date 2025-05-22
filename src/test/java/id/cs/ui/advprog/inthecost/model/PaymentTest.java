@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.builder.PaymentBuilder;
 import id.cs.ui.advprog.inthecost.enums.PaymentStatusEnum;
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ public class PaymentTest {
         UUID userId = UUID.randomUUID();
 
         // Act
-        payment = Payment.builder()
+        payment = new PaymentBuilder()
                 .id(id)
                 .amount(amount)
                 .transactionDateTime(date)
@@ -59,7 +60,7 @@ public class PaymentTest {
         UUID kostId = UUID.randomUUID();
 
         // Act
-        payment = Payment.builder()
+        payment = new PaymentBuilder()
                 .id(id)
                 .amount(amount)
                 .transactionDateTime(date)
@@ -167,7 +168,7 @@ public class PaymentTest {
         UUID userId = UUID.randomUUID();
 
         // Act
-        payment = Payment.builder()
+        payment = new PaymentBuilder()
                 .id(id)
                 .amount(amount)
                 .transactionDateTime(date)

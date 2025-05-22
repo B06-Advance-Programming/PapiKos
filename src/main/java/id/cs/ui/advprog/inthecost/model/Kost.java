@@ -6,6 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import java.util.UUID;
 
@@ -31,6 +33,9 @@ public class Kost {
 
     @Column(name = "harga_per_bulan")
     private int hargaPerBulan;
+
+    @Column(name = "owner_id")
+    private UUID ownerId;
 
     // manual set each times
     public Kost() {
@@ -66,6 +71,39 @@ public class Kost {
         this.hargaPerBulan = hargaPerBulan;
     }
 
+    // constructor with owner_id
+    public Kost(String nama, String alamat, String deskripsi, int jumlahKamar, int hargaPerBulan, UUID ownerId) {
+        // handle null atau kosong
+        if (nama == null || nama.trim().isEmpty()) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
+        }
+        if (alamat == null || alamat.trim().isEmpty()) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
+        }
+        if (deskripsi == null || deskripsi.trim().isEmpty()) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
+        }
+        if (ownerId == null) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Owner ID tidak boleh kosong");
+        }
+
+        // handle integer value yang tidak diperbolehkan
+        if (jumlahKamar < 0) {
+            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
+        }
+        if (hargaPerBulan <= 0) {
+            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
+        }
+
+        kostID = UUID.randomUUID();
+        this.nama = nama;
+        this.alamat = alamat;
+        this.deskripsi = deskripsi;
+        this.jumlahKamar = jumlahKamar;
+        this.hargaPerBulan = hargaPerBulan;
+        this.ownerId = ownerId;
+    }
+
     // cek manual saat set
     public void setNama(String nama) {
         if (nama == null || nama.trim().isEmpty()) {
@@ -96,5 +134,16 @@ public class Kost {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
         }
         this.hargaPerBulan = hargaPerBulan;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        if (ownerId == null) {
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Owner ID tidak boleh kosong");
+        }
+        this.ownerId = ownerId;
+    }
+
+    public void setKostID(UUID kostID) {
+        this.kostID = kostID;
     }
 }

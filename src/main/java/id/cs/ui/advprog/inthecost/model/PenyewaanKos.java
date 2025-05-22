@@ -42,6 +42,9 @@ public class PenyewaanKos {
     @Column(name = "status")
     private StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
 
+    @Column(name = "user_id", columnDefinition = "uuid")
+    private UUID userId;
+
     public boolean isEditable() {
         return this.status == StatusPenyewaan.DIAJUKAN;
     }

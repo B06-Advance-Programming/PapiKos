@@ -4,18 +4,21 @@ import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
+import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
+import id.cs.ui.advprog.inthecost.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import jakarta.transaction.Transactional;
-
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,12 +36,25 @@ public class PenyewaanKosServiceTest {
     @Autowired
     private KostRepository kostRepository;
 
+    @Autowired
+    private UserRepository userRepository;
 
     private Kost kos;
+    private User owner;
 
     @BeforeEach
     public void setUp() {
-        kos = new Kost("Kos Mawar", "Jl. Melati No. 2", "Kos nyaman", 5, 1200000);
+        // Create and save a user owner before creating Kost
+        owner = new User();
+        String unique = UUID.randomUUID().toString();
+        owner.setUsername("owner_" + unique);
+        owner.setPassword("password");
+        owner.setEmail("owner_" + unique + "@example.com");
+        owner.setBalance(100000);
+        owner.setRoles(new HashSet<>());  // set roles if needed
+        owner = userRepository.save(owner);
+
+        kos = new Kost("Kos Mawar", "Jl. Melati No. 2", "Kos nyaman", 5, 1200000, owner.getId());
         kostRepository.save(kos);
     }
 
