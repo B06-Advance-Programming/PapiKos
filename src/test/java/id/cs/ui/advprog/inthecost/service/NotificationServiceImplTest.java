@@ -151,4 +151,139 @@ class NotificationServiceImplTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
+    
+    @Test
+    void countNotifications_WithValidUserId_ShouldReturnCorrectCount() {
+        // Arrange
+        List<InboxNotification> notifications = List.of(
+            new InboxNotification(testUser, "Test notification 1"),
+            new InboxNotification(testUser, "Test notification 2")
+        );
+        when(inboxRepository.findByUserId(testUserId)).thenReturn(notifications);
+        
+        // Act
+        long count = notificationService.countNotifications(testUserId.toString());
+        
+        // Assert
+        assertEquals(2, count);
+    }
+    
+    @Test
+    void countNotifications_WithInvalidUUID_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.countNotifications("invalid-uuid"));
+    }
+    
+    @Test
+    void createNotification_WithValidData_ShouldSaveNotification() {
+        // Arrange
+        String message = "Test notification message";
+        InboxNotification notification = new InboxNotification(testUser, message);
+        
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(inboxRepository.save(any(InboxNotification.class))).thenReturn(notification);
+        
+        // Act
+        InboxNotification result = notificationService.createNotification(testUserId.toString(), message);
+        
+        // Assert
+        assertNotNull(result);
+        assertEquals(message, result.getMessage());
+        assertEquals(testUser, result.getUser());
+        
+        verify(inboxRepository).save(notificationCaptor.capture());
+        InboxNotification savedNotification = notificationCaptor.getValue();
+        assertEquals(testUser, savedNotification.getUser());
+        assertEquals(message, savedNotification.getMessage());
+    }
+    
+    @Test
+    void createNotification_WithNullUserId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.createNotification(null, "Test message"));
+    }
+    
+    @Test
+    void createNotification_WithEmptyMessage_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.createNotification(testUserId.toString(), ""));
+    }
+    
+    @Test
+    void createNotification_WithUserNotFound_ShouldThrowException() {
+        // Arrange
+        when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
+        
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.createNotification(testUserId.toString(), "Test message"));
+    }
+    
+    @Test
+    void deleteNotification_WithExistingId_ShouldDeleteNotification() {
+        // Arrange
+        Long notificationId = 1L;
+        when(inboxRepository.existsById(notificationId)).thenReturn(true);
+        
+        // Act
+        notificationService.deleteNotification(notificationId);
+        
+        // Assert
+        verify(inboxRepository).deleteById(notificationId);
+    }
+    
+    @Test
+    void deleteNotification_WithNonExistentId_ShouldThrowException() {
+        // Arrange
+        Long notificationId = 1L;
+        when(inboxRepository.existsById(notificationId)).thenReturn(false);
+        
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.deleteNotification(notificationId));
+    }
+    
+    @Test
+    void deleteNotification_WithNullId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.deleteNotification(null));
+    }
+    
+    @Test
+    void getNotificationById_WithExistingId_ShouldReturnNotification() {
+        // Arrange
+        Long notificationId = 1L;
+        InboxNotification notification = new InboxNotification(testUser, "Test notification");
+        
+        when(inboxRepository.findById(notificationId)).thenReturn(Optional.of(notification));
+        
+        // Act
+        InboxNotification result = notificationService.getNotificationById(notificationId);
+        
+        // Assert
+        assertNotNull(result);
+        assertEquals(notification, result);
+    }
+    
+    @Test
+    void getNotificationById_WithNonExistentId_ShouldThrowException() {
+        // Arrange
+        Long notificationId = 1L;
+        when(inboxRepository.findById(notificationId)).thenReturn(Optional.empty());
+        
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.getNotificationById(notificationId));
+    }
+    
+    @Test
+    void getNotificationById_WithNullId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.getNotificationById(null));
+    }
 }
