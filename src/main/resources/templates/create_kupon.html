@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Buat Kupon</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<h1>Buat Kupon Baru</h1>
+
+<form th:action="@{/kupon/create}" method="post" th:object="${kupon}">
+    <!-- Pemilik (User) Dropdown -->
+    <div>
+        <label for="pemilikId">Pemilik:</label>
+        <select id="pemilikId" name="pemilikId" required>
+            <option value="" disabled selected>Pilih Pemilik</option>
+            <th:block th:each="user : ${users}">
+                <option th:value="${user.id}" th:text="${user.username}"></option>
+            </th:block>
+        </select>
+    </div>
+
+    <!-- Kost Multi-Select -->
+    <div>
+        <label for="kosIds">Pilih Kos:</label>
+        <select id="kosIds" name="kosIds" multiple size="5" required>
+            <th:block th:each="kost : ${kosts}">
+                <option th:value="${kost.kostID}" th:text="${kost.nama}"></option>
+            </th:block>
+        </select>
+        <p><i>* Gunakan Ctrl (atau Cmd di Mac) untuk memilih lebih dari satu</i></p>
+    </div>
+
+    <div>
+        <label for="persentase">Diskon (%):</label>
+        <input type="number" id="persentase" th:field="*{persentase}" min="1" required/>
+    </div>
+
+    <!-- Input untuk Masa Berlaku -->
+    <div class="form-group">
+        <label for="masaBerlaku">Masa Berlaku</label>
+        <input type="date" class="form-control" id="masaBerlaku" name="masaBerlaku"
+               th:field="*{masaBerlaku}" required/>
+    </div>
+
+    <!-- Input untuk Deskripsi -->
+    <div class="form-group">
+        <label for="deskripsi">Deskripsi</label>
+        <textarea class="form-control" id="deskripsi" name="deskripsi"
+                  th:field="*{deskripsi}" rows="3" placeholder="Masukkan deskripsi kupon" required></textarea>
+    </div>
+
+    <!-- Checkbox untuk Kupon Global -->
+    <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="kuponGlobal" name="kuponGlobal"
+               th:field="*{kuponGlobal}"/>
+        <label class="form-check-label" for="kuponGlobal">Kupon Global</label>
+    </div>
+
+
+    <!-- Tombol Submit -->
+    <div>
+        <button type="submit">Simpan Kupon</button>
+    </div>
+</form>
+</body>
+</html>
