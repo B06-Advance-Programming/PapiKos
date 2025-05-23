@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.controller;
 
+import id.cs.ui.advprog.inthecost.dto.RegisterAdminDto;
 import id.cs.ui.advprog.inthecost.dto.RegisterUserDto;
 import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.service.UserService;
@@ -21,8 +22,8 @@ public class AdminController {
 
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public ResponseEntity<User> createAdministrator(@RequestBody RegisterUserDto registerUserDto) {
-        User createdAdmin = userService.createAdministrator(registerUserDto);
+    public ResponseEntity<User> createAdministrator(@RequestBody RegisterAdminDto registerAdminDto) {
+        User createdAdmin = userService.createAdministrator(registerAdminDto);
 
         return ResponseEntity.ok(createdAdmin);
     }
