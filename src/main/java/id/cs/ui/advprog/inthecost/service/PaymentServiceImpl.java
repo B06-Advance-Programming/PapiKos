@@ -18,6 +18,7 @@ import id.cs.ui.advprog.inthecost.repository.PaymentRepository;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -50,9 +52,10 @@ public class PaymentServiceImpl implements PaymentService {
         this.kostRepository = kostRepository;
     }
 
+    @Async
     @Override
     @Transactional
-    public Payment recordTopUpPayment(UUID userId, Double amount, String description) {
+    public CompletableFuture<Payment> recordTopUpPayment(UUID userId, Double amount, String description) {
         Payment payment = new PaymentBuilder()
                 .amount(amount)
                 .transactionDateTime(LocalDateTime.now())
@@ -71,8 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
             user.setBalance(user.getBalance() + amount);
             userRepository.save(user);
         }
-
-        return savedPayment;
+        return CompletableFuture.completedFuture(savedPayment);
     }
 
     private boolean hasPendingPenyewaan(UUID userId, UUID kostId) {
@@ -80,9 +82,10 @@ public class PaymentServiceImpl implements PaymentService {
         return !pending.isEmpty();
     }
 
+    @Async
     @Override
     @Transactional
-    public Payment recordKostPayment(UUID userId, UUID ownerId, UUID kostId, Double amount, String description) {
+    public CompletableFuture<Payment> recordKostPayment(UUID userId, UUID ownerId, UUID kostId, Double amount, String description) {
         if (!hasPendingPenyewaan(userId, kostId)) {
             throw new RuntimeException("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini");
         }
@@ -102,7 +105,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .kostId(kostId)
                     .build();
 
-            return paymentRepository.save(payment);
+            return CompletableFuture.completedFuture(paymentRepository.save(payment));
         }
 
         Payment payment = new PaymentBuilder()
@@ -121,13 +124,11 @@ public class PaymentServiceImpl implements PaymentService {
         user.setBalance(user.getBalance() - amount);
         userRepository.save(user);
 
-        // Increase owner's balance by payment amount
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new RuntimeException("Owner not found with ID: " + ownerId));
         owner.setBalance(owner.getBalance() + amount);
         userRepository.save(owner);
 
-        // Update PenyewaanKos status to DISETUJUI
         List<PenyewaanKos> penyewaanList = penyewaanKosRepository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
         if (!penyewaanList.isEmpty()) {
             PenyewaanKos penyewaan = penyewaanList.get(0);
@@ -135,12 +136,13 @@ public class PaymentServiceImpl implements PaymentService {
             penyewaanKosRepository.save(penyewaan);
         }
 
-        return savedPayment;
+        return CompletableFuture.completedFuture(savedPayment);
     }
 
+    @Async
     @Override
     @Transactional
-    public Payment processKostPaymentWithKupon(UUID userId, UUID ownerId, UUID kostId, Double originalAmount, String kuponCode) {
+    public CompletableFuture<Payment> processKostPaymentWithKupon(UUID userId, UUID ownerId, UUID kostId, Double originalAmount, String kuponCode) {
         if (!hasPendingPenyewaan(userId, kostId)) {
             throw new RuntimeException("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini");
         }
@@ -181,7 +183,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .kostId(kostId)
                     .build();
 
-            return paymentRepository.save(failedPayment);
+            return CompletableFuture.completedFuture(paymentRepository.save(failedPayment));
         }
 
         Payment payment = new PaymentBuilder()
@@ -200,7 +202,6 @@ public class PaymentServiceImpl implements PaymentService {
         user.setBalance(user.getBalance() - discountedAmount);
         userRepository.save(user);
 
-        // Increase owner's balance by discounted amount
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new RuntimeException("Owner not found with ID: " + ownerId));
         owner.setBalance(owner.getBalance() + discountedAmount);
@@ -209,7 +210,6 @@ public class PaymentServiceImpl implements PaymentService {
         kupon.decreaseQuantityByOne();
         kuponRepository.save(kupon);
 
-        // Update PenyewaanKos status to DISETUJUI
         List<PenyewaanKos> penyewaanList = penyewaanKosRepository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
         if (!penyewaanList.isEmpty()) {
             PenyewaanKos penyewaan = penyewaanList.get(0);
@@ -217,7 +217,7 @@ public class PaymentServiceImpl implements PaymentService {
             penyewaanKosRepository.save(penyewaan);
         }
 
-        return savedPayment;
+        return CompletableFuture.completedFuture(savedPayment);
     }
 
     @Override
@@ -227,26 +227,32 @@ public class PaymentServiceImpl implements PaymentService {
         return (double) kost.getHargaPerBulan();
     }
 
+    @Async
     @Override
-    public List<Payment> getTransactionHistory(UUID userId) {
-        return paymentRepository.findByUserId(userId);
+    public CompletableFuture<List<Payment>> getTransactionHistory(UUID userId) {
+        List<Payment> payments = paymentRepository.findByUserId(userId);
+        return CompletableFuture.completedFuture(payments);
     }
 
+    @Async
     @Override
-    public List<Payment> getFilteredTransactionHistory(UUID userId, PaymentTypeEnum paymentType, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        List<Payment> userTransactions = paymentRepository.findByUserId(userId);
-        return filterPayments(userTransactions, paymentType, startDateTime, endDateTime);
+    public CompletableFuture<List<Payment>> getFilteredTransactionHistory(UUID userId, PaymentTypeEnum paymentType, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        List<Payment> payments = paymentRepository.findByUserId(userId);
+        return CompletableFuture.completedFuture(filterPayments(payments, paymentType, startDateTime, endDateTime));
     }
 
+    @Async
     @Override
-    public List<Payment> getOwnerTransactionHistory(UUID ownerId) {
-        return paymentRepository.findByOwnerId(ownerId);
+    public CompletableFuture<List<Payment>> getOwnerTransactionHistory(UUID ownerId) {
+        List<Payment> payments = paymentRepository.findByOwnerId(ownerId);
+        return CompletableFuture.completedFuture(payments);
     }
 
+    @Async
     @Override
-    public List<Payment> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType, LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        List<Payment> ownerTransactions = paymentRepository.findByOwnerId(ownerId);
-        return filterPayments(ownerTransactions, paymentType, startDateTime, endDateTime);
+    public CompletableFuture<List<Payment>> getFilteredOwnerTransactionHistory(UUID ownerId, PaymentTypeEnum paymentType, LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        List<Payment> payments = paymentRepository.findByOwnerId(ownerId);
+        return CompletableFuture.completedFuture(filterPayments(payments, paymentType, startDateTime, endDateTime));
     }
 
     private List<Payment> filterPayments(List<Payment> payments, PaymentTypeEnum paymentType, LocalDateTime startDateTime, LocalDateTime endDateTime) {
