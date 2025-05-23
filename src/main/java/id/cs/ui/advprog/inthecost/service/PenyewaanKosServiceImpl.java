@@ -4,6 +4,7 @@ import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         return repository.save(penyewaan);
     }
 
+    @Async
     @Override
     public void delete(UUID id) {
         repository.deleteById(id);
