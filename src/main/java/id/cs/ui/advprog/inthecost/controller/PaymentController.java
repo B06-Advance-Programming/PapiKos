@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -46,7 +47,7 @@ public class PaymentController {
     }
 
     @PostMapping("/topup")
-    public ResponseEntity<?> topUp(
+    public CompletableFuture<ResponseEntity<?>> topUp(
             @RequestBody TopUpRequest req,
             @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
 
@@ -56,20 +57,19 @@ public class PaymentController {
         try {
             userId = UUID.fromString(req.getUserId());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid UUID format for userId");
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId"));
         }
 
         if (!validateUserSession(userId)) {
-            return ResponseEntity.status(401).body("Invalid user session");
+            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Invalid user session"));
         }
 
-        Payment payment = paymentService.recordTopUpPayment(userId, req.getAmount(), req.getDescription());
-
-        return ResponseEntity.ok(payment);
+        return paymentService.recordTopUpPayment(userId, req.getAmount(), req.getDescription())
+                .thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/kost")
-    public ResponseEntity<?> kostPayment(
+    public CompletableFuture<ResponseEntity<?>> kostPayment(
             @RequestBody KostPaymentRequest req,
             @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
 
@@ -81,41 +81,50 @@ public class PaymentController {
             ownerId = UUID.fromString(req.getOwnerId());
             kostId = UUID.fromString(req.getKostId());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid UUID format for userId, ownerId, or kostId");
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId, ownerId, or kostId"));
         }
 
         if (!validateUserSession(userId)) {
-            return ResponseEntity.status(401).body("Invalid user session");
+            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Invalid user session"));
         }
 
         if (!isUserAllowedToPayKost(userId, kostId)) {
-            return ResponseEntity.status(403).body("User tidak diizinkan membayar kost ini");
+            return CompletableFuture.completedFuture(ResponseEntity.status(403).body("User tidak diizinkan membayar kost ini"));
         }
 
         if (!penyewaanKosService.hasPendingPenyewaan(userId, kostId)) {
-            return ResponseEntity.badRequest().body("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini");
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini"));
         }
 
         if (isKostAlreadyPaid(userId, kostId)) {
-            return ResponseEntity.badRequest().body("Kost sudah dibayar untuk periode ini");
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Kost sudah dibayar untuk periode ini"));
         }
 
+        double amount;
         try {
-            double amount = paymentService.getKostPrice(kostId); // Fetch the correct amount internally!
-            Payment payment;
-            if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
-                payment = paymentService.processKostPaymentWithKupon(userId, ownerId, kostId, amount, req.getCouponCode());
-            } else {
-                payment = paymentService.recordKostPayment(userId, ownerId, kostId, amount, req.getDescription());
-            }
-            return ResponseEntity.ok(payment);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            amount = paymentService.getKostPrice(kostId);
+        } catch (RuntimeException ex) {
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(ex.getMessage()));
         }
+
+        CompletableFuture<Payment> futurePayment;
+        if (req.getCouponCode() != null && !req.getCouponCode().isBlank()) {
+            futurePayment = paymentService.processKostPaymentWithKupon(userId, ownerId, kostId, amount, req.getCouponCode());
+        } else {
+            futurePayment = paymentService.recordKostPayment(userId, ownerId, kostId, amount, req.getDescription());
+        }
+
+        return futurePayment.handle((payment, ex) -> {
+            if (ex != null) {
+                return ResponseEntity.badRequest().body(ex.getMessage());
+            } else {
+                return ResponseEntity.ok(payment);
+            }
+        });
     }
 
     @GetMapping("/history/{userId}")
-    public ResponseEntity<?> getTransactionHistory(
+    public CompletableFuture<ResponseEntity<?>> getTransactionHistory(
             @PathVariable String userId,
             @RequestHeader(value = "X-Session-Token", required = false) String sessionToken) {
 
@@ -123,20 +132,19 @@ public class PaymentController {
         try {
             uuidUserId = UUID.fromString(userId);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid UUID format for userId");
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId"));
         }
 
         if (!validateUserSession(uuidUserId)) {
-            return ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa");
+            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa"));
         }
 
-        List<Payment> history = paymentService.getTransactionHistory(uuidUserId);
-
-        return ResponseEntity.ok(history);
+        return paymentService.getTransactionHistory(uuidUserId)
+                .thenApply(ResponseEntity::ok);
     }
 
     @GetMapping("/history/{userId}/filter")
-    public ResponseEntity<?> getFilteredTransactionHistory(
+    public CompletableFuture<ResponseEntity<?>> getFilteredTransactionHistory(
             @PathVariable String userId,
             @RequestParam(required = false) PaymentTypeEnum paymentType,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDateTime,
@@ -147,16 +155,15 @@ public class PaymentController {
         try {
             uuidUserId = UUID.fromString(userId);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid UUID format for userId");
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId"));
         }
 
         if (!validateUserSession(uuidUserId)) {
-            return ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa");
+            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa"));
         }
 
-        List<Payment> filtered = paymentService.getFilteredTransactionHistory(uuidUserId, paymentType, startDateTime, endDateTime);
-
-        return ResponseEntity.ok(filtered);
+        return paymentService.getFilteredTransactionHistory(uuidUserId, paymentType, startDateTime, endDateTime)
+                .thenApply(ResponseEntity::ok);
     }
 
     // DTOs for requests
@@ -176,7 +183,6 @@ public class PaymentController {
         public void setDescription(String description) { this.description = description; }
     }
 
-    // Updated KostPaymentRequest
     public static class KostPaymentRequest {
         private String userId;
         private String ownerId;
@@ -200,9 +206,6 @@ public class PaymentController {
         public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
     }
 
-    /**
-     * Simple logging of request context
-     */
     private void logRequestContext(String testingMode, String methodName) {
         if ("true".equalsIgnoreCase(testingMode)) {
             System.out.println(methodName + " called from test context");

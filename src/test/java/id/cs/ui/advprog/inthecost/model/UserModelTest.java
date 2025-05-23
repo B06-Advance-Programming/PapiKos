@@ -73,7 +73,7 @@ public class UserModelTest {
 
         assertThat(authorities)
                 .extracting(SimpleGrantedAuthority::getAuthority)
-                .containsExactlyInAnyOrder("USER", "ADMIN");
+                .containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
     }
 
     @Test
