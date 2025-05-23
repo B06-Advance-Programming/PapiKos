@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PengelolaanKostServiceTest {
 
     @Autowired
-    private PengelolaanKostImpl pengelolaanKost;
+    private PengelolaanKost pengelolaanKost;
 
     @Autowired
     private KostRepository kostRepository;

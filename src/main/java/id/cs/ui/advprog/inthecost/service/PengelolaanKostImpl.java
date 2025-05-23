@@ -5,6 +5,7 @@ import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class PengelolaanKostImpl implements PengelolaanKost {
     public void updateKostByID(UUID kostId, Kost kost) {
         Optional<Kost> existingKost = kostRepository.findById(kostId);
 
-        if (!existingKost.isPresent()) {
+        if (existingKost.isEmpty()) {
             throw new ValidationException(ValidationErrorCode.INVALID_ID, "ID Kost tidak ditemukan.");
         }
 
