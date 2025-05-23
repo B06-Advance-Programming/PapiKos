@@ -23,14 +23,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/kupon")
 public class KuponController{
     @Autowired
     private KuponServiceImpl kuponService;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private KostRepository kostRepository;
@@ -39,7 +37,7 @@ public class KuponController{
     public ResponseEntity<List<KuponResponse>> getAllKupon() {
         logCurrentUser();
 
-        List<Kupon> kupons = kuponService.getAllKupon();
+        List<Kupon> kupons = kuponService.getAllKupon().join();
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -56,7 +54,7 @@ public class KuponController{
     public ResponseEntity<KuponResponse> getKuponById(@PathVariable UUID id) {
         logCurrentUser();
         try{
-            Kupon kupon = kuponService.getKuponById(id);
+            Kupon kupon = kuponService.getKuponById(id).join();
             return ResponseEntity.ok(mapToResponse(kupon));
         }catch (RuntimeException e){
             return ResponseEntity.notFound().build();
@@ -88,7 +86,7 @@ public class KuponController{
                     request.getDeskripsi(),
                     request.getQuantity()
             );
-            Kupon updatedKupon = kuponService.getKuponById(id);
+            Kupon updatedKupon = kuponService.getKuponById(id).join();
             return ResponseEntity.ok(mapToResponse(updatedKupon));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -130,7 +128,7 @@ public class KuponController{
     public ResponseEntity<List<KuponResponse>> getKuponsByKost(@PathVariable UUID kostId) {
         logCurrentUser();
 
-        List<Kupon> kupons = kuponService.findByKostId(kostId);
+        List<Kupon> kupons = kuponService.findByKostId(kostId).join();
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

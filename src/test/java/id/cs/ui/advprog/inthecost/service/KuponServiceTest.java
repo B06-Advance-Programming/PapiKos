@@ -147,7 +147,7 @@ public class KuponServiceTest{
 
         when(kuponRepository.findById(id)).thenReturn(Optional.of(selectedKupon));
 
-        Kupon result = kuponService.getKuponById(id);
+        Kupon result = kuponService.getKuponById(id).join();
 
         assertThat(result).isNotNull();
         assertThat(result.getIdKupon()).isEqualTo(id);
@@ -172,7 +172,7 @@ public class KuponServiceTest{
         when(kuponRepository.findByKodeUnik(selectedKupon.getKodeUnik()))
                 .thenReturn(Optional.of(selectedKupon));
 
-        Kupon result = kuponService.getKuponByKodeUnik(selectedKupon.getKodeUnik());
+        Kupon result = kuponService.getKuponByKodeUnik(selectedKupon.getKodeUnik()).join();
         assertThat(result).isEqualTo(selectedKupon);
     }
 
@@ -214,7 +214,7 @@ public class KuponServiceTest{
     void testGetAllKupon() {
         when(kuponRepository.findAll()).thenReturn(kuponList);
 
-        List<Kupon> result = kuponService.getAllKupon();
+        List<Kupon> result = kuponService.getAllKupon().join();
 
         assertThat(result).hasSize(kuponList.size());
         assertThat(result).containsExactlyElementsOf(kuponList);

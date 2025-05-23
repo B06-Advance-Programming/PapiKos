@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -143,7 +144,7 @@ public class KuponControllerTest {
         );
         injectId(dummyUpdate, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
 
-        when(kuponService.getKuponById(dummyUpdate.getIdKupon())).thenReturn(dummyUpdate);
+        when(kuponService.getKuponById(dummyUpdate.getIdKupon())).thenReturn(CompletableFuture.completedFuture(dummyUpdate));
         when(kuponService.updateKupon(dummyUpdate.getIdKupon(), dummyUpdate.getKosPemilik().stream().map(Kost::getKostID).collect(Collectors.toList()), dummyUpdate.getPersentase(), dummyUpdate.getNamaKupon(),
                 dummyUpdate.getMasaBerlaku(), dummyUpdate.getDeskripsi(), dummyUpdate.getQuantity())).thenReturn(dummyUpdate);
 
@@ -173,7 +174,7 @@ public class KuponControllerTest {
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyData);
 
         kuponController.createKupon(createRequest);
-        when(kuponService.getKuponById(dummyData.getIdKupon())).thenReturn(dummyData);
+        when(kuponService.getKuponById(dummyData.getIdKupon())).thenReturn(CompletableFuture.completedFuture(dummyData));
 
         var response = kuponController.deleteKupon(dummyData.getIdKupon());
 
@@ -198,7 +199,7 @@ public class KuponControllerTest {
         when(kuponService.createKupon(any(Kupon.class))).thenReturn(dummyData);
 
         kuponController.createKupon(createRequest);
-        when(kuponService.getKuponById(dummyData.getIdKupon())).thenReturn(dummyData);
+        when(kuponService.getKuponById(dummyData.getIdKupon())).thenReturn(CompletableFuture.completedFuture(dummyData));
 
         var response = kuponController.getKuponById(UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
 
@@ -240,7 +241,9 @@ public class KuponControllerTest {
         injectId(dummyData1, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69ea9"));
 
         kuponController.createKupon(createRequest1);
-        when(kuponService.getAllKupon()).thenReturn(List.of(dummyData, dummyData1));
+        when(kuponService.getAllKupon())
+                .thenReturn(CompletableFuture.completedFuture(List.of(dummyData, dummyData1)));
+
 
         ResponseEntity<List<KuponResponse>> response = kuponController.getAllKupon();
 
