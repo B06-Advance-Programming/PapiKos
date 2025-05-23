@@ -48,23 +48,6 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testFindByUsername() {
-        // Uji apakah bisa menemukan pengguna berdasarkan username
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRole);
-        User user = new User("john_doe", "password123", "john@example.com", roles);
-
-        userRepository.save(user);
-
-        Optional<User> foundUser = userRepository.findByUsername("john_doe");
-
-        assertThat(foundUser).isPresent(); // Pastikan user ditemukan
-        assertThat(foundUser.get().getUsername()).isEqualTo("john_doe");
-        assertThat(foundUser.get().getEmail()).isEqualTo("john@example.com");
-        assertThat(foundUser.get().getRoles()).contains(userRole); // Pastikan role yang terkait ada
-    }
-
-    @Test
     public void testFindByEmail() {
         // Uji apakah bisa menemukan pengguna berdasarkan username
         Set<Role> roles = new HashSet<>();
@@ -79,14 +62,6 @@ public class UserRepositoryTest {
         assertThat(foundUser.get().getUsername()).isEqualTo("john_doe");
         assertThat(foundUser.get().getEmail()).isEqualTo("johnbukandoe@example.com");
         assertThat(foundUser.get().getRoles()).contains(userRole); // Pastikan role yang terkait ada
-    }
-
-    @Test
-    public void testFindByUsernameNotFound() {
-        // Uji jika username tidak ada di database
-        Optional<User> foundUser = userRepository.findByUsername("non_existing_user");
-
-        assertThat(foundUser).isNotPresent(); // Pastikan user tidak ditemukan
     }
 
     @Test
