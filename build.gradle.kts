@@ -60,6 +60,8 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
 }
 
 tasks.register<Test>("unitTest") {

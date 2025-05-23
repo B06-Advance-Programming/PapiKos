@@ -4,17 +4,17 @@ import id.cs.ui.advprog.inthecost.dto.LoginUserDto;
 import id.cs.ui.advprog.inthecost.dto.RegisterUserDto;
 import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationService(
@@ -28,15 +28,16 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
+        log.debug("Registering new user with email: {}", input.getEmail());
         User user = new User();
         user.setUsername(input.getUsername());
         user.setEmail(input.getEmail());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
-
         return userRepository.save(user);
     }
 
     public User authenticate(LoginUserDto input) {
+        log.debug("Authenticating user with email: {}", input.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
@@ -44,7 +45,9 @@ public class AuthenticationService {
                 )
         );
 
-        return userRepository.findByEmail(input.getEmail())
-                .orElseThrow();
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        log.debug("User authenticated successfully: {}", user.getUsername());
+        return user;
     }
 }
