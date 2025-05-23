@@ -2,10 +2,8 @@ package id.cs.ui.advprog.inthecost.repository;
 
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
-import id.cs.ui.advprog.inthecost.model.Role;
 import id.cs.ui.advprog.inthecost.model.User;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,12 +38,13 @@ public class KuponRepositoryTest {
         owner = userRepository.save(owner);
 
         Kost kos = new Kost();
+        kos.setKostID(UUID.fromString("7370b889-e97d-46a2-8e0d-486489777333"));
         kos.setNama("Kos Mawar");
         kos.setAlamat("Jl. Melati No. 2");
         kos.setDeskripsi("Kos nyaman");
         kos.setJumlahKamar(5);
         kos.setHargaPerBulan(1200000);
-        kos.setOwnerId(owner.getId());  // Set the ownerId BEFORE saving
+        kos.setOwnerId(owner.getId());
 
         Kost kos1 = kostRepository.save(kos);
 
@@ -104,8 +103,19 @@ public class KuponRepositoryTest {
         kuponRepository.saveAll(kuponList);
         List<Kupon> result = kuponRepository.findAll();
 
-//        assertThat(result).hasSizeGreaterThanOrEqualTo(2);
-//        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Kupon Semester Baru"))).isTrue();
-//        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Kupon Hari Pahlawan 2025"))).isTrue();
+        assertThat(result).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Kupon Semester Baru"))).isTrue();
+        assertThat(result.stream().anyMatch(k -> k.getDeskripsi().equals("Kupon Hari Pahlawan 2025"))).isTrue();
+    }
+
+    @Test
+    void testFindByKostId(){
+        kuponRepository.saveAll(kuponList);
+        List<Kupon> kupons = kuponRepository.findByKostId(UUID.fromString("7370b889-e97d-46a2-8e0d-486489777333"));
+        Kupon kupon = kupons.getFirst();
+
+        assertThat(kupon).isNotNull();
+        assertThat(kupon.getNamaKupon()).isEqualTo("Kupon Pahlawan");
+        assertThat(kupon.getQuantity()).isEqualTo(6);
     }
 }
