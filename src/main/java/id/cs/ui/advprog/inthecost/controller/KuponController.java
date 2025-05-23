@@ -2,6 +2,7 @@ package id.cs.ui.advprog.inthecost.controller;
 
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
+import id.cs.ui.advprog.inthecost.service.KuponService;
 import id.cs.ui.advprog.inthecost.service.KuponServiceImpl;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/kupon")
 public class KuponController{
     @Autowired
-    private KuponServiceImpl kuponService;
+    private KuponService kuponService;
 
     @Autowired
     private KostRepository kostRepository;
@@ -38,6 +39,8 @@ public class KuponController{
         logCurrentUser();
 
         List<Kupon> kupons = kuponService.getAllKupon().join();
+        System.out.println("[DEBUG] kupons size: " + kupons.size());
+        kupons.forEach(k -> System.out.println("[DEBUG] Kupon: " + k.getNamaKupon()));
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
