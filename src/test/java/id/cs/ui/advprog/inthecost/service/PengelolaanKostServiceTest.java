@@ -55,14 +55,14 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testAddKost() {
+    public void testAddKost() throws Exception {
         User owner = createSampleUser();
 
         List<Kost> allKostBefore = kostRepository.findAll();
         int currentSize = allKostBefore.size();
 
         Kost kost = createSampleKost(owner.getId());
-        pengelolaanKost.addKost(kost);
+        pengelolaanKost.addKost(kost).get(); // tunggu async selesai
 
         List<Kost> allKostAfter = kostRepository.findAll();
         assertEquals(currentSize + 1, allKostAfter.size());
@@ -75,11 +75,11 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testGetAllKost() {
+    public void testGetAllKost() throws Exception {
         User owner1 = createSampleUser();
         User owner2 = createSampleUser();
 
-        List<Kost> kostList = pengelolaanKost.getAllKost();
+        List<Kost> kostList = pengelolaanKost.getAllKost().get(); // tunggu async selsai
         int currentSize = kostList.size();
 
         Kost kost1 = createSampleKost(owner1.getId());
@@ -89,7 +89,7 @@ public class PengelolaanKostServiceTest {
         kostRepository.save(kost1);
         kostRepository.save(kost2);
 
-        kostList = pengelolaanKost.getAllKost();
+        kostList = pengelolaanKost.getAllKost().get(); // tunggu async slesai
         assertEquals(currentSize + 2, kostList.size());
     }
 

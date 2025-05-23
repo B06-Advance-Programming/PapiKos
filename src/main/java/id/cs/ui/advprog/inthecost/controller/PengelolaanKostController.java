@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/pengelolaan_kost")
@@ -18,29 +19,28 @@ public class PengelolaanKostController {
 
     // Create Kost
     @PostMapping
-    public ResponseEntity<String> addKost(@RequestBody Kost kost) {
-        pengelolaanKost.addKost(kost);
-        return ResponseEntity.ok("Kost berhasil ditambahkan.");
+    public CompletableFuture<ResponseEntity<String>> addKost(@RequestBody Kost kost) {
+        return pengelolaanKost.addKost(kost)
+                .thenApply(v -> ResponseEntity.ok("Kost berhasil ditambahkan."));
     }
 
     // Read All Kost
     @GetMapping
-    public ResponseEntity<List<Kost>> getAllKost() {
-        List<Kost> kostList = pengelolaanKost.getAllKost();
-        return ResponseEntity.ok(kostList);
+    public CompletableFuture<ResponseEntity<List<Kost>>> getAllKost() {
+        return pengelolaanKost.getAllKost()
+                .thenApply(ResponseEntity::ok);
     }
 
-    // Update Kost by ID
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateKost(@PathVariable UUID id, @RequestBody Kost kost) {
-        pengelolaanKost.updateKostByID(id, kost);
-        return ResponseEntity.ok("Kost berhasil diperbarui.");
+    public CompletableFuture<ResponseEntity<String>> updateKost(@PathVariable UUID id, @RequestBody Kost kost) {
+        return pengelolaanKost.updateKostByID(id, kost)
+                .thenApply(v -> ResponseEntity.ok("Kost berhasil diperbarui."));
     }
 
-    // Delete Kost by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteKost(@PathVariable UUID id) {
-        pengelolaanKost.deleteKost(id);
-        return ResponseEntity.ok("Kost berhasil dihapus.");
+    public CompletableFuture<ResponseEntity<String>> deleteKost(@PathVariable UUID id) {
+        return pengelolaanKost.deleteKost(id)
+                .thenApply(v -> ResponseEntity.ok("Kost berhasil dihapus."));
     }
+
 }
