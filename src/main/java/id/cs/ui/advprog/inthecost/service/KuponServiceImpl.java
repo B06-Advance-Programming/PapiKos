@@ -94,4 +94,9 @@ public class KuponServiceImpl implements KuponService {
     public List<Kupon> getAllKupon() {
         return kuponRepository.findAll();
     }
+
+    @Override
+    public List<Kupon> findByKostId(UUID kostId) {
+        return kuponRepository.findByKostId(kostId);
+    }
 }

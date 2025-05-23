@@ -126,6 +126,22 @@ public class KuponController{
         return ResponseEntity.ok(mapToResponse(savedKupon));
     }
 
+    @GetMapping("/kost/{kostId}")
+    public ResponseEntity<List<KuponResponse>> getKuponsByKost(@PathVariable UUID kostId) {
+        logCurrentUser();
+
+        List<Kupon> kupons = kuponService.findByKostId(kostId);
+        if (kupons.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        List<KuponResponse> responses = kupons.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
+    }
+
     private KuponResponse mapToResponse(Kupon kupon) {
         KuponResponse response = new KuponResponse();
         response.setIdKupon(kupon.getIdKupon());

@@ -28,4 +28,6 @@ public interface KuponService {
     void deleteKupon(UUID id);
 
     List<Kupon> getAllKupon();
+
+    List<Kupon> findByKostId(UUID kostId);
 }
