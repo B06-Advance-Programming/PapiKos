@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class PenyewaanKosServiceImpl implements PenyewaanKosService {
@@ -43,8 +44,9 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
 
     @Async
     @Override
-    public void delete(UUID id) {
+    public CompletableFuture<Void> delete(UUID id) {
         repository.deleteById(id);
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
