@@ -1,20 +1,19 @@
 package id.cs.ui.advprog.inthecost.model;
+
 import id.cs.ui.advprog.inthecost.exception.*;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import id.cs.ui.advprog.inthecost.observer.Observer;
+import id.cs.ui.advprog.inthecost.observer.Subject;
+import jakarta.persistence.*;
 import lombok.Getter;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Entity
 @Table(name = "kost")
-public class Kost {
+public class Kost implements Subject {
     @Id
     @Column(name = "kost_id")
     private UUID kostID;
@@ -36,6 +35,12 @@ public class Kost {
 
     @Column(name = "owner_id")
     private UUID ownerId;
+
+    @Transient // Mark as non-persistent
+    private final Set<Observer> observers = new HashSet<>();
+
+    @Transient
+    private boolean enableObservers = true; // Flag to enable/disable observer notifications
 
     // manual set each times
     public Kost() {
@@ -63,7 +68,7 @@ public class Kost {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
         }
 
-        kostID = UUID.randomUUID();
+        this.kostID = UUID.randomUUID();
         this.nama = nama;
         this.alamat = alamat;
         this.deskripsi = deskripsi;
@@ -94,6 +99,11 @@ public class Kost {
         if (hargaPerBulan <= 0) {
             throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
         }
+
+        this.kostID = UUID.randomUUID();
+        this.nama = nama;
+        this.alamat = alamat;
+        this.deskripsi = deskripsi;
 
         kostID = UUID.randomUUID();
         this.nama = nama;
@@ -127,7 +137,13 @@ public class Kost {
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
         }
+
+        int oldValue = this.jumlahKamar;
         this.jumlahKamar = jumlahKamar;
+
+        if (enableObservers && oldValue == 0 && jumlahKamar > 0) {
+            notifyObservers();
+        }
     }
     public void setHargaPerBulan(int hargaPerBulan) {
         if (hargaPerBulan <= 0) {
@@ -145,5 +161,32 @@ public class Kost {
 
     public void setKostID(UUID kostID) {
         this.kostID = kostID;
+    }
+
+    @Override
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(this);
+        }
+    }
+
+    // Disable observer notifications (useful for tests)
+    public void disableObservers() {
+        this.enableObservers = false;
+    }
+
+    // Enable observer notifications
+    public void enableObservers() {
+        this.enableObservers = true;
     }
 }

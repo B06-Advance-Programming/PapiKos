@@ -28,6 +28,7 @@ repositories {
 
 val junitJupiterVersion = "5.9.1"
 val mockitoVersion = "5.2.0"
+val jjwtVersion = "0.11.5"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
@@ -52,11 +53,17 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
 
-    // untuk user
+//    // untuk user
     implementation("org.springframework.boot:spring-boot-starter-security")
 
     // Spring Session JDBC
     implementation("org.springframework.session:spring-session-jdbc")
+
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
 }
 
 tasks.register<Test>("unitTest") {
