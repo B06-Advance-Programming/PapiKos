@@ -1,4 +1,4 @@
-  name: Unit Test
+name: Unit Test
 on:
     push:
       branches: [ staging, auth, kupon, payment, pengelolaan_kos, penyewaan_kos, wishlist]
