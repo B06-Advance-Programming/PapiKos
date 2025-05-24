@@ -235,7 +235,7 @@ public class PaymentController {
         List<PenyewaanKosDTO> dtos = result.stream()
                 .map(pk -> new PenyewaanKosDTO(
                         pk.getId(),
-                        pk.getNamaLengkap(),
+                        pk.getNamaLengkap() != null ? pk.getNamaLengkap() : "",
                         pk.getNomorTelepon(),
                         pk.getTanggalCheckIn(),
                         pk.getDurasiBulan(),
