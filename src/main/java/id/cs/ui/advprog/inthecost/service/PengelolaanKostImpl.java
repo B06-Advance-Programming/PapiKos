@@ -38,6 +38,12 @@ public class PengelolaanKostImpl implements PengelolaanKost {
         return CompletableFuture.completedFuture(kostRepository.findAll());
     }
 
+    @Override
+    public CompletableFuture<List<Kost>> getKostByOwnerId(UUID ownerId) {
+        List<Kost> kostList = kostRepository.findByOwnerId(ownerId);
+        return CompletableFuture.completedFuture(kostList);
+    }
+
     @Override @Async
     public CompletableFuture<Void> updateKostByID(UUID kostId, Kost kost) {
         try {

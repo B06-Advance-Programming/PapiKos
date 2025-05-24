@@ -10,6 +10,7 @@ public interface PengelolaanKost {
     CompletableFuture<Void> addKost(Kost kost);
     // Cek Kost
     CompletableFuture<List<Kost>> getAllKost();
+    CompletableFuture<List<Kost>> getKostByOwnerId(UUID id);
     CompletableFuture<Void> updateKostByID(UUID kostId, Kost kost);
     CompletableFuture<Void> deleteKost(UUID kostId);
 }
