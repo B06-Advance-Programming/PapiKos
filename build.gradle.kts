@@ -76,6 +76,7 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.test{
+    systemProperty("spring.profiles.active", "test")
     finalizedBy(tasks.jacocoTestReport)
 }
 

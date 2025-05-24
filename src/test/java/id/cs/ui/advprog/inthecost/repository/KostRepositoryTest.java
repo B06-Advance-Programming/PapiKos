@@ -34,7 +34,7 @@ class KostRepositoryTest {
         HashSet roles = new HashSet<>();
 
         // Create a User and save to DB to satisfy FK constraint
-        owner = new User("testuser", "password", "testuser@example.com", roles);
+        owner = new User("testuser3", "password", "testuser@example.com", roles);
         owner = userRepository.save(owner);
         ownerId = owner.getId();
 

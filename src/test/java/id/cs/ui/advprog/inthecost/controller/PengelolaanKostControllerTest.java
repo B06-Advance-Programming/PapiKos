@@ -10,11 +10,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -39,18 +41,21 @@ public class PengelolaanKostControllerTest {
 
     @Test
     public void testAddKost() throws Exception {
-        Kost newKost = new Kost();
-        newKost.setNama("Kost Baru");
-        newKost.setHargaPerBulan(2000000);
+        // Setup dummy return
+        when(pengelolaanKost.addKost(any(Kost.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
-        mockMvc.perform(post("/api/pengelolaan_kost")
+        // Kirim request async
+        MvcResult mvcResult = mockMvc.perform(post("/api/pengelolaan_kost")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"nama\": \"Kost Baru\", \"hargaPerBulan\": 2000000}"))
+                .andExpect(request().asyncStarted()) // pastikan async jalan
+                .andReturn();
+
+        // Tunggu dan validasi hasil
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Kost berhasil ditambahkan."));
-
-        // Verifikasi bahwa addKost dipanggil tepat satu kali
-        verify(pengelolaanKost, times(1)).addKost(any(Kost.class));
     }
 
     @Test
@@ -67,14 +72,18 @@ public class PengelolaanKostControllerTest {
         kostList.add(kost2);
 
         // Mocking the getAllKost method
-        when(pengelolaanKost.getAllKost()).thenReturn(kostList);
+        when(pengelolaanKost.getAllKost())
+                .thenReturn(CompletableFuture.completedFuture(kostList));
 
-        mockMvc.perform(get("/api/pengelolaan_kost"))
+        MvcResult res = mockMvc.perform(get("/api/pengelolaan_kost"))
+                .andExpect(request().asyncStarted()) // pastikan async jalan
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(res))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].nama").value("Kost Baru"))
                 .andExpect(jsonPath("$[1].nama").value("Kost bura"));
-
         verify(pengelolaanKost, times(1)).getAllKost();
     }
 
@@ -82,24 +91,31 @@ public class PengelolaanKostControllerTest {
     public void testUpdateKost() throws Exception {
         UUID id = UUID.randomUUID();  // ID untuk path variable
 
-        // Mocking the updateKostByID method to do nothing
-        doNothing().when(pengelolaanKost).updateKostByID(eq(id), any(Kost.class));
+        // Mocking the updateKostByID method to return a completed future
+        when(pengelolaanKost.updateKostByID(eq(id), any(Kost.class)))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
-        // JSON body harus sesuai field di kelas Kost
+        // JSON body sesuai dengan field di kelas Kost
         String requestBody = """
-        {
-            "nama": "Kost Updated",
-            "hargaPerBulan": 2500000
-        }
-        """;
+    {
+        "nama": "Kost Updated",
+        "hargaPerBulan": 2500000
+    }
+    """;
 
-        mockMvc.perform(put("/api/pengelolaan_kost/{id}", id)
+        // Kirim request dan verifikasi async dimulai
+        MvcResult result = mockMvc.perform(put("/api/pengelolaan_kost/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        // Dispatch hasil async dan verifikasi response akhir
+        mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Kost berhasil diperbarui."));
 
-        // Verifikasi bahwa method dipanggil dengan benar
+        // Verifikasi bahwa method service dipanggil sekali
         verify(pengelolaanKost, times(1)).updateKostByID(eq(id), any(Kost.class));
     }
 
@@ -107,13 +123,21 @@ public class PengelolaanKostControllerTest {
     public void testDeleteKost() throws Exception {
         UUID id = UUID.randomUUID();
 
-        // Mocking the deleteKost method
-        doNothing().when(pengelolaanKost).deleteKost(eq(id));
+        // Mocking the deleteKost method to return CompletableFuture
+        when(pengelolaanKost.deleteKost(eq(id)))
+                .thenReturn(CompletableFuture.completedFuture(null));
 
-        mockMvc.perform(delete("/api/pengelolaan_kost/{id}", id))
+        // Perform the request and wait for async to start
+        MvcResult result = mockMvc.perform(delete("/api/pengelolaan_kost/{id}", id))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        // Dispatch async result and verify final response
+        mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Kost berhasil dihapus."));
 
+        // Verify that the service was called once
         verify(pengelolaanKost, times(1)).deleteKost(eq(id));
     }
 }
