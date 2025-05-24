@@ -4,14 +4,13 @@ import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
 import id.cs.ui.advprog.inthecost.model.Payment;
 import id.cs.ui.advprog.inthecost.service.PaymentService;
 import id.cs.ui.advprog.inthecost.service.PenyewaanKosService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -46,11 +45,11 @@ public class PaymentController {
         return true;
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PENYEWA', 'PEMILIK')")
     @PostMapping("/topup")
     public CompletableFuture<ResponseEntity<?>> topUp(
             @RequestBody TopUpRequest req,
             @RequestHeader(value = "X-Testing-Mode", required = false) String testingMode) {
-
         logRequestContext(testingMode, "topUp");
 
         UUID userId;
@@ -68,6 +67,7 @@ public class PaymentController {
                 .thenApply(ResponseEntity::ok);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PENYEWA', 'PEMILIK')")
     @PostMapping("/kost")
     public CompletableFuture<ResponseEntity<?>> kostPayment(
             @RequestBody KostPaymentRequest req,
@@ -123,6 +123,7 @@ public class PaymentController {
         });
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PENYEWA', 'PEMILIK')")
     @GetMapping("/history/{userId}")
     public CompletableFuture<ResponseEntity<?>> getTransactionHistory(
             @PathVariable String userId,
@@ -143,6 +144,7 @@ public class PaymentController {
                 .thenApply(ResponseEntity::ok);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'PENYEWA', 'PEMILIK')")
     @GetMapping("/history/{userId}/filter")
     public CompletableFuture<ResponseEntity<?>> getFilteredTransactionHistory(
             @PathVariable String userId,

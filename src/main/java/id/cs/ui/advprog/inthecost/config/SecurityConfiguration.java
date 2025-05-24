@@ -35,7 +35,7 @@ public class SecurityConfiguration {
         http.cors().and().csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/**","/actuator/**")
+                .requestMatchers("/auth/**","/actuator/**", "/api/payments/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
