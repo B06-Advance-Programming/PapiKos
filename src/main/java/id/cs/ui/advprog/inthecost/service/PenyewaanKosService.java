@@ -13,4 +13,5 @@ public interface PenyewaanKosService {
     PenyewaanKos findById(UUID id);
     List<PenyewaanKos> findAll();
     boolean hasPendingPenyewaan(UUID userId, UUID kostId);
+    List<PenyewaanKos> getAllByUserIdAndStatus(UUID userId, StatusPenyewaan status);
 }

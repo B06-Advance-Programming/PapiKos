@@ -15,25 +15,25 @@ import java.util.UUID;
 @Table(name = "kost")
 public class Kost implements Subject {
     @Id
-    @Column(name = "kost_id")
+    @Column(name = "kost_id", nullable = false)
     private UUID kostID;
 
-    @Column(name = "nama")
+    @Column(name = "nama", nullable = false)
     private String nama;
 
-    @Column(name = "alamat")
+    @Column(name = "alamat", nullable = false)
     private String alamat;
 
-    @Column(name = "deskripsi")
+    @Column(name = "deskripsi", nullable = false)
     private String deskripsi;
 
-    @Column(name = "jumlah_kamar")
+    @Column(name = "jumlah_kamar", nullable = false)
     private int jumlahKamar;
 
-    @Column(name = "harga_per_bulan")
+    @Column(name = "harga_per_bulan", nullable = false)
     private int hargaPerBulan;
 
-    @Column(name = "owner_id")
+    @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 
     @Transient // Mark as non-persistent

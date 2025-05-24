@@ -9,4 +9,5 @@ import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 
 public interface PenyewaanKosRepository extends JpaRepository<PenyewaanKos, UUID> {
     List<PenyewaanKos> findByKos_KostIDAndUserIdAndStatus(UUID kostId, UUID userId, StatusPenyewaan status);
+    List<PenyewaanKos> findByUserIdAndStatus(UUID userId, StatusPenyewaan status);
 }
