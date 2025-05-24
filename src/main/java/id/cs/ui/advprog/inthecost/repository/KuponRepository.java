@@ -14,7 +14,9 @@ import java.util.UUID;
 public interface KuponRepository extends JpaRepository<Kupon, UUID> {
 
     Optional<Kupon> findByKodeUnik(String kodeUnik);
-    @Query("SELECT k FROM Kupon k JOIN k.kosPemilik kp WHERE kp.kostID = :kostId")
+
+    @Query("SELECT k FROM Kupon k JOIN FETCH k.kosPemilik kp WHERE kp.kostID = :kostId")
     List<Kupon> findByKostId(@Param("kostId") UUID kostId);
+
 
 }
