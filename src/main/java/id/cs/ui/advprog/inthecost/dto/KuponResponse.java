@@ -14,7 +14,7 @@ public class KuponResponse {
     private LocalDate masaBerlaku;
     private String deskripsi;
     private String statusKupon;
-    private List<String> kosPemilik;
+    private List<UUID> kosPemilik;
     private int quantity;
 
     public UUID getIdKupon() { return idKupon; }
@@ -38,8 +38,8 @@ public class KuponResponse {
     public String getStatusKupon() { return statusKupon; }
     public void setStatusKupon(String statusKupon) { this.statusKupon = statusKupon; }
 
-    public List<String> getKosPemilik() { return kosPemilik; }
-    public void setKosPemilik(List<String> kosPemilik) { this.kosPemilik = kosPemilik; }
+    public List<UUID> getKosPemilik() { return kosPemilik; }
+    public void setKosPemilik(List<UUID> kosPemilik) { this.kosPemilik = kosPemilik; }
 
     public int getQuantity(){return quantity; }
     public void setQuantity(int quantity){this.quantity = quantity;}

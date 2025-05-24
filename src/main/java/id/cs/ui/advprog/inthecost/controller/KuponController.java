@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/kupon")
 public class KuponController{
@@ -65,6 +65,7 @@ public class KuponController{
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<Void> deleteKupon(@PathVariable UUID id) {
         try {
             kuponService.getKuponById(id);
@@ -77,6 +78,7 @@ public class KuponController{
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<KuponResponse> updateKupon(@PathVariable UUID id, @RequestBody KuponRequest request) {
         logCurrentUser();
         try {
@@ -101,6 +103,7 @@ public class KuponController{
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<KuponResponse> createKupon(@RequestBody KuponRequest request) {
         logCurrentUser();
 
@@ -155,7 +158,7 @@ public class KuponController{
         response.setQuantity(kupon.getQuantity());
         response.setKosPemilik(
                 kupon.getKosPemilik().stream()
-                        .map(Kost::getNama)
+                        .map(Kost::getKostID)
                         .toList()
         );
         return response;
