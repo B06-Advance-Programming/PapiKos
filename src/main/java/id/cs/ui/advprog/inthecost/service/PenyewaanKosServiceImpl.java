@@ -61,4 +61,9 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         List<PenyewaanKos> pendingList = repository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
         return !pendingList.isEmpty();
     }
+
+    @Override
+    public List<PenyewaanKos> getAllByUserIdAndStatus(UUID userId, StatusPenyewaan status) {
+        return repository.findByUserIdAndStatus(userId, status);
+    }
 }

@@ -1,6 +1,7 @@
 package id.cs.ui.advprog.inthecost.controller;
 
 import id.cs.ui.advprog.inthecost.enums.PaymentTypeEnum;
+import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.Payment;
 import id.cs.ui.advprog.inthecost.service.PaymentService;
 import id.cs.ui.advprog.inthecost.service.PenyewaanKosService;
@@ -9,10 +10,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -215,4 +219,63 @@ public class PaymentController {
             System.out.println(methodName + " called from normal runtime");
         }
     }
+
+    @PreAuthorize("hasAnyRole('PENYEWA')")
+    @GetMapping("/penyewaan/diajukan")
+    public ResponseEntity<?> getDiajukanPenyewaanKosByUser(
+            @RequestParam("userId") String userIdStr) {
+        UUID userId;
+        try {
+            userId = UUID.fromString(userIdStr);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid UUID for userId");
+        }
+
+        List<PenyewaanKos> result = penyewaanKosService.getAllByUserIdAndStatus(userId, StatusPenyewaan.DIAJUKAN);
+        List<PenyewaanKosDTO> dtos = result.stream()
+                .map(pk -> new PenyewaanKosDTO(
+                        pk.getId(),
+                        pk.getNamaLengkap(),
+                        pk.getNomorTelepon(),
+                        pk.getTanggalCheckIn(),
+                        pk.getDurasiBulan(),
+                        pk.getKos() != null ? pk.getKos().getKostID() : null,
+                        pk.getStatus(),
+                        pk.getUserId()
+                ))
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    public static class PenyewaanKosDTO {
+        private UUID id;
+        private String namaLengkap;
+        private String nomorTelepon;
+        private LocalDate tanggalCheckIn;
+        private int durasiBulan;
+        private UUID kostId;
+        private StatusPenyewaan status;
+        private UUID userId;
+
+        public PenyewaanKosDTO(UUID id, String namaLengkap, String nomorTelepon, LocalDate tanggalCheckIn, int durasiBulan, UUID kostId, StatusPenyewaan status, UUID userId) {
+            this.id = id;
+            this.namaLengkap = namaLengkap;
+            this.nomorTelepon = nomorTelepon;
+            this.tanggalCheckIn = tanggalCheckIn;
+            this.durasiBulan = durasiBulan;
+            this.kostId = kostId;
+            this.status = status;
+            this.userId = userId;
+        }
+
+        public UUID getId() { return id; }
+        public String getNamaLengkap() { return namaLengkap; }
+        public String getNomorTelepon() { return nomorTelepon; }
+        public LocalDate getTanggalCheckIn() { return tanggalCheckIn; }
+        public int getDurasiBulan() { return durasiBulan; }
+        public UUID getKostId() { return kostId; }
+        public StatusPenyewaan getStatus() { return status; }
+        public UUID getUserId() { return userId; }
+    }
+
 }
