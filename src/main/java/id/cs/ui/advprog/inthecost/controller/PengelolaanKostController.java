@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import java.util.concurrent.CompletableFuture;
 
+
 @RestController
 @PreAuthorize("isAuthenticated()")
 @RequestMapping("/api/pengelolaan_kost")
