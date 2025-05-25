@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 @Repository
 @Profile("!prod")  // Active when NOT prod (e.g. dev, test)
@@ -45,21 +44,21 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public List<Payment> findByUserId(UUID userId) {
         return payments.values().stream()
                 .filter(payment -> Objects.equals(payment.getUserId(), userId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<Payment> findByOwnerId(UUID ownerId) {
         return payments.values().stream()
                 .filter(payment -> Objects.equals(payment.getOwnerId(), ownerId))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<Payment> findByPaymentType(PaymentTypeEnum paymentType) {
         return payments.values().stream()
                 .filter(payment -> payment.getPaymentType() == paymentType)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -70,6 +69,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                     return (paymentDateTime.isEqual(startDateTime) || paymentDateTime.isAfter(startDateTime))
                             && (paymentDateTime.isEqual(endDateTime) || paymentDateTime.isBefore(endDateTime));
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }
