@@ -25,12 +25,17 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class NotificationController {
 
+    // Constants for repeated string literals
+    private static final String STATUS_KEY = "status";
+    private static final String MESSAGE_KEY = "message";
+    private static final String SUCCESS_STATUS = "success";
+
     private final NotificationService notificationService;
     private final KostRepository kostRepository;
 
     /**
      * Get all inbox notifications for a specific user
-     * 
+     *
      * @param userId The ID of the user
      * @return List of inbox notifications
      */
@@ -45,10 +50,10 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving notifications: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Count notifications for a user
-     * 
+     *
      * @param userId The ID of the user
      * @return Count of notifications
      */
@@ -56,10 +61,10 @@ public class NotificationController {
     public ResponseEntity<Map<String, Long>> getNotificationCount(@PathVariable String userId) {
         try {
             long count = notificationService.countNotifications(userId);
-            
+
             Map<String, Long> response = new HashMap<>();
             response.put("count", count);
-            
+
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID format: " + e.getMessage(), e);
@@ -67,27 +72,27 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error counting notifications: " + e.getMessage(), e);
         }
     }
-      /**
+    /**
      * Manually trigger notifications for a kost
      * Useful for testing or administrative purposes
-     * 
+     *
      * @param kostId The ID of the kost to notify about
      * @return Success message
-     */    
+     */
     @PostMapping("/trigger/{kostId}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Map<String, String>> triggerNotification(@PathVariable String kostId) {
         try {
             UUID kostUUID = UUID.fromString(kostId);
             Kost kost = kostRepository.findById(kostUUID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kost not found with ID: " + kostId));
-            
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kost not found with ID: " + kostId));
+
             notificationService.notifyUsers(kost);
-            
+
             Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Notifications sent for kost: " + kost.getNama());
-            
+            response.put(STATUS_KEY, SUCCESS_STATUS);
+            response.put(MESSAGE_KEY, "Notifications sent for kost: " + kost.getNama());
+
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid kost ID format: " + e.getMessage(), e);
@@ -95,7 +100,7 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error triggering notifications: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Get a specific notification by ID
      *     * @param notificationId The ID of the notification
@@ -112,9 +117,9 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving notification: " + e.getMessage(), e);
         }
     }
-      /**
+    /**
      * Create a custom notification for a user
-     * 
+     *
      * @param userId The ID of the user
      * @param request The request body containing the notification message
      * @return The created notification
@@ -122,25 +127,26 @@ public class NotificationController {
     @PostMapping("/create/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<InboxNotification> createNotification(
-            @PathVariable String userId, 
+            @PathVariable String userId,
             @RequestBody Map<String, String> request) {
         try {
-            String message = request.get("message");
+            String message = request.get(MESSAGE_KEY);
             if (message == null || message.trim().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
             }
-            
-            InboxNotification notification = notificationService.createNotification(userId, message);            return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+
+            InboxNotification notification = notificationService.createNotification(userId, message);
+            return ResponseEntity.status(HttpStatus.CREATED).body(notification);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating notification: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Create a notification for all users in the system
-     * 
+     *
      * @param request The request body containing the notification message
      * @return Information about the created notifications
      */
@@ -148,18 +154,18 @@ public class NotificationController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> broadcastNotification(@RequestBody Map<String, String> request) {
         try {
-            String message = request.get("message");
+            String message = request.get(MESSAGE_KEY);
             if (message == null || message.trim().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
             }
-            
+
             int notificationCount = notificationService.createNotificationForAllUsers(message);
-            
+
             Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Notification broadcast sent successfully");
+            response.put(STATUS_KEY, SUCCESS_STATUS);
+            response.put(MESSAGE_KEY, "Notification broadcast sent successfully");
             response.put("recipientCount", notificationCount);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -167,10 +173,10 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error broadcasting notification: " + e.getMessage(), e);
         }
     }
-    
+
     /**
      * Delete a notification by ID
-     * 
+     *
      * @param notificationId The ID of the notification to delete
      * @return Success message
      */
@@ -179,11 +185,11 @@ public class NotificationController {
     public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable UUID notificationId) {
         try {
             notificationService.deleteNotification(notificationId);
-            
+
             Map<String, String> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "Notification deleted successfully");
-            
+            response.put(STATUS_KEY, SUCCESS_STATUS);
+            response.put(MESSAGE_KEY, "Notification deleted successfully");
+
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
@@ -191,15 +197,15 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting notification: " + e.getMessage(), e);
         }
     }
-      /**
+    /**
      * Handle invalid notification ID format
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> response = new HashMap<>();
-        response.put("status", "error");
-        response.put("message", "Invalid notification ID format");
-        
+        response.put(STATUS_KEY, "error");
+        response.put(MESSAGE_KEY, "Invalid notification ID format");
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
