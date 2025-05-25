@@ -36,24 +36,6 @@ public class PaymentController {
         this.penyewaanKosService = penyewaanKosService;
     }
 
-    // Mock validation of user session
-    private boolean validateUserSession(UUID userId) {
-        logger.info("Validate session for userId={} (mockup always true)", userId);
-        return true;
-    }
-
-    // Mock check if kost already paid for user
-    private boolean isKostAlreadyPaid(UUID userId, UUID kostId) {
-        logger.info("Checking if kost is already paid userId={}, kostId={} (mockup false)", userId, kostId);
-        return false;
-    }
-
-    // Mock user permission to pay for kost
-    private boolean isUserAllowedToPayKost(UUID userId, UUID kostId) {
-        logger.info("Validating kost ownership userId={}, kostId={} (mockup true)", userId, kostId);
-        return true;
-    }
-
     @PreAuthorize("hasAnyRole('USER', 'PENYEWA', 'PEMILIK')")
     @PostMapping("/topup")
     public CompletableFuture<ResponseEntity<?>> topUp(
@@ -66,10 +48,6 @@ public class PaymentController {
             userId = UUID.fromString(req.getUserId());
         } catch (IllegalArgumentException e) {
             return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(INVALID_UUID_FORMAT_FOR_USERID));
-        }
-
-        if (!validateUserSession(userId)) {
-            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Invalid user session"));
         }
 
         return paymentService.recordTopUpPayment(userId, req.getAmount(), req.getDescription())
@@ -93,20 +71,8 @@ public class PaymentController {
             return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId, ownerId, or kostId"));
         }
 
-        if (!validateUserSession(userId)) {
-            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Invalid user session"));
-        }
-
-        if (!isUserAllowedToPayKost(userId, kostId)) {
-            return CompletableFuture.completedFuture(ResponseEntity.status(403).body("User tidak diizinkan membayar kost ini"));
-        }
-
         if (!penyewaanKosService.hasPendingPenyewaan(userId, kostId)) {
             return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini"));
-        }
-
-        if (isKostAlreadyPaid(userId, kostId)) {
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Kost sudah dibayar untuk periode ini"));
         }
 
         double amount;
@@ -145,10 +111,6 @@ public class PaymentController {
             return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(INVALID_UUID_FORMAT_FOR_USERID));
         }
 
-        if (!validateUserSession(uuidUserId)) {
-            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa"));
-        }
-
         return paymentService.getTransactionHistory(uuidUserId)
                 .thenApply(ResponseEntity::ok);
     }
@@ -167,10 +129,6 @@ public class PaymentController {
             uuidUserId = UUID.fromString(userId);
         } catch (IllegalArgumentException e) {
             return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(INVALID_UUID_FORMAT_FOR_USERID));
-        }
-
-        if (!validateUserSession(uuidUserId)) {
-            return CompletableFuture.completedFuture(ResponseEntity.status(401).body("Session tidak valid atau kedaluwarsa"));
         }
 
         return paymentService.getFilteredTransactionHistory(uuidUserId, paymentType, startDateTime, endDateTime)

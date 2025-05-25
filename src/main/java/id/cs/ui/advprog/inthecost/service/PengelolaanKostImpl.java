@@ -17,8 +17,12 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class PengelolaanKostImpl implements PengelolaanKost {
 
+    private final KostRepository kostRepository;
+
     @Autowired
-    private KostRepository kostRepository;
+    public PengelolaanKostImpl(KostRepository kostRepository) {
+        this.kostRepository = kostRepository;
+    }
 
     @Override
     public CompletableFuture<Void> addKost(Kost kost) {
