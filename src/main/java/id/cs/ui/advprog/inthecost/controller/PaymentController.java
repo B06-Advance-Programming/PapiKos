@@ -220,6 +220,7 @@ public class PaymentController {
         }
     }
 
+
     @PreAuthorize("hasAnyRole('PENYEWA')")
     @GetMapping("/penyewaan/diajukan")
     public ResponseEntity<?> getDiajukanPenyewaanKosByUser(
@@ -240,6 +241,7 @@ public class PaymentController {
                         pk.getTanggalCheckIn(),
                         pk.getDurasiBulan(),
                         pk.getKos() != null ? pk.getKos().getKostID() : null,
+                        pk.getKos() != null ? pk.getKos().getOwnerId() : null,  // add ownerId here
                         pk.getStatus(),
                         pk.getUserId()
                 ))
@@ -254,16 +256,18 @@ public class PaymentController {
         private LocalDate tanggalCheckIn;
         private int durasiBulan;
         private UUID kostId;
+        private UUID ownerId;  // new field
         private StatusPenyewaan status;
         private UUID userId;
 
-        public PenyewaanKosDTO(UUID id, String namaLengkap, String nomorTelepon, LocalDate tanggalCheckIn, int durasiBulan, UUID kostId, StatusPenyewaan status, UUID userId) {
+        public PenyewaanKosDTO(UUID id, String namaLengkap, String nomorTelepon, LocalDate tanggalCheckIn, int durasiBulan, UUID kostId, UUID ownerId, StatusPenyewaan status, UUID userId) {
             this.id = id;
             this.namaLengkap = namaLengkap;
             this.nomorTelepon = nomorTelepon;
             this.tanggalCheckIn = tanggalCheckIn;
             this.durasiBulan = durasiBulan;
             this.kostId = kostId;
+            this.ownerId = ownerId;
             this.status = status;
             this.userId = userId;
         }
@@ -274,6 +278,7 @@ public class PaymentController {
         public LocalDate getTanggalCheckIn() { return tanggalCheckIn; }
         public int getDurasiBulan() { return durasiBulan; }
         public UUID getKostId() { return kostId; }
+        public UUID getOwnerId() { return ownerId; }  // getter for ownerId
         public StatusPenyewaan getStatus() { return status; }
         public UUID getUserId() { return userId; }
     }
