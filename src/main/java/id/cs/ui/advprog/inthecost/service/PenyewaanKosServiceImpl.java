@@ -27,6 +27,15 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         if (penyewaan.getId() == null) {
             penyewaan.setId(UUID.randomUUID());
         }
+
+        // Ambil semua penyewaan lain dengan userId + kostId + status diajukan
+        List<PenyewaanKos> existingList = repository.findByKos_KostIDAndUserIdAndStatus(penyewaan.getKos().getKostID(), penyewaan.getUserId(), StatusPenyewaan.DIAJUKAN);
+
+        for (PenyewaanKos existing : existingList) {
+            existing.setStatus(StatusPenyewaan.DIBATALKAN);
+            repository.save(existing);
+        }
+
         penyewaan.setStatus(StatusPenyewaan.DIAJUKAN);
         return repository.save(penyewaan);
     }
@@ -36,7 +45,7 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         PenyewaanKos existing = findById(penyewaan.getId());
 
         if (existing.getStatus() != StatusPenyewaan.DIAJUKAN) {
-            throw new IllegalStateException("Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN.");
+            throw new IllegalStateException(String.format("Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN. status sekarang '%s'", penyewaan.getStatus()));
         }
 
         return repository.save(penyewaan);
