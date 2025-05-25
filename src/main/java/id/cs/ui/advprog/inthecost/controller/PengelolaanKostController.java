@@ -2,22 +2,23 @@ package id.cs.ui.advprog.inthecost.controller;
 
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.service.PengelolaanKost;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/pengelolaan_kost")
 public class PengelolaanKostController {
 
-    @Autowired
-    private PengelolaanKost pengelolaanKost;
+    private final PengelolaanKost pengelolaanKost;
+
+    public PengelolaanKostController(PengelolaanKost pengelolaanKost) {
+        this.pengelolaanKost = pengelolaanKost;
+    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('PEMILIK', 'ADMIN')")
