@@ -2,11 +2,12 @@ package id.cs.ui.advprog.inthecost.repository;
 
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
+import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 
-@Repository
 public interface PenyewaanKosRepository extends JpaRepository<PenyewaanKos, UUID> {
-    // Bisa tambahkan custom query jika diperlukan nanti
+    List<PenyewaanKos> findByKos_KostIDAndUserIdAndStatus(UUID kostId, UUID userId, StatusPenyewaan status);
+    List<PenyewaanKos> findByUserIdAndStatus(UUID userId, StatusPenyewaan status);
 }

@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("java")
+    id("org.sonarqube") version "6.0.1.5171"
 }
 
 group = "id.cs.ui.advprog"
@@ -27,10 +28,13 @@ repositories {
 
 val junitJupiterVersion = "5.9.1"
 val mockitoVersion = "5.2.0"
+val jjwtVersion = "0.11.5"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-prometheus")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -49,11 +53,17 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
 
-    // untuk user
+//    // untuk user
     implementation("org.springframework.boot:spring-boot-starter-security")
 
     // Spring Session JDBC
     implementation("org.springframework.session:spring-session-jdbc")
+
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
 }
 
 tasks.register<Test>("unitTest") {
@@ -66,6 +76,7 @@ tasks.withType<Test>().configureEach {
 }
 
 tasks.test{
+    systemProperty("spring.profiles.active", "test")
     finalizedBy(tasks.jacocoTestReport)
 }
 
@@ -79,4 +90,20 @@ tasks.bootJar {
 
 tasks.jar {
     enabled = false
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "InTheKost")
+        property("sonar.projectName", "InTheKost")
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
 }

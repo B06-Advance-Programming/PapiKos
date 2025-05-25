@@ -1,8 +1,5 @@
 package id.cs.ui.advprog.inthecost.enums;
 
-import id.cs.ui.advprog.inthecost.model.Kupon;
-
-import java.time.LocalDate;
 import lombok.Getter;
 
 @Getter

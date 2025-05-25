@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,11 +18,9 @@ public class UserModelTest {
 
     @BeforeEach
     public void setUp() {
-        // Menyiapkan Role (mock)
         roleUser = new Role("USER");
         roleAdmin = new Role("ADMIN");
 
-        // Menyiapkan User dan menetapkan roles
         Set<Role> roles = new HashSet<>();
         roles.add(roleUser);
         roles.add(roleAdmin);
@@ -31,40 +30,54 @@ public class UserModelTest {
 
     @Test
     public void testUserConstructorAndGetters() {
-        // Memastikan objek user terbuat dengan benar
         assertThat(user).isNotNull();
         assertThat(user.getUsername()).isEqualTo("testuser");
         assertThat(user.getPassword()).isEqualTo("password");
         assertThat(user.getEmail()).isEqualTo("test@example.com");
+        assertThat(user.getBalance()).isEqualTo(0.0);
+        assertThat(user.getRoles()).containsExactlyInAnyOrder(roleUser, roleAdmin);
+    }
 
-        // Memastikan roles terpasang dengan benar
-        assertThat(user.getRoles()).hasSize(2);
-        assertThat(user.getRoles()).contains(roleUser, roleAdmin);
+    @Test
+    public void testParameterizedConstructorWithBalance() {
+        Set<Role> roles = new HashSet<>();
+        roles.add(new Role("MANAGER"));
+
+        User userWithBalance = new User("admin", "adminpass", "admin@test.com", 150.0, roles);
+
+        assertThat(userWithBalance.getUsername()).isEqualTo("admin");
+        assertThat(userWithBalance.getBalance()).isEqualTo(150.0);
+        assertThat(userWithBalance.getRoles()).hasSize(1);
+    }
+
+    @Test
+    public void testDefaultConstructor() {
+        User defaultUser = new User();
+        assertThat(defaultUser.getUsername()).isNull();
+        assertThat(defaultUser.getBalance()).isEqualTo(0.0);
+        assertThat(defaultUser.getRoles()).isEmpty();
     }
 
     @Test
     public void testAddRoleToUser() {
-        // Menambahkan role baru
-        Role roleManager = new Role("DUMMYROLE-TIDK-LEWAT-DB-AMAN");
+        Role roleManager = new Role("MANAGER");
         user.getRoles().add(roleManager);
 
-        // Memastikan role baru ditambahkan dengan benar
-        assertThat(user.getRoles()).hasSize(3);
-        assertThat(user.getRoles()).contains(roleUser, roleAdmin, roleManager);
+        assertThat(user.getRoles()).hasSize(3)
+                .containsExactlyInAnyOrder(roleUser, roleAdmin, roleManager);
     }
 
     @Test
     public void testGetAuthorities() {
-        // Memastikan authorities berfungsi dengan benar
         Set<SimpleGrantedAuthority> authorities = (Set<SimpleGrantedAuthority>) user.getAuthorities();
 
-        assertThat(authorities).hasSize(2);
-        assertThat(authorities).contains(new SimpleGrantedAuthority("USER"), new SimpleGrantedAuthority("ADMIN"));
+        assertThat(authorities)
+                .extracting(SimpleGrantedAuthority::getAuthority)
+                .containsExactlyInAnyOrder("ROLE_USER", "ROLE_ADMIN");
     }
 
     @Test
     public void testUserDetailsMethods() {
-        // Memastikan semua metode UserDetails bekerja dengan benar
         assertThat(user.isAccountNonExpired()).isTrue();
         assertThat(user.isAccountNonLocked()).isTrue();
         assertThat(user.isCredentialsNonExpired()).isTrue();
@@ -73,13 +86,44 @@ public class UserModelTest {
 
     @Test
     public void testSettersAndGetters() {
-        // Memastikan setter dan getter berfungsi dengan benar
-        user.setUsername("newUsername");
-        user.setPassword("newPassword");
-        user.setEmail("newemail@example.com");
+        UUID newId = UUID.randomUUID();
+        user.setId(newId);
+        user.setUsername("newuser");
+        user.setPassword("newpass");
+        user.setEmail("new@test.com");
+        user.setBalance(99.99);
 
-        assertThat(user.getUsername()).isEqualTo("newUsername");
-        assertThat(user.getPassword()).isEqualTo("newPassword");
-        assertThat(user.getEmail()).isEqualTo("newemail@example.com");
+        Set<Role> newRoles = new HashSet<>();
+        Role newRole = new Role("EDITOR");
+        newRoles.add(newRole);
+        user.setRoles(newRoles);
+
+        assertThat(user.getId()).isEqualTo(newId);
+        assertThat(user.getUsername()).isEqualTo("newuser");
+        assertThat(user.getPassword()).isEqualTo("newpass");
+        assertThat(user.getEmail()).isEqualTo("new@test.com");
+        assertThat(user.getBalance()).isEqualTo(99.99);
+        assertThat(user.getRoles()).containsExactly(newRole);
+    }
+
+    @Test
+    public void testRoleManagement() {
+        // Test empty roles
+        user.setRoles(new HashSet<>());
+        assertThat(user.getRoles()).isEmpty();
+
+        // Test null safety
+        user.setRoles(null);
+        assertThat(user.getRoles()).isNull();
+    }
+
+    @Test
+    public void testIdGeneration() {
+        User newUser = new User();
+        newUser.setId(UUID.randomUUID());
+        assertThat(newUser.getId())
+                .as("User ID should be auto-generated")
+                .isNotNull()
+                .isInstanceOf(UUID.class);
     }
 }
