@@ -3,7 +3,6 @@ package id.cs.ui.advprog.inthecost.model;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "user_roles")

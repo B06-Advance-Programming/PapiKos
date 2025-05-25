@@ -1,7 +1,6 @@
 package id.cs.ui.advprog.inthecost.controller;
 
 import id.cs.ui.advprog.inthecost.dto.RegisterAdminDto;
-import id.cs.ui.advprog.inthecost.dto.RegisterUserDto;
 import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.service.UserService;
 import org.springframework.http.ResponseEntity;
