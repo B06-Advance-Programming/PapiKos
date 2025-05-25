@@ -24,7 +24,7 @@ public class PengelolaanKostImpl implements PengelolaanKost {
         this.kostRepository = kostRepository;
     }
 
-    @Override
+    @Override @Async
     public CompletableFuture<Void> addKost(Kost kost) {
         try {
             kostRepository.save(kost);
@@ -37,12 +37,12 @@ public class PengelolaanKostImpl implements PengelolaanKost {
     }
 
     // Mengambil daftar semua kost
-    @Override
+    @Override @Async
     public CompletableFuture<List<Kost>> getAllKost() {
         return CompletableFuture.completedFuture(kostRepository.findAll());
     }
 
-    @Override
+    @Override @Async
     public CompletableFuture<List<Kost>> getKostByOwnerId(UUID ownerId) {
         List<Kost> kostList = kostRepository.findByOwnerId(ownerId);
         return CompletableFuture.completedFuture(kostList);
