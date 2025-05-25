@@ -97,13 +97,12 @@ public class NotificationServiceImpl implements NotificationService {
         InboxNotification notification = new InboxNotification(user, message);
         return inboxRepository.save(notification);
     }
-    
-    /**
+      /**
      * {@inheritDoc}
      */
     @Override
     @Transactional
-    public void deleteNotification(Long notificationId) {
+    public void deleteNotification(UUID notificationId) {
         if (notificationId == null) {
             throw new IllegalArgumentException("Notification ID cannot be null");
         }
@@ -120,7 +119,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     @Transactional(readOnly = true)
-    public InboxNotification getNotificationById(Long notificationId) {
+    public InboxNotification getNotificationById(UUID notificationId) {
         if (notificationId == null) {
             throw new IllegalArgumentException("Notification ID cannot be null");
         }

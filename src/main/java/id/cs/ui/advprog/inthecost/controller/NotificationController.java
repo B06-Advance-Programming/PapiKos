@@ -98,12 +98,11 @@ public class NotificationController {
     
     /**
      * Get a specific notification by ID
-     * 
-     * @param notificationId The ID of the notification
+     *     * @param notificationId The ID of the notification
      * @return The notification
      */
     @GetMapping("/{notificationId}")
-    public ResponseEntity<InboxNotification> getNotification(@PathVariable Long notificationId) {
+    public ResponseEntity<InboxNotification> getNotification(@PathVariable UUID notificationId) {
         try {
             InboxNotification notification = notificationService.getNotificationById(notificationId);
             return ResponseEntity.ok(notification);
@@ -138,8 +137,7 @@ public class NotificationController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating notification: " + e.getMessage(), e);
         }
-    }
-      /**
+    }    /**
      * Delete a notification by ID
      * 
      * @param notificationId The ID of the notification to delete
@@ -147,7 +145,7 @@ public class NotificationController {
      */
     @DeleteMapping("/{notificationId}")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable Long notificationId) {
+    public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable UUID notificationId) {
         try {
             notificationService.deleteNotification(notificationId);
             
@@ -162,12 +160,11 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting notification: " + e.getMessage(), e);
         }
     }
-    
-    /**
+      /**
      * Handle invalid notification ID format
      */
-    @ExceptionHandler(NumberFormatException.class)
-    public ResponseEntity<Map<String, String>> handleNumberFormatException(NumberFormatException e) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> response = new HashMap<>();
         response.put("status", "error");
         response.put("message", "Invalid notification ID format");

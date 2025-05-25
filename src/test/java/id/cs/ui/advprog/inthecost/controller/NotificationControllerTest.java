@@ -31,10 +31,9 @@ public class NotificationControllerTest {
     private NotificationService notificationService;
 
     @Mock
-    private KostRepository kostRepository;
-
-    private UUID userId;
+    private KostRepository kostRepository;    private UUID userId;
     private UUID kostId;
+    private UUID notificationId;
     private User user;
     private Kost kost;
     private InboxNotification notification;
@@ -45,6 +44,7 @@ public class NotificationControllerTest {
         
         userId = UUID.randomUUID();
         kostId = UUID.randomUUID();
+        notificationId = UUID.randomUUID();
         
         user = new User();
         user.setId(userId);
@@ -110,12 +110,11 @@ public class NotificationControllerTest {
             notificationController.triggerNotification(kostId.toString());
         });
     }
-    
-    @Test
+      @Test
     void testGetNotificationById_Success() {
-        when(notificationService.getNotificationById(1L)).thenReturn(notification);
+        when(notificationService.getNotificationById(notificationId)).thenReturn(notification);
 
-        ResponseEntity<InboxNotification> response = notificationController.getNotification(1L);
+        ResponseEntity<InboxNotification> response = notificationController.getNotification(notificationId);
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(notification, response.getBody());
@@ -123,10 +122,10 @@ public class NotificationControllerTest {
     
     @Test
     void testGetNotificationById_NotFound() {
-        when(notificationService.getNotificationById(1L)).thenThrow(new IllegalArgumentException("Notification not found"));
+        when(notificationService.getNotificationById(notificationId)).thenThrow(new IllegalArgumentException("Notification not found"));
 
         assertThrows(ResponseStatusException.class, () -> {
-            notificationController.getNotification(1L);
+            notificationController.getNotification(notificationId);
         });
     }
     
@@ -152,33 +151,32 @@ public class NotificationControllerTest {
             notificationController.createNotification(userId.toString(), requestBody);
         });
     }
-    
-    @Test
+      @Test
     void testDeleteNotification_Success() {
-        doNothing().when(notificationService).deleteNotification(1L);
+        doNothing().when(notificationService).deleteNotification(notificationId);
 
-        ResponseEntity<Map<String, String>> response = notificationController.deleteNotification(1L);
+        ResponseEntity<Map<String, String>> response = notificationController.deleteNotification(notificationId);
         
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("success", response.getBody().get("status"));
         assertEquals("Notification deleted successfully", response.getBody().get("message"));
         
-        verify(notificationService, times(1)).deleteNotification(1L);
+        verify(notificationService, times(1)).deleteNotification(notificationId);
     }
     
     @Test
     void testDeleteNotification_NotFound() {
-        doThrow(new IllegalArgumentException("Notification not found")).when(notificationService).deleteNotification(1L);
+        doThrow(new IllegalArgumentException("Notification not found")).when(notificationService).deleteNotification(notificationId);
 
         assertThrows(ResponseStatusException.class, () -> {
-            notificationController.deleteNotification(1L);
+            notificationController.deleteNotification(notificationId);
         });
     }
     
     @Test
-    void testHandleNumberFormatException() {
-        NumberFormatException ex = new NumberFormatException("Invalid format");
-        ResponseEntity<Map<String, String>> response = notificationController.handleNumberFormatException(ex);
+    void testHandleIllegalArgumentException() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid format");
+        ResponseEntity<Map<String, String>> response = notificationController.handleIllegalArgumentException(ex);
         
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("error", response.getBody().get("status"));
