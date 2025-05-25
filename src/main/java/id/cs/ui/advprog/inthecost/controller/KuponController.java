@@ -3,8 +3,6 @@ package id.cs.ui.advprog.inthecost.controller;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.service.KuponService;
-import id.cs.ui.advprog.inthecost.service.KuponServiceImpl;
-import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 
 import id.cs.ui.advprog.inthecost.dto.KuponRequest;
@@ -146,6 +144,45 @@ public class KuponController{
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/owner/{ownerId}")
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
+    public ResponseEntity<List<KuponResponse>> getKuponsByOwnerId(@PathVariable UUID ownerId) {
+        List<Kost> kosts = kostRepository.findByOwnerId(ownerId);
+        List<UUID> kostIds = kosts.stream().map(Kost::getKostID).toList();
+
+        List<Kupon> allKupons = kuponService.getAllKupon().join();
+
+        List<Kupon> filteredKupons = allKupons.stream()
+                .filter(kupon -> kupon.getKosPemilik().stream()
+                        .anyMatch(k -> kostIds.contains(k.getKostID())))
+                .toList();
+
+        if (filteredKupons.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        List<KuponResponse> responses = filteredKupons.stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/kode/{kodeUnik}")
+    public ResponseEntity<KuponResponse> getKuponByKodeUnik(@PathVariable String kodeUnik) {
+        logCurrentUser();
+
+        try {
+            Kupon kupon = kuponService.getKuponByKodeUnik(kodeUnik).join();
+            return ResponseEntity.ok(mapToResponse(kupon));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("tidak ditemukan")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     private KuponResponse mapToResponse(Kupon kupon) {
         KuponResponse response = new KuponResponse();
         response.setIdKupon(kupon.getIdKupon());
@@ -156,11 +193,10 @@ public class KuponController{
         response.setDeskripsi(kupon.getDeskripsi());
         response.setStatusKupon(kupon.getStatusKupon().getValue());
         response.setQuantity(kupon.getQuantity());
-        response.setKosPemilik(
-                kupon.getKosPemilik().stream()
-                        .map(Kost::getKostID)
-                        .toList()
-        );
+        List<KuponResponse.KostInfo> kostInfoList = kupon.getKosPemilik().stream()
+                .map(kost -> new KuponResponse.KostInfo(kost.getKostID(), kost.getNama()))
+                .collect(Collectors.toList());
+        response.setKosPemilik(kostInfoList);
         return response;
     }
 
