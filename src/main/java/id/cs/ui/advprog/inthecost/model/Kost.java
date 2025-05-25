@@ -104,11 +104,6 @@ public class Kost implements Subject {
         this.nama = nama;
         this.alamat = alamat;
         this.deskripsi = deskripsi;
-
-        kostID = UUID.randomUUID();
-        this.nama = nama;
-        this.alamat = alamat;
-        this.deskripsi = deskripsi;
         this.jumlahKamar = jumlahKamar;
         this.hargaPerBulan = hargaPerBulan;
         this.ownerId = ownerId;
