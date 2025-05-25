@@ -31,6 +31,9 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.time.LocalDateTime;
 
 @ExtendWith(MockitoExtension.class)
 public class PaymentServiceTest {
@@ -413,5 +416,187 @@ public class PaymentServiceTest {
         penyewaan.setUserId(userId);
         penyewaan.setStatus(StatusPenyewaan.DIAJUKAN);
         return penyewaan;
+    }
+
+    // Add these methods to your existing PaymentServiceTest class
+
+    @Test
+    void getTransactionHistory_shouldReturnUserTransactions() throws Exception {
+        List<Payment> mockPayments = Arrays.asList(
+                new PaymentBuilder()
+                        .id(1L)
+                        .userId(userId)
+                        .amount(100000.0)
+                        .paymentType(PaymentTypeEnum.TOP_UP)
+                        .build()
+        );
+
+        when(paymentRepository.findByUserId(userId)).thenReturn(mockPayments);
+
+        List<Payment> result = paymentService.getTransactionHistory(userId).get();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(mockPayments, result);
+    }
+
+    @Test
+    void getFilteredTransactionHistory_shouldFilterByTypeAndDate() throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        List<Payment> mockPayments = Arrays.asList(
+                new PaymentBuilder()
+                        .id(1L)
+                        .userId(userId)
+                        .amount(100000.0)
+                        .paymentType(PaymentTypeEnum.TOP_UP)
+                        .transactionDateTime(now)
+                        .build(),
+                new PaymentBuilder()
+                        .id(2L)
+                        .userId(userId)
+                        .amount(200000.0)
+                        .paymentType(PaymentTypeEnum.KOST_PAYMENT)
+                        .transactionDateTime(now.plusHours(1))
+                        .build()
+        );
+
+        when(paymentRepository.findByUserId(userId)).thenReturn(mockPayments);
+
+        List<Payment> result = paymentService.getFilteredTransactionHistory(
+                userId,
+                PaymentTypeEnum.TOP_UP,
+                now.minusMinutes(1),
+                now.plusMinutes(1)
+        ).get();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(PaymentTypeEnum.TOP_UP, result.get(0).getPaymentType());
+    }
+
+    @Test
+    void getOwnerTransactionHistory_shouldReturnOwnerTransactions() throws Exception {
+        List<Payment> mockPayments = Arrays.asList(
+                new PaymentBuilder()
+                        .id(1L)
+                        .ownerId(ownerId)
+                        .amount(500000.0)
+                        .paymentType(PaymentTypeEnum.KOST_PAYMENT)
+                        .build()
+        );
+
+        when(paymentRepository.findByOwnerId(ownerId)).thenReturn(mockPayments);
+
+        List<Payment> result = paymentService.getOwnerTransactionHistory(ownerId).get();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(mockPayments, result);
+    }
+
+    @Test
+    void getFilteredOwnerTransactionHistory_shouldFilterByTypeAndDate() throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        List<Payment> mockPayments = Arrays.asList(
+                new PaymentBuilder()
+                        .id(1L)
+                        .ownerId(ownerId)
+                        .amount(500000.0)
+                        .paymentType(PaymentTypeEnum.KOST_PAYMENT)
+                        .transactionDateTime(now)
+                        .build(),
+                new PaymentBuilder()
+                        .id(2L)
+                        .ownerId(ownerId)
+                        .amount(100000.0)
+                        .paymentType(PaymentTypeEnum.KOST_PAYMENT)
+                        .transactionDateTime(now.plusHours(2))
+                        .build()
+        );
+
+        when(paymentRepository.findByOwnerId(ownerId)).thenReturn(mockPayments);
+
+        List<Payment> result = paymentService.getFilteredOwnerTransactionHistory(
+                ownerId,
+                PaymentTypeEnum.KOST_PAYMENT,
+                now.minusMinutes(1),
+                now.plusMinutes(1)
+        ).get();
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(PaymentTypeEnum.KOST_PAYMENT, result.get(0).getPaymentType());
+    }
+
+    @Test
+    void processKostPaymentWithKupon_shouldHandleZeroDiscount() throws Exception {
+        User mockUser = new User();
+        mockUser.setId(userId);
+        mockUser.setBalance(1000000.0);
+
+        User mockOwner = new User();
+        mockOwner.setId(ownerId);
+        mockOwner.setBalance(500000.0);
+
+        Kupon kupon = mock(Kupon.class);
+        when(kuponRepository.findByKodeUnik("KU123")).thenReturn(Optional.of(kupon));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(userRepository.findById(ownerId)).thenReturn(Optional.of(mockOwner));
+        when(penyewaanKosRepository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN))
+                .thenReturn(List.of(createPenyewaanKosWithRequestedStatus()));
+
+        doNothing().when(kupon).refreshStatus();
+        when(kupon.getStatusKupon()).thenReturn(KuponStatus.VALID);
+        when(kupon.getMasaBerlaku()).thenReturn(LocalDate.now().plusDays(1));
+        when(kupon.getQuantity()).thenReturn(10);
+        when(kupon.getPersentase()).thenReturn(100); // 100% discount
+
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(i -> i.getArgument(0));
+        when(kuponRepository.save(any(Kupon.class))).thenAnswer(i -> i.getArgument(0));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(penyewaanKosRepository.save(any(PenyewaanKos.class))).thenAnswer(i -> i.getArgument(0));
+
+        double originalAmount = 500000.0;
+        Payment payment = paymentService.processKostPaymentWithKupon(userId, ownerId, kostId, originalAmount, "KU123").get();
+
+        assertEquals(0, payment.getAmount(), 0.001);
+        assertEquals(PaymentStatusEnum.SUCCESS, payment.getPaymentStatus());
+    }
+
+    @Test
+    void filterPayments_shouldHandleNullParameters() {
+        List<Payment> mockPayments = Arrays.asList(
+                new PaymentBuilder()
+                        .id(1L)
+                        .userId(userId)
+                        .amount(100000.0)
+                        .paymentType(PaymentTypeEnum.TOP_UP)
+                        .transactionDateTime(LocalDateTime.now())
+                        .build()
+        );
+
+        // Use reflection to access private method
+        try {
+            Method filterPaymentsMethod = PaymentServiceImpl.class.getDeclaredMethod(
+                    "filterPayments",
+                    List.class,
+                    PaymentTypeEnum.class,
+                    LocalDateTime.class,
+                    LocalDateTime.class
+            );
+            filterPaymentsMethod.setAccessible(true);
+
+            List<Payment> result = (List<Payment>) filterPaymentsMethod.invoke(
+                    paymentService,
+                    mockPayments,
+                    null,
+                    null,
+                    null
+            );
+
+            assertEquals(1, result.size());
+        } catch (Exception e) {
+            fail("Reflection failed: " + e.getMessage());
+        }
     }
 }
