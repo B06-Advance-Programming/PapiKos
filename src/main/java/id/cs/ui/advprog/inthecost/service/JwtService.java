@@ -18,10 +18,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     @Value("${security.jwt.secret-key}")
-    private String secretKey;
+    String secretKey;
 
     @Value("${security.jwt.expiration-time}")
-    private long jwtExpiration;
+    long jwtExpiration;
 
     public String extractUsername(String token) {
         String subject = extractClaim(token, Claims::getSubject);
@@ -78,7 +78,7 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
+    Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignInKey())
