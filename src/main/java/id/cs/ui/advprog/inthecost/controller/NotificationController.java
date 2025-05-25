@@ -130,14 +130,45 @@ public class NotificationController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
             }
             
-            InboxNotification notification = notificationService.createNotification(userId, message);
-            return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+            InboxNotification notification = notificationService.createNotification(userId, message);            return ResponseEntity.status(HttpStatus.CREATED).body(notification);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating notification: " + e.getMessage(), e);
         }
-    }    /**
+    }
+    
+    /**
+     * Create a notification for all users in the system
+     * 
+     * @param request The request body containing the notification message
+     * @return Information about the created notifications
+     */
+    @PostMapping("/broadcast")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> broadcastNotification(@RequestBody Map<String, String> request) {
+        try {
+            String message = request.get("message");
+            if (message == null || message.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
+            }
+            
+            int notificationCount = notificationService.createNotificationForAllUsers(message);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Notification broadcast sent successfully");
+            response.put("recipientCount", notificationCount);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error broadcasting notification: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
      * Delete a notification by ID
      * 
      * @param notificationId The ID of the notification to delete

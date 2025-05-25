@@ -93,9 +93,30 @@ public class NotificationServiceImpl implements NotificationService {
         UUID userUUID = UUID.fromString(userId);
         User user = userRepository.findById(userUUID)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-        
-        InboxNotification notification = new InboxNotification(user, message);
+          InboxNotification notification = new InboxNotification(user, message);
         return inboxRepository.save(notification);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public int createNotificationForAllUsers(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            throw new IllegalArgumentException("Message cannot be null or empty");
+        }
+        
+        List<User> allUsers = userRepository.findAll();
+        int notificationCount = 0;
+        
+        for (User user : allUsers) {
+            InboxNotification notification = new InboxNotification(user, message);
+            inboxRepository.save(notification);
+            notificationCount++;
+        }
+        
+        return notificationCount;
     }
       /**
      * {@inheritDoc}

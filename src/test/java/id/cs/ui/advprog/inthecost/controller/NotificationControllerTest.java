@@ -182,4 +182,44 @@ public class NotificationControllerTest {
         assertEquals("error", response.getBody().get("status"));
         assertEquals("Invalid notification ID format", response.getBody().get("message"));
     }
+    
+    @Test
+    void testBroadcastNotification_Success() {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("message", "Broadcast notification to all users");
+        
+        when(notificationService.createNotificationForAllUsers(anyString())).thenReturn(5);
+
+        ResponseEntity<Map<String, Object>> response = notificationController.broadcastNotification(requestBody);
+        
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("success", response.getBody().get("status"));
+        assertEquals("Notification broadcast sent successfully", response.getBody().get("message"));
+        assertEquals(5, response.getBody().get("recipientCount"));
+        
+        verify(notificationService, times(1)).createNotificationForAllUsers(anyString());
+    }
+    
+    @Test
+    void testBroadcastNotification_EmptyMessage() {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("message", "");
+
+        assertThrows(ResponseStatusException.class, () -> {
+            notificationController.broadcastNotification(requestBody);
+        });
+    }
+    
+    @Test
+    void testBroadcastNotification_ServiceError() {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("message", "Broadcast message");
+        
+        when(notificationService.createNotificationForAllUsers(anyString()))
+            .thenThrow(new RuntimeException("Database error"));
+
+        assertThrows(ResponseStatusException.class, () -> {
+            notificationController.broadcastNotification(requestBody);
+        });
+    }
 }
