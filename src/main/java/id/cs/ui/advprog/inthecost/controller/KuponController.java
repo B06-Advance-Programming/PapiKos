@@ -10,6 +10,8 @@ import id.cs.ui.advprog.inthecost.dto.KuponResponse;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +28,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/kupon")
 public class KuponController{
+    private static final Logger logger = LoggerFactory.getLogger(KuponController.class);
+
     @Autowired
     private KuponService kuponService;
 
@@ -37,15 +41,15 @@ public class KuponController{
         logCurrentUser();
 
         List<Kupon> kupons = kuponService.getAllKupon().join();
-        System.out.println("[DEBUG] kupons size: " + kupons.size());
-        kupons.forEach(k -> System.out.println("[DEBUG] Kupon: " + k.getNamaKupon()));
+        logger.debug("kupons size: {}", kupons.size());
+        kupons.forEach(k -> logger.debug("Kupon: {}", k.getNamaKupon()));
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
         List<KuponResponse> responses = kupons.stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(responses);
     }
@@ -139,7 +143,7 @@ public class KuponController{
 
         List<KuponResponse> responses = kupons.stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(responses);
     }
@@ -195,7 +199,7 @@ public class KuponController{
         response.setQuantity(kupon.getQuantity());
         List<KuponResponse.KostInfo> kostInfoList = kupon.getKosPemilik().stream()
                 .map(kost -> new KuponResponse.KostInfo(kost.getKostID(), kost.getNama()))
-                .collect(Collectors.toList());
+                .toList();
         response.setKosPemilik(kostInfoList);
         return response;
     }
@@ -207,9 +211,9 @@ public class KuponController{
             String roles = auth.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.joining(", "));
-            System.out.println("[DEBUG] User: " + username + ", Roles: " + roles);
+            logger.debug("User: {}, Roles: {}", username, roles);
         } else {
-            System.out.println("[DEBUG] Anonymous or unauthenticated request");
+            logger.debug("Anonymous or unauthenticated request");
         }
     }
 }
