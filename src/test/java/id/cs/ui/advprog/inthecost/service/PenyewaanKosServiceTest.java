@@ -1,6 +1,5 @@
 package id.cs.ui.advprog.inthecost.service;
 
-import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
@@ -8,135 +7,140 @@ import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
-
-import jakarta.transaction.Transactional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
+@ExtendWith(MockitoExtension.class)
 public class PenyewaanKosServiceTest {
 
-    @Autowired
-    private PenyewaanKosService service;
-
-    @Autowired
+    @Mock
     private PenyewaanKosRepository repository;
-
-    @Autowired
+    @Mock
     private KostRepository kostRepository;
-
-    @Autowired
+    @Mock
     private UserRepository userRepository;
+
+    @InjectMocks
+    private PenyewaanKosServiceImpl service;
 
     private Kost kos;
     private User owner;
 
     @BeforeEach
-    public void setUp() {
-        // Create and save a user owner before creating Kost
+    void setUp() {
         owner = new User();
-        String unique = UUID.randomUUID().toString();
-        owner.setUsername("owner_" + unique);
+        owner.setId(UUID.randomUUID());
+        owner.setUsername("owner_test");
         owner.setPassword("password");
-        owner.setEmail("owner_" + unique + "@example.com");
+        owner.setEmail("owner_test@example.com");
         owner.setBalance(100000);
-        owner.setRoles(new HashSet<>());  // set roles if needed
-        owner = userRepository.save(owner);
 
         kos = new Kost("Kos Mawar", "Jl. Melati No. 2", "Kos nyaman", 5, 1200000, owner.getId());
-        kostRepository.save(kos);
+        kos.setKostID(UUID.randomUUID());
     }
 
     @Test
-    public void testCreatePenyewaan() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder()
-                .namaLengkap("Ayu")
-                .nomorTelepon("08123456789")
-                .tanggalCheckIn(LocalDate.of(2025, 6, 1))
-                .durasiBulan(3)
-                .kos(kos)
-                .build();
+    void testCreatePenyewaan() {
+        PenyewaanKos penyewaan = new PenyewaanKos();
+        penyewaan.setNamaLengkap("Ayu");
+        penyewaan.setNomorTelepon("08123456789");
+        penyewaan.setTanggalCheckIn(LocalDate.of(2025, 6, 1));
+        penyewaan.setDurasiBulan(3);
+        penyewaan.setKos(kos);
 
-        PenyewaanKos result = service.create(p);
+        when(repository.save(any(PenyewaanKos.class))).thenAnswer(i -> {
+            PenyewaanKos arg = i.getArgument(0);
+            arg.setId(UUID.randomUUID());
+            return arg;
+        });
+
+        PenyewaanKos result = service.create(penyewaan);
 
         assertNotNull(result.getId());
         assertEquals(StatusPenyewaan.DIAJUKAN, result.getStatus());
+        verify(repository).save(any(PenyewaanKos.class));
     }
 
     @Test
-    public void testUpdatePenyewaanBerhasilJikaDiajukan() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder()
-                .namaLengkap("Rina")
-                .kos(kos)
-                .build();
+    void testUpdatePenyewaanBerhasilJikaDiajukan() {
+        PenyewaanKos penyewaan = new PenyewaanKos();
+        penyewaan.setId(UUID.randomUUID());
+        penyewaan.setNamaLengkap("Rina");
+        penyewaan.setKos(kos);
+        penyewaan.setStatus(StatusPenyewaan.DIAJUKAN);
 
-        PenyewaanKos saved = service.create(p);
-        saved.setNamaLengkap("Rina Update");
+        when(repository.findById(penyewaan.getId())).thenReturn(Optional.of(penyewaan));
+        when(repository.save(any(PenyewaanKos.class))).thenAnswer(i -> i.getArgument(0));
 
-        PenyewaanKos updated = service.update(saved);
+        penyewaan.setNamaLengkap("Rina Update");
+        PenyewaanKos updated = service.update(penyewaan);
+
         assertEquals("Rina Update", updated.getNamaLengkap());
+        verify(repository).save(penyewaan);
     }
 
     @Test
-    public void testUpdateGagalJikaStatusDisetujui() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder()
-                .namaLengkap("Andi")
-                .kos(kos)
-                .build();
+    void testUpdateGagalJikaStatusDisetujui() {
+        PenyewaanKos penyewaan = new PenyewaanKos();
+        penyewaan.setId(UUID.randomUUID());
+        penyewaan.setNamaLengkap("Andi");
+        penyewaan.setKos(kos);
+        penyewaan.setStatus(StatusPenyewaan.DISETUJUI);
 
-        PenyewaanKos saved = service.create(p);
-        saved.setStatus(StatusPenyewaan.DISETUJUI);  // update status dulu
-        saved.setNamaLengkap("Tidak Boleh Diubah");
+        when(repository.findById(penyewaan.getId())).thenReturn(Optional.of(penyewaan));
 
-        assertThrows(IllegalStateException.class, () -> {
-            service.update(saved);
-        });
+        penyewaan.setNamaLengkap("Tidak Boleh Diubah");
+
+        assertThrows(IllegalStateException.class, () -> service.update(penyewaan));
     }
 
     @Test
-    public void testDeletePenyewaan() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder()
-                .namaLengkap("Bayu")
-                .kos(kos)
-                .build();
+    void testDeletePenyewaan() throws Exception {
+        UUID id = kos.getKostID();
 
-        PenyewaanKos saved = service.create(p);
-        UUID id = saved.getId();
+        doNothing().when(repository).deleteById(id);
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
-        service.delete(id);
+        service.delete(id).get();
+
         assertTrue(repository.findById(id).isEmpty());
+        verify(repository).deleteById(id);
     }
 
     @Test
-    public void testFindById() {
-        PenyewaanKos p = PenyewaanKosBuilder.builder()
-                .namaLengkap("Dina")
-                .kos(kos)
-                .build();
+    void testFindById() {
+        PenyewaanKos penyewaan = new PenyewaanKos();
+        penyewaan.setId(UUID.randomUUID());
+        penyewaan.setNamaLengkap("Dina");
+        penyewaan.setKos(kos);
 
-        PenyewaanKos saved = service.create(p);
-        PenyewaanKos found = service.findById(saved.getId());
+        when(repository.findById(penyewaan.getId())).thenReturn(Optional.of(penyewaan));
+
+        PenyewaanKos found = service.findById(penyewaan.getId());
 
         assertEquals("Dina", found.getNamaLengkap());
+        verify(repository).findById(penyewaan.getId());
     }
 
     @Test
-    public void testFindAll() {
-        service.create(PenyewaanKosBuilder.builder().kos(kos).build());
-        service.create(PenyewaanKosBuilder.builder().kos(kos).build());
+    void testFindAll() {
+        PenyewaanKos p1 = new PenyewaanKos();
+        PenyewaanKos p2 = new PenyewaanKos();
+        when(repository.findAll()).thenReturn(List.of(p1, p2));
 
         List<PenyewaanKos> all = service.findAll();
-        assertTrue(all.size() >= 2);
+        assertEquals(2, all.size());
+        verify(repository).findAll();
     }
 }
