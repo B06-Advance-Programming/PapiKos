@@ -5,6 +5,8 @@ import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
 import id.cs.ui.advprog.inthecost.model.Payment;
 import id.cs.ui.advprog.inthecost.service.PaymentService;
 import id.cs.ui.advprog.inthecost.service.PenyewaanKosService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ import java.util.List;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private static final String INVALID_UUID_FORMAT_FOR_USERID = "Invalid UUID format for userId";
+
     private final PaymentService paymentService;
     private final PenyewaanKosService penyewaanKosService;
 
@@ -33,19 +38,19 @@ public class PaymentController {
 
     // Mock validation of user session
     private boolean validateUserSession(UUID userId) {
-        System.out.println("Validate session for userId=" + userId + " (mockup always true)");
+        logger.info("Validate session for userId={} (mockup always true)", userId);
         return true;
     }
 
     // Mock check if kost already paid for user
     private boolean isKostAlreadyPaid(UUID userId, UUID kostId) {
-        System.out.println("Checking if kost is already paid userId=" + userId + ", kostId=" + kostId + " (mockup false)");
+        logger.info("Checking if kost is already paid userId={}, kostId={} (mockup false)", userId, kostId);
         return false;
     }
 
     // Mock user permission to pay for kost
     private boolean isUserAllowedToPayKost(UUID userId, UUID kostId) {
-        System.out.println("Validating kost ownership userId=" + userId + ", kostId=" + kostId + " (mockup true)");
+        logger.info("Validating kost ownership userId={}, kostId={} (mockup true)", userId, kostId);
         return true;
     }
 
@@ -60,7 +65,7 @@ public class PaymentController {
         try {
             userId = UUID.fromString(req.getUserId());
         } catch (IllegalArgumentException e) {
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId"));
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(INVALID_UUID_FORMAT_FOR_USERID));
         }
 
         if (!validateUserSession(userId)) {
@@ -137,7 +142,7 @@ public class PaymentController {
         try {
             uuidUserId = UUID.fromString(userId);
         } catch (IllegalArgumentException e) {
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId"));
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(INVALID_UUID_FORMAT_FOR_USERID));
         }
 
         if (!validateUserSession(uuidUserId)) {
@@ -161,7 +166,7 @@ public class PaymentController {
         try {
             uuidUserId = UUID.fromString(userId);
         } catch (IllegalArgumentException e) {
-            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body("Invalid UUID format for userId"));
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(INVALID_UUID_FORMAT_FOR_USERID));
         }
 
         if (!validateUserSession(uuidUserId)) {
@@ -214,12 +219,11 @@ public class PaymentController {
 
     private void logRequestContext(String testingMode, String methodName) {
         if ("true".equalsIgnoreCase(testingMode)) {
-            System.out.println(methodName + " called from test context");
+            logger.info("{} called from test context", methodName);
         } else {
-            System.out.println(methodName + " called from normal runtime");
+            logger.info("{} called from normal runtime", methodName);
         }
     }
-
 
     @PreAuthorize("hasAnyRole('PENYEWA')")
     @GetMapping("/penyewaan/diajukan")
@@ -282,5 +286,4 @@ public class PaymentController {
         public StatusPenyewaan getStatus() { return status; }
         public UUID getUserId() { return userId; }
     }
-
 }

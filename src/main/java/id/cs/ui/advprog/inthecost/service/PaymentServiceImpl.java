@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -266,6 +265,6 @@ public class PaymentServiceImpl implements PaymentService {
         return payments.stream()
                 .filter(typeFilter)
                 .filter(dateFilter)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

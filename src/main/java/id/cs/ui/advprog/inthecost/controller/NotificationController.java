@@ -98,12 +98,11 @@ public class NotificationController {
     
     /**
      * Get a specific notification by ID
-     * 
-     * @param notificationId The ID of the notification
+     *     * @param notificationId The ID of the notification
      * @return The notification
      */
     @GetMapping("/{notificationId}")
-    public ResponseEntity<InboxNotification> getNotification(@PathVariable Long notificationId) {
+    public ResponseEntity<InboxNotification> getNotification(@PathVariable UUID notificationId) {
         try {
             InboxNotification notification = notificationService.getNotificationById(notificationId);
             return ResponseEntity.ok(notification);
@@ -131,15 +130,45 @@ public class NotificationController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
             }
             
-            InboxNotification notification = notificationService.createNotification(userId, message);
-            return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+            InboxNotification notification = notificationService.createNotification(userId, message);            return ResponseEntity.status(HttpStatus.CREATED).body(notification);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating notification: " + e.getMessage(), e);
         }
     }
-      /**
+    
+    /**
+     * Create a notification for all users in the system
+     * 
+     * @param request The request body containing the notification message
+     * @return Information about the created notifications
+     */
+    @PostMapping("/broadcast")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> broadcastNotification(@RequestBody Map<String, String> request) {
+        try {
+            String message = request.get("message");
+            if (message == null || message.trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
+            }
+            
+            int notificationCount = notificationService.createNotificationForAllUsers(message);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Notification broadcast sent successfully");
+            response.put("recipientCount", notificationCount);
+            
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error broadcasting notification: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
      * Delete a notification by ID
      * 
      * @param notificationId The ID of the notification to delete
@@ -147,7 +176,7 @@ public class NotificationController {
      */
     @DeleteMapping("/{notificationId}")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable Long notificationId) {
+    public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable UUID notificationId) {
         try {
             notificationService.deleteNotification(notificationId);
             
@@ -162,12 +191,11 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting notification: " + e.getMessage(), e);
         }
     }
-    
-    /**
+      /**
      * Handle invalid notification ID format
      */
-    @ExceptionHandler(NumberFormatException.class)
-    public ResponseEntity<Map<String, String>> handleNumberFormatException(NumberFormatException e) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> response = new HashMap<>();
         response.put("status", "error");
         response.put("message", "Invalid notification ID format");

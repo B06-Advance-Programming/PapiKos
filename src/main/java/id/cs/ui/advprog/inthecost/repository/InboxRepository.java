@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.UUID;
 
-public interface InboxRepository extends JpaRepository<InboxNotification, Long> {
+public interface InboxRepository extends JpaRepository<InboxNotification, UUID> {
     // Find all notifications for a specific user
     List<InboxNotification> findByUserId(UUID userId);
 

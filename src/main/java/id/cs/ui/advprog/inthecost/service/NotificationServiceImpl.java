@@ -93,8 +93,7 @@ public class NotificationServiceImpl implements NotificationService {
         UUID userUUID = UUID.fromString(userId);
         User user = userRepository.findById(userUUID)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-        
-        InboxNotification notification = new InboxNotification(user, message);
+          InboxNotification notification = new InboxNotification(user, message);
         return inboxRepository.save(notification);
     }
     
@@ -103,7 +102,28 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     @Transactional
-    public void deleteNotification(Long notificationId) {
+    public int createNotificationForAllUsers(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            throw new IllegalArgumentException("Message cannot be null or empty");
+        }
+        
+        List<User> allUsers = userRepository.findAll();
+        int notificationCount = 0;
+        
+        for (User user : allUsers) {
+            InboxNotification notification = new InboxNotification(user, message);
+            inboxRepository.save(notification);
+            notificationCount++;
+        }
+        
+        return notificationCount;
+    }
+      /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteNotification(UUID notificationId) {
         if (notificationId == null) {
             throw new IllegalArgumentException("Notification ID cannot be null");
         }
@@ -120,7 +140,7 @@ public class NotificationServiceImpl implements NotificationService {
      */
     @Override
     @Transactional(readOnly = true)
-    public InboxNotification getNotificationById(Long notificationId) {
+    public InboxNotification getNotificationById(UUID notificationId) {
         if (notificationId == null) {
             throw new IllegalArgumentException("Notification ID cannot be null");
         }

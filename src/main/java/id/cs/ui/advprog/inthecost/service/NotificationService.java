@@ -4,6 +4,7 @@ import id.cs.ui.advprog.inthecost.model.InboxNotification;
 import id.cs.ui.advprog.inthecost.model.Kost;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Interface for notification-related services
@@ -30,8 +31,7 @@ public interface NotificationService {
      * @return The count of notifications for the user
      */
     long countNotifications(String userId);
-    
-    /**
+      /**
      * Create a custom notification for a specific user
      * @param userId The ID of the user as a string
      * @param message The notification message
@@ -40,15 +40,22 @@ public interface NotificationService {
     InboxNotification createNotification(String userId, String message);
     
     /**
+     * Create a notification for all users in the system
+     * @param message The notification message to send to all users
+     * @return The number of notifications created
+     */
+    int createNotificationForAllUsers(String message);
+    
+    /**
      * Delete a notification by its ID
      * @param notificationId The ID of the notification to delete
      */
-    void deleteNotification(Long notificationId);
+    void deleteNotification(UUID notificationId);
     
     /**
      * Get a notification by its ID
      * @param notificationId The ID of the notification
      * @return The notification, if found
      */
-    InboxNotification getNotificationById(Long notificationId);
+    InboxNotification getNotificationById(UUID notificationId);
 }
