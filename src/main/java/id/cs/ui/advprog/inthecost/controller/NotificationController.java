@@ -7,6 +7,7 @@ import id.cs.ui.advprog.inthecost.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -66,14 +67,15 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error counting notifications: " + e.getMessage(), e);
         }
     }
-    
-    /**
+      /**
      * Manually trigger notifications for a kost
      * Useful for testing or administrative purposes
      * 
      * @param kostId The ID of the kost to notify about
      * @return Success message
-     */    @PostMapping("/trigger/{kostId}")
+     */    
+    @PostMapping("/trigger/{kostId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Map<String, String>> triggerNotification(@PathVariable String kostId) {
         try {
             UUID kostUUID = UUID.fromString(kostId);
@@ -111,8 +113,7 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving notification: " + e.getMessage(), e);
         }
     }
-    
-    /**
+      /**
      * Create a custom notification for a user
      * 
      * @param userId The ID of the user
@@ -120,6 +121,7 @@ public class NotificationController {
      * @return The created notification
      */
     @PostMapping("/create/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<InboxNotification> createNotification(
             @PathVariable String userId, 
             @RequestBody Map<String, String> request) {
@@ -137,14 +139,14 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating notification: " + e.getMessage(), e);
         }
     }
-    
-    /**
+      /**
      * Delete a notification by ID
      * 
      * @param notificationId The ID of the notification to delete
      * @return Success message
      */
     @DeleteMapping("/{notificationId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Map<String, String>> deleteNotification(@PathVariable Long notificationId) {
         try {
             notificationService.deleteNotification(notificationId);

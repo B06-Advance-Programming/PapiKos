@@ -17,4 +17,5 @@ public class PenyewaanKosRequestDto {
     private int durasiBulan;
     private UUID kostId;
     private UUID userId;
+    private String status;
 }
