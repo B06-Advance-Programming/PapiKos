@@ -200,7 +200,7 @@ public class KuponController{
         return response;
     }
 
-    private void logCurrentUser() {
+    void logCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated()) {
             String username = auth.getName();
