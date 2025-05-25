@@ -14,10 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import org.springframework.http.ResponseEntity;
+
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class PaymentControllerTest {
 
@@ -28,7 +31,7 @@ public class PaymentControllerTest {
     private PaymentService paymentService;
 
     @Mock
-    private PenyewaanKosService penyewaanKosService; // Mock tambahan untuk service yang null
+    private PenyewaanKosService penyewaanKosService;
 
     @BeforeEach
     void setUp() {
@@ -36,7 +39,7 @@ public class PaymentControllerTest {
     }
 
     @Test
-    void testTopUp() {
+    void testTopUp() throws Exception {
         PaymentController.TopUpRequest req = new PaymentController.TopUpRequest();
         String userIdStr = UUID.randomUUID().toString();
         req.setUserId(userIdStr);
@@ -58,11 +61,12 @@ public class PaymentControllerTest {
                 .build();
 
         when(paymentService.recordTopUpPayment(userId, 150000.0, "Top Up via bank"))
-                .thenReturn(expectedPayment);
+                .thenReturn(CompletableFuture.completedFuture(expectedPayment));
 
         String testHeaderValue = "true";
 
-        var response = paymentController.topUp(req, testHeaderValue);
+        CompletableFuture<ResponseEntity<?>> responseFuture = paymentController.topUp(req, testHeaderValue);
+        ResponseEntity<?> response = responseFuture.get(); // wait for completion
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
@@ -70,7 +74,7 @@ public class PaymentControllerTest {
     }
 
     @Test
-    void testKostPayment_withoutCoupon() {
+    void testKostPayment_withoutCoupon() throws Exception {
         PaymentController.KostPaymentRequest req = new PaymentController.KostPaymentRequest();
 
         String userIdStr = UUID.randomUUID().toString();
@@ -101,16 +105,17 @@ public class PaymentControllerTest {
                 .transactionDateTime(now)
                 .build();
 
-        // Mock penyewaanKosService supaya tidak null dan mengembalikan nilai benar
+        // Mock penyewaanKosService so it returns true as expected by controller
         when(penyewaanKosService.hasPendingPenyewaan(userId, kostId)).thenReturn(true);
 
         when(paymentService.getKostPrice(kostId)).thenReturn(500000.0);
         when(paymentService.recordKostPayment(userId, ownerId, kostId, 500000.0, "Monthly Kost Payment"))
-                .thenReturn(expectedPayment);
+                .thenReturn(CompletableFuture.completedFuture(expectedPayment));
 
         String testHeaderValue = "true";
 
-        var response = paymentController.kostPayment(req, testHeaderValue);
+        CompletableFuture<ResponseEntity<?>> responseFuture = paymentController.kostPayment(req, testHeaderValue);
+        ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
@@ -118,7 +123,7 @@ public class PaymentControllerTest {
     }
 
     @Test
-    void testGetTransactionHistory() {
+    void testGetTransactionHistory() throws Exception {
         UUID userId = UUID.randomUUID();
         List<Payment> payments = Arrays.asList(
                 new PaymentBuilder()
@@ -131,9 +136,11 @@ public class PaymentControllerTest {
                         .build()
         );
 
-        when(paymentService.getTransactionHistory(userId)).thenReturn(payments);
+        when(paymentService.getTransactionHistory(userId))
+                .thenReturn(CompletableFuture.completedFuture(payments));
 
-        var response = paymentController.getTransactionHistory(userId.toString(), null);
+        CompletableFuture<ResponseEntity<?>> responseFuture = paymentController.getTransactionHistory(userId.toString(), null);
+        ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
@@ -141,7 +148,7 @@ public class PaymentControllerTest {
     }
 
     @Test
-    void testGetFilteredTransactionHistory() {
+    void testGetFilteredTransactionHistory() throws Exception {
         UUID userId = UUID.randomUUID();
         PaymentTypeEnum paymentType = PaymentTypeEnum.TOP_UP;
         LocalDateTime startDateTime = LocalDateTime.of(2024, 1, 1, 0, 0);
@@ -159,12 +166,14 @@ public class PaymentControllerTest {
         );
 
         when(paymentService.getFilteredTransactionHistory(userId, paymentType, startDateTime, endDateTime))
-                .thenReturn(filteredPayments);
+                .thenReturn(CompletableFuture.completedFuture(filteredPayments));
 
-        var response = paymentController.getFilteredTransactionHistory(userId.toString(), paymentType, startDateTime, endDateTime, null);
+        CompletableFuture<ResponseEntity<?>> responseFuture = paymentController.getFilteredTransactionHistory(userId.toString(), paymentType, startDateTime, endDateTime, null);
+        ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(filteredPayments, response.getBody());
     }
+
 }

@@ -49,7 +49,7 @@ public class Kupon {
     @Enumerated(EnumType.STRING)
     private KuponStatus statusKupon;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "kupon_kost",
             joinColumns = @JoinColumn(name = "id_kupon"),

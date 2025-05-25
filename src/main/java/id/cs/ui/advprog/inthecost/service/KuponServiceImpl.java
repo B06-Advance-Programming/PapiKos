@@ -5,12 +5,14 @@ import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.KuponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class KuponServiceImpl implements KuponService {
@@ -24,23 +26,6 @@ public class KuponServiceImpl implements KuponService {
     @Override
     public Kupon createKupon(Kupon kupon) {
         return kuponRepository.save(kupon);
-    }
-
-    @Override
-    public Kupon updateKupon(Kupon kupon) {
-        Optional<Kupon> existingKupon = kuponRepository.findById(kupon.getIdKupon());
-        if (existingKupon.isPresent()) {
-            Kupon updated = existingKupon.get();
-            updated.setPersentase(kupon.getPersentase());
-            updated.setMasaBerlaku(kupon.getMasaBerlaku());
-            updated.setDeskripsi(kupon.getDeskripsi());
-            updated.setKosPemilik(kupon.getKosPemilik());
-            updated.setNamaKupon(kupon.getNamaKupon());
-            updated.setQuantity(kupon.getQuantity());
-            return kuponRepository.save(updated);
-        } else {
-            throw new IllegalArgumentException("Kupon dengan ID " + kupon.getIdKupon() + " tidak ditemukan.");
-        }
     }
 
     @Override
@@ -69,16 +54,20 @@ public class KuponServiceImpl implements KuponService {
         }
     }
 
+    @Async
     @Override
-    public Kupon getKuponById(UUID id) {
-        return kuponRepository.findById(id)
+    public CompletableFuture<Kupon> getKuponById(UUID id) {
+        Kupon kupon = kuponRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Kupon dengan ID " + id + " tidak ditemukan."));
+        return CompletableFuture.completedFuture(kupon);
     }
 
+    @Async
     @Override
-    public Kupon getKuponByKodeUnik(String kodeUnik){
-        return kuponRepository.findByKodeUnik(kodeUnik)
+    public CompletableFuture<Kupon> getKuponByKodeUnik(String kodeUnik){
+        Kupon kupon = kuponRepository.findByKodeUnik(kodeUnik)
                 .orElseThrow(() -> new RuntimeException("Kupon dengan Kode unik " + kodeUnik + " tidak ditemukan."));
+        return CompletableFuture.completedFuture(kupon);
     }
 
     @Override
@@ -90,8 +79,17 @@ public class KuponServiceImpl implements KuponService {
         }
     }
 
+    @Async
     @Override
-    public List<Kupon> getAllKupon() {
-        return kuponRepository.findAll();
+    public CompletableFuture<List<Kupon>> getAllKupon() {
+        List<Kupon> kupons = kuponRepository.findAll();
+        return CompletableFuture.completedFuture(kupons);
+    }
+
+    @Async
+    @Override
+    public CompletableFuture<List<Kupon>> findByKostId(UUID kostId) {
+        List<Kupon> kupons = kuponRepository.findByKostId(kostId);
+        return CompletableFuture.completedFuture(kupons);
     }
 }

@@ -6,6 +6,7 @@ import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.User;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,8 +16,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -31,38 +38,35 @@ public class PengelolaanKostServiceTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User createSampleUser() {
-        User user = new User();
-        // Generate unique username/email using UUID to avoid duplicates
+    User user;
+    Kost kost;
+
+    @BeforeEach
+    public void createSampleUserAndKost() {
+        user = new User();
         String unique = UUID.randomUUID().toString();
         user.setUsername("owner_" + unique);
         user.setPassword("password");
         user.setEmail("owner_" + unique + "@example.com");
         user.setBalance(100000);
-        user.setRoles(new HashSet<>()); // Set roles as needed
-        return userRepository.save(user);
-    }
+        user.setRoles(new HashSet<>());
+        user = userRepository.saveAndFlush(user);  // flush biar langsung commit dan dapet id
 
-    private Kost createSampleKost(UUID ownerId) {
-        Kost kost = new Kost();
+        kost = new Kost();
         kost.setNama("Kost Asri");
         kost.setAlamat("Jl. Mawar No.10");
         kost.setDeskripsi("Dekat kampus, nyaman");
         kost.setJumlahKamar(15);
         kost.setHargaPerBulan(750000);
-        kost.setOwnerId(ownerId); // This must not be null
-        return kost;
+        kost.setOwnerId(user.getId());  // pakai id dari user yang sudah disimpan
     }
 
     @Test
     public void testAddKost() {
-        User owner = createSampleUser();
-
         List<Kost> allKostBefore = kostRepository.findAll();
         int currentSize = allKostBefore.size();
 
-        Kost kost = createSampleKost(owner.getId());
-        pengelolaanKost.addKost(kost);
+        pengelolaanKost.addKost(kost).join();
 
         List<Kost> allKostAfter = kostRepository.findAll();
         assertEquals(currentSize + 1, allKostAfter.size());
@@ -76,43 +80,49 @@ public class PengelolaanKostServiceTest {
 
     @Test
     public void testGetAllKost() {
-        User owner1 = createSampleUser();
-        User owner2 = createSampleUser();
-
-        List<Kost> kostList = pengelolaanKost.getAllKost();
+        List<Kost> kostList = pengelolaanKost.getAllKost().join();
         int currentSize = kostList.size();
 
-        Kost kost1 = createSampleKost(owner1.getId());
-        Kost kost2 = createSampleKost(owner2.getId());
-        kost2.setNama("Kost Harmoni");
+        pengelolaanKost.addKost(kost).join(); // + 1
 
-        kostRepository.save(kost1);
-        kostRepository.save(kost2);
+        createSampleUserAndKost();
+        pengelolaanKost.addKost(kost).join(); // + 2
 
-        kostList = pengelolaanKost.getAllKost();
+        kostList = pengelolaanKost.getAllKost().join();
         assertEquals(currentSize + 2, kostList.size());
     }
 
     @Test
     public void testUpdateKostByID() {
-        User owner = createSampleUser();
-        Kost original = kostRepository.save(createSampleKost(owner.getId()));
-        Kost updated = createSampleKost(owner.getId());
+        // Simpan Kost awal ke database
+        Kost original = kostRepository.save(kost);
+
+        // Ubah beberapa field
+        Kost updated = kostRepository.findById(original.getKostID()).get();
         updated.setNama("Kost Update");
-        updated.setHargaPerBulan(850000);
+        updated.setAlamat("Jl. Baru");
+        updated.setDeskripsi("Deskripsi Baru");
+        updated.setJumlahKamar(8);
+        updated.setHargaPerBulan(900000);
 
-        pengelolaanKost.updateKostByID(original.getKostID(), updated);
+        // Lakukan update
+        System.out.println();
+        pengelolaanKost.updateKostByID(original.getKostID(), updated).join();
 
+        // Ambil kembali dari DB dan pastikan nilai-nya berubah
         Optional<Kost> result = kostRepository.findById(original.getKostID());
         assertTrue(result.isPresent());
-        assertEquals("Kost Update", result.get().getNama());
-        assertEquals(850000, result.get().getHargaPerBulan());
+
+        Kost updatedResult = result.get();
+        assertEquals("Kost Update", updatedResult.getNama());
+        assertEquals("Jl. Baru", updatedResult.getAlamat());
+        assertEquals("Deskripsi Baru", updatedResult.getDeskripsi());
+        assertEquals(8, updatedResult.getJumlahKamar());
+        assertEquals(900000, updatedResult.getHargaPerBulan());
     }
 
     @Test
     public void testDeleteKost() {
-        User owner = createSampleUser();
-        Kost kost = kostRepository.save(createSampleKost(owner.getId()));
         pengelolaanKost.deleteKost(kost.getKostID());
 
         Optional<Kost> deleted = kostRepository.findById(kost.getKostID());
@@ -121,14 +131,19 @@ public class PengelolaanKostServiceTest {
 
     @Test
     public void testUpdateKostByID_InvalidId_ThrowsException() {
-        User owner = createSampleUser();
-        Kost updated = createSampleKost(owner.getId());
+        Kost original = kostRepository.save(kost);
         UUID invalidId = UUID.randomUUID();
 
-        ValidationException exception = assertThrows(
-                ValidationException.class,
-                () -> pengelolaanKost.updateKostByID(invalidId, updated)
+        ExecutionException thrown = assertThrows(
+                ExecutionException.class,
+                () -> pengelolaanKost.updateKostByID(invalidId, original).get()
         );
+
+        // Unwrap cause-nya dan pastikan itu ValidationException
+        Throwable cause = thrown.getCause();
+        assertTrue(cause instanceof ValidationException);
+        ValidationException exception = (ValidationException) cause;
+
         assertEquals(ValidationErrorCode.INVALID_ID.getCode(), exception.getErrorCode());
     }
 }

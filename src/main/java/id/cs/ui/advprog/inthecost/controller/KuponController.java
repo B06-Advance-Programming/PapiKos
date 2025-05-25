@@ -2,6 +2,7 @@ package id.cs.ui.advprog.inthecost.controller;
 
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
+import id.cs.ui.advprog.inthecost.service.KuponService;
 import id.cs.ui.advprog.inthecost.service.KuponServiceImpl;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
@@ -13,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,10 +29,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/kupon")
 public class KuponController{
     @Autowired
-    private KuponServiceImpl kuponService;
-
-    @Autowired
-    private UserRepository userRepository;
+    private KuponService kuponService;
 
     @Autowired
     private KostRepository kostRepository;
@@ -39,7 +38,9 @@ public class KuponController{
     public ResponseEntity<List<KuponResponse>> getAllKupon() {
         logCurrentUser();
 
-        List<Kupon> kupons = kuponService.getAllKupon();
+        List<Kupon> kupons = kuponService.getAllKupon().join();
+        System.out.println("[DEBUG] kupons size: " + kupons.size());
+        kupons.forEach(k -> System.out.println("[DEBUG] Kupon: " + k.getNamaKupon()));
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -56,7 +57,7 @@ public class KuponController{
     public ResponseEntity<KuponResponse> getKuponById(@PathVariable UUID id) {
         logCurrentUser();
         try{
-            Kupon kupon = kuponService.getKuponById(id);
+            Kupon kupon = kuponService.getKuponById(id).join();
             return ResponseEntity.ok(mapToResponse(kupon));
         }catch (RuntimeException e){
             return ResponseEntity.notFound().build();
@@ -64,6 +65,7 @@ public class KuponController{
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<Void> deleteKupon(@PathVariable UUID id) {
         try {
             kuponService.getKuponById(id);
@@ -76,6 +78,7 @@ public class KuponController{
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<KuponResponse> updateKupon(@PathVariable UUID id, @RequestBody KuponRequest request) {
         logCurrentUser();
         try {
@@ -88,7 +91,7 @@ public class KuponController{
                     request.getDeskripsi(),
                     request.getQuantity()
             );
-            Kupon updatedKupon = kuponService.getKuponById(id);
+            Kupon updatedKupon = kuponService.getKuponById(id).join();
             return ResponseEntity.ok(mapToResponse(updatedKupon));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -100,6 +103,7 @@ public class KuponController{
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<KuponResponse> createKupon(@RequestBody KuponRequest request) {
         logCurrentUser();
 
@@ -126,6 +130,22 @@ public class KuponController{
         return ResponseEntity.ok(mapToResponse(savedKupon));
     }
 
+    @GetMapping("/kost/{kostId}")
+    public ResponseEntity<List<KuponResponse>> getKuponsByKost(@PathVariable UUID kostId) {
+        logCurrentUser();
+
+        List<Kupon> kupons = kuponService.findByKostId(kostId).join();
+        if (kupons.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        List<KuponResponse> responses = kupons.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
+    }
+
     private KuponResponse mapToResponse(Kupon kupon) {
         KuponResponse response = new KuponResponse();
         response.setIdKupon(kupon.getIdKupon());
@@ -138,7 +158,7 @@ public class KuponController{
         response.setQuantity(kupon.getQuantity());
         response.setKosPemilik(
                 kupon.getKosPemilik().stream()
-                        .map(Kost::getNama)
+                        .map(Kost::getKostID)
                         .toList()
         );
         return response;

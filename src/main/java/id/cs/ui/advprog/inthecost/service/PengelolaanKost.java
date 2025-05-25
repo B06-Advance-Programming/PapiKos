@@ -4,11 +4,13 @@ import id.cs.ui.advprog.inthecost.model.Kost;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface PengelolaanKost {
-    void addKost(Kost kost);
+    CompletableFuture<Void> addKost(Kost kost);
     // Cek Kost
-    List<Kost> getAllKost();
-    void updateKostByID(UUID kostId, Kost kost);
-    void deleteKost(UUID kostId);
+    CompletableFuture<List<Kost>> getAllKost();
+    CompletableFuture<List<Kost>> getKostByOwnerId(UUID id);
+    CompletableFuture<Void> updateKostByID(UUID kostId, Kost kost);
+    CompletableFuture<Void> deleteKost(UUID kostId);
 }
