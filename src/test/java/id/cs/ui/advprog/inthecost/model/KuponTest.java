@@ -173,10 +173,37 @@ public class KuponTest {
     }
 
     @Test
-    void testStatusKuponInvalidĀ(){
+    void testStatusKuponValidQuantity(){
+        kupon.setQuantity(2);
+        kupon.decreaseQuantityByOne();
+        assertEquals(KuponStatus.VALID, kupon.getStatusKupon());
+    }
+
+    @Test
+    void testStatusKuponValidQuantityBySet(){
+        kupon.setQuantity(4);
+        assertEquals(KuponStatus.VALID, kupon.getStatusKupon());
+    }
+
+    @Test
+    void testStatusKuponInvalid(){
         kupon.setMasaBerlaku(LocalDate.of(2020, 1, 1));
         assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
     }
+
+    @Test
+    void testStatusKuponInvalidQuantity(){
+        kupon.setQuantity(1);
+        kupon.decreaseQuantityByOne();
+        assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
+    }
+
+    @Test
+    void testStatusKuponInvalidQuantityBySet(){
+        kupon.setQuantity(0);
+        assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
+    }
+
 
     @Test
     void testKuponToString(){
@@ -202,9 +229,11 @@ public class KuponTest {
         kupon.setQuantity(1);
         kupon.decreaseQuantityByOne();
         assertEquals(0, kupon.getQuantity());
+        assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
         // Should remain at 0 if called again
         kupon.decreaseQuantityByOne();
         assertEquals(0, kupon.getQuantity());
+        assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
     }
 
     @Test

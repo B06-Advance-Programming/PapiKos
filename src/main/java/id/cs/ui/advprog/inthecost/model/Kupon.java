@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.model;
 
+import id.cs.ui.advprog.inthecost.strategy.QuantityBasedKuponStatusStrategy;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -61,7 +62,11 @@ public class Kupon {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    private static final KuponStatusStrategy defaultStatusStrategy = new DefaultKuponStatusStrategy();
+    @Transient
+    private static final List<KuponStatusStrategy> evaluationStrategies = List.of(
+            new DefaultKuponStatusStrategy(),
+            new QuantityBasedKuponStatusStrategy()
+    );
 
     public Kupon() {
         this.quantity = 1;
@@ -102,12 +107,19 @@ public class Kupon {
     }
 
     public void refreshStatus() {
-        this.statusKupon = defaultStatusStrategy.evaluate(this);
+        this.statusKupon = KuponStatus.VALID;
+        for (KuponStatusStrategy strategy : evaluationStrategies) {
+            if (strategy.evaluate(this) == KuponStatus.INVALID) {
+                this.statusKupon = KuponStatus.INVALID;
+                return;
+            }
+        }
     }
 
     public void decreaseQuantityByOne() {
         if(this.quantity > 0)
             this.quantity = this.quantity - 1;
+        refreshStatus();
     }
 
     public void setPersentase(int persentase) {
@@ -122,6 +134,11 @@ public class Kupon {
             throw new IllegalArgumentException("Deskripsi cannot be null or empty");
         }
         this.deskripsi = deskripsi;
+    }
+
+    public void setQuantity(int quantity){
+        this.quantity = quantity;
+        refreshStatus();
     }
 
     public void setMasaBerlaku(LocalDate masaBerlaku) {
