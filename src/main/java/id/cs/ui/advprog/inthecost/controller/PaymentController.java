@@ -62,7 +62,9 @@ public class PaymentController {
 
         logRequestContext(testingMode, "kostPayment");
 
-        UUID userId, ownerId, kostId;
+        UUID userId;
+        UUID ownerId;
+        UUID kostId;
         try {
             userId = UUID.fromString(req.getUserId());
             ownerId = UUID.fromString(req.getOwnerId());

@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.*;
@@ -151,7 +150,7 @@ public class KuponControllerTest {
         injectId(dummyUpdate, UUID.fromString("adf47413-df12-426e-b06e-0c57e2c69cd5"));
 
         when(kuponService.getKuponById(dummyUpdate.getIdKupon())).thenReturn(CompletableFuture.completedFuture(dummyUpdate));
-        when(kuponService.updateKupon(dummyUpdate.getIdKupon(), dummyUpdate.getKosPemilik().stream().map(Kost::getKostID).collect(Collectors.toList()), dummyUpdate.getPersentase(), dummyUpdate.getNamaKupon(),
+        when(kuponService.updateKupon(dummyUpdate.getIdKupon(), dummyUpdate.getKosPemilik().stream().map(Kost::getKostID).toList(), dummyUpdate.getPersentase(), dummyUpdate.getNamaKupon(),
                 dummyUpdate.getMasaBerlaku(), dummyUpdate.getDeskripsi(), dummyUpdate.getQuantity())).thenReturn(dummyUpdate);
 
         var response = kuponController.updateKupon(dummyUpdate.getIdKupon(), editRequest);
