@@ -8,11 +8,6 @@ class InthecostApplicationTests {
 
     @Test
     void contextLoads() {
+        // This one is empty to trigger the start application
     }
-
-//    @Test
-//    void mainMethodTest(){
-//        InthecostApplication.main(new String[]{});
-//    }
-
 }
