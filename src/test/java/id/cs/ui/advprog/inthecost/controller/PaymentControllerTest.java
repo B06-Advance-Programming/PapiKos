@@ -76,7 +76,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expectedPayment, response.getBody());
     }
 
@@ -91,7 +91,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Invalid UUID format for userId", response.getBody());
     }
 
@@ -122,7 +122,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expectedPayment, response.getBody());
     }
 
@@ -167,7 +167,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expectedPayment, response.getBody());
     }
 
@@ -210,7 +210,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expectedPayment, response.getBody());
     }
 
@@ -253,7 +253,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(expectedPayment, response.getBody());
     }
 
@@ -268,7 +268,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Invalid UUID format for userId, ownerId, or kostId", response.getBody());
     }
 
@@ -293,7 +293,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Tidak ada penyewaan kos dengan status DIAJUKAN untuk user ini", response.getBody());
     }
 
@@ -319,7 +319,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Kost not found", response.getBody());
     }
 
@@ -352,7 +352,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Payment failed", response.getBody());
     }
 
@@ -381,7 +381,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(payments, response.getBody());
     }
 
@@ -391,7 +391,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Invalid UUID format for userId", response.getBody());
     }
 
@@ -423,7 +423,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(filteredPayments, response.getBody());
     }
 
@@ -437,7 +437,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = responseFuture.get();
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Invalid UUID format for userId", response.getBody());
     }
 
@@ -468,7 +468,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = paymentController.getDiajukanPenyewaanKosByUser(userIdStr);
 
         assertNotNull(response);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
 
         List<PaymentController.PenyewaanKosDTO> dtos = (List<PaymentController.PenyewaanKosDTO>) response.getBody();
         assertNotNull(dtos);
@@ -489,7 +489,7 @@ public class PaymentControllerTest {
         ResponseEntity<?> response = paymentController.getDiajukanPenyewaanKosByUser("invalid-uuid");
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertEquals("Invalid UUID for userId", response.getBody());
     }
 }
