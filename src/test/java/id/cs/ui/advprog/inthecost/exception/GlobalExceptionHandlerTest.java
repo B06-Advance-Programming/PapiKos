@@ -11,12 +11,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class GlobalExceptionHandlerTest {
+class GlobalExceptionHandlerTest {
 
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    public void testHandleBadCredentialsException() {
+    void testHandleBadCredentialsException() {
         BadCredentialsException ex = new BadCredentialsException("Bad credentials");
         ProblemDetail detail = handler.handleSecurityException(ex);
 
@@ -26,7 +26,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testHandleAccountStatusException() {
+    void testHandleAccountStatusException() {
         AccountStatusException ex = mock(AccountStatusException.class);
         when(ex.getMessage()).thenReturn("Account locked");
         ProblemDetail detail = handler.handleSecurityException(ex);
@@ -37,7 +37,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testHandleAccessDeniedException() {
+    void testHandleAccessDeniedException() {
         AccessDeniedException ex = new AccessDeniedException("Access denied");
         ProblemDetail detail = handler.handleSecurityException(ex);
 
@@ -47,7 +47,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testHandleSignatureException() {
+    void testHandleSignatureException() {
         SignatureException ex = new SignatureException("Invalid signature");
         ProblemDetail detail = handler.handleSecurityException(ex);
 
@@ -57,7 +57,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testHandleExpiredJwtException() {
+    void testHandleExpiredJwtException() {
         ExpiredJwtException ex = mock(ExpiredJwtException.class);
         when(ex.getMessage()).thenReturn("Token expired");
         ProblemDetail detail = handler.handleSecurityException(ex);
@@ -68,7 +68,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    public void testHandleGenericException() {
+    void testHandleGenericException() {
         Exception ex = new Exception("General error");
         ProblemDetail detail = handler.handleSecurityException(ex);
 

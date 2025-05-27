@@ -6,10 +6,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserRolesTest {
+class UserRolesTest {
 
     @Test
-    public void testConstructorAndGetters() {
+    void testConstructorAndGetters() {
         User user = new User();
         user.setId(UUID.randomUUID());
 
@@ -23,7 +23,7 @@ public class UserRolesTest {
     }
 
     @Test
-    public void testSetters() {
+    void testSetters() {
         UserRoles userRoles = new UserRoles();
         userRoles.setId(1);
 
@@ -40,7 +40,7 @@ public class UserRolesTest {
     }
 
     @Test
-    public void testEqualsAndHashCode_sameObject() {
+    void testEqualsAndHashCode_sameObject() {
         User user = new User();
         user.setId(UUID.randomUUID());
 
@@ -54,7 +54,7 @@ public class UserRolesTest {
     }
 
     @Test
-    public void testEqualsAndHashCode_differentObject() {
+    void testEqualsAndHashCode_differentObject() {
         User user1 = new User();
         user1.setId(UUID.randomUUID());
 
@@ -73,7 +73,7 @@ public class UserRolesTest {
     }
 
     @Test
-    public void testEqualsWithNullAndOtherType() {
+    void testEqualsWithNullAndOtherType() {
         User user = new User();
         user.setId(UUID.randomUUID());
 

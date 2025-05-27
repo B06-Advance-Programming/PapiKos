@@ -8,10 +8,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PenyewaanKosDtoTest {
+class PenyewaanKosDtoTest {
 
     @Test
-    public void testAllGetters() {
+    void testAllGetters() {
         UUID id = UUID.randomUUID();
         String namaLengkap = "John Doe";
         String nomorTelepon = "08123456789";

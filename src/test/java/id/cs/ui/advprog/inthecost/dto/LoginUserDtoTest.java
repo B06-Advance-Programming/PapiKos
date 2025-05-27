@@ -3,10 +3,10 @@ package id.cs.ui.advprog.inthecost.dto;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoginUserDtoTest {
+class LoginUserDtoTest {
 
     @Test
-    public void testEmailGetterAndSetter() {
+    void testEmailGetterAndSetter() {
         LoginUserDto dto = new LoginUserDto();
         String expectedEmail = "test@example.com";
 
@@ -16,7 +16,7 @@ public class LoginUserDtoTest {
     }
 
     @Test
-    public void testPasswordGetterAndSetter() {
+    void testPasswordGetterAndSetter() {
         LoginUserDto dto = new LoginUserDto();
         String expectedPassword = "securePassword123";
 
@@ -26,7 +26,7 @@ public class LoginUserDtoTest {
     }
 
     @Test
-    public void testFullObjectSetAndGet() {
+    void testFullObjectSetAndGet() {
         LoginUserDto dto = new LoginUserDto();
         String expectedEmail = "user@example.com";
         String expectedPassword = "mySecretPass";

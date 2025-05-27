@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-public class KosAvailabilityObserverTest {
+class KosAvailabilityObserverTest {
 
     private Kost kost;
     private WishlistObserver observer;

@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-public class WishlistObserverTest {
+class WishlistObserverTest {
 
     private NotificationService notificationServiceMock;
     private WishlistObserver wishlistObserver;

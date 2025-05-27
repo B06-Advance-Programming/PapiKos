@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.time.LocalDateTime;
 
 @ExtendWith(MockitoExtension.class)
-public class PaymentServiceTest {
+class PaymentServiceTest {
 
     @Mock
     private PaymentRepository paymentRepository;

@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
-public class PengelolaanKostServiceTest {
+class PengelolaanKostServiceTest {
 
     @Autowired
     private PengelolaanKost pengelolaanKost;
@@ -42,7 +42,7 @@ public class PengelolaanKostServiceTest {
     Kost kost;
 
     @BeforeEach
-    public void createSampleUserAndKost() {
+    void createSampleUserAndKost() {
         user = new User();
         String unique = UUID.randomUUID().toString();
         user.setUsername("owner_" + unique);
@@ -62,7 +62,7 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testAddKost() {
+    void testAddKost() {
         List<Kost> allKostBefore = kostRepository.findAll();
         int currentSize = allKostBefore.size();
 
@@ -79,7 +79,7 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testGetAllKost() {
+    void testGetAllKost() {
         List<Kost> kostList = pengelolaanKost.getAllKost().join();
         int currentSize = kostList.size();
 
@@ -93,7 +93,7 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testUpdateKostByID() {
+    void testUpdateKostByID() {
         // Simpan Kost awal ke database
         Kost original = kostRepository.save(kost);
 
@@ -122,7 +122,7 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testDeleteKost() {
+    void testDeleteKost() {
         pengelolaanKost.deleteKost(kost.getKostID());
 
         Optional<Kost> deleted = kostRepository.findById(kost.getKostID());
@@ -130,7 +130,7 @@ public class PengelolaanKostServiceTest {
     }
 
     @Test
-    public void testUpdateKostByID_InvalidId_ThrowsException() {
+    void testUpdateKostByID_InvalidId_ThrowsException() {
         Kost original = kostRepository.save(kost);
         UUID invalidId = UUID.randomUUID();
 

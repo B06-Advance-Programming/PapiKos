@@ -9,13 +9,13 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PenyewaanKosTest {
+class PenyewaanKosTest {
 
     private PenyewaanKos penyewaan;
     private Kost kos;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         kos = new Kost();
         kos.setNama("Kos Mawar");
         kos.setAlamat("Jl. Melati No. 2");
@@ -33,68 +33,68 @@ public class PenyewaanKosTest {
     }
 
     @Test
-    public void testGetNamaLengkap() {
+    void testGetNamaLengkap() {
         assertEquals("Budi Santoso", penyewaan.getNamaLengkap());
     }
 
     @Test
-    public void testGetNomorTelepon() {
+    void testGetNomorTelepon() {
         assertEquals("08123456789", penyewaan.getNomorTelepon());
     }
 
     @Test
-    public void testGetTanggalCheckIn() {
+    void testGetTanggalCheckIn() {
         assertEquals(LocalDate.of(2025, 5, 1), penyewaan.getTanggalCheckIn());
     }
 
     @Test
-    public void testGetDurasiBulan() {
+    void testGetDurasiBulan() {
         assertEquals(6, penyewaan.getDurasiBulan());
     }
 
     @Test
-    public void testGetKosNama() {
+    void testGetKosNama() {
         assertEquals("Kos Mawar", penyewaan.getKos().getNama());
     }
 
     @Test
-    public void testGetKosAlamat() {
+    void testGetKosAlamat() {
         assertEquals("Jl. Melati No. 2", penyewaan.getKos().getAlamat());
     }
 
     @Test
-    public void testGetKosDeskripsi() {
+    void testGetKosDeskripsi() {
         assertEquals("Kos nyaman dekat kampus", penyewaan.getKos().getDeskripsi());
     }
 
     @Test
-    public void testGetKosJumlahKamar() {
+    void testGetKosJumlahKamar() {
         assertEquals(10, penyewaan.getKos().getJumlahKamar());
     }
 
     @Test
-    public void testGetKosHargaSewaBulanan() {
+    void testGetKosHargaSewaBulanan() {
         assertEquals(1500000, kos.getHargaPerBulan());
     }
 
     @Test
-    public void testStatusDefaultDiajukan() {
+    void testStatusDefaultDiajukan() {
         assertEquals(StatusPenyewaan.DIAJUKAN, penyewaan.getStatus());
     }
 
     @Test
-    public void testBisaEditJikaDiajukan() {
+    void testBisaEditJikaDiajukan() {
         assertTrue(penyewaan.isEditable());
     }
 
     @Test
-    public void testTidakBisaEditJikaDisetujui() {
+    void testTidakBisaEditJikaDisetujui() {
         penyewaan.setStatus(StatusPenyewaan.DISETUJUI);
         assertFalse(penyewaan.isEditable());
     }
 
     @Test
-    public void testTidakBisaEditJikaDibatalkan() {
+    void testTidakBisaEditJikaDibatalkan() {
         penyewaan.setStatus(StatusPenyewaan.DIBATALKAN);
         assertFalse(penyewaan.isEditable());
     }

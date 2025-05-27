@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 @Transactional
 @ComponentScan(basePackages = "id.cs.ui.advprog.inthecost")
-public class KuponServiceTest{
+class KuponServiceTest{
     @InjectMocks
     KuponServiceImpl kuponService;
 

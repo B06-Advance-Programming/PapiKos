@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -24,7 +24,7 @@ public class UserRepositoryTest {
     private Role userRole;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Menyiapkan role USER untuk pengujian
         userRole = new Role("USER");
 
@@ -33,7 +33,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testSaveUser() {
+    void testSaveUser() {
         // Uji apakah user dapat disimpan ke dalam repository
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
@@ -48,7 +48,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testFindByEmail() {
+    void testFindByEmail() {
         // Uji apakah bisa menemukan pengguna berdasarkan username
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
@@ -65,7 +65,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testDeleteUser() {
+    void testDeleteUser() {
         // Uji apakah user dapat dihapus
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
@@ -82,7 +82,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testUpdateUser() {
+    void testUpdateUser() {
         // Uji apakah data user bisa diperbarui
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
@@ -102,7 +102,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testUserRoles() {
+    void testUserRoles() {
         // Uji apakah role dapat dikaitkan dengan user
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
