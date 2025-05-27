@@ -7,10 +7,8 @@ import id.cs.ui.advprog.inthecost.repository.KostRepository;
 
 import id.cs.ui.advprog.inthecost.dto.KuponRequest;
 import id.cs.ui.advprog.inthecost.dto.KuponResponse;
-
 import jakarta.persistence.EntityNotFoundException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,11 +23,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/kupon")
 public class KuponController{
-    @Autowired
-    private KuponService kuponService;
+    private final KuponService kuponService;
+    private final KostRepository kostRepository;
 
-    @Autowired
-    private KostRepository kostRepository;
+    public KuponController(KuponService kuponService, KostRepository kostRepository){
+        this.kuponService = kuponService;
+        this.kostRepository = kostRepository;
+    }
 
     @GetMapping
     public ResponseEntity<List<KuponResponse>> getAllKupon() {
