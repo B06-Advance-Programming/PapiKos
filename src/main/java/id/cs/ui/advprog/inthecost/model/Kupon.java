@@ -136,6 +136,11 @@ public class Kupon {
         this.deskripsi = deskripsi;
     }
 
+    public void setQuantity(int quantity){
+        this.quantity = quantity;
+        refreshStatus();
+    }
+
     public void setMasaBerlaku(LocalDate masaBerlaku) {
         if (masaBerlaku == null) {
             throw new IllegalArgumentException("Masa berlaku cannot be null");
