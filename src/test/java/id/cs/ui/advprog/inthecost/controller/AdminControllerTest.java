@@ -36,7 +36,7 @@ class AdminControllerTest {
 
         ResponseEntity<User> response = adminController.createAdministrator(registerAdminDto);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(mockUser, response.getBody());
 
         verify(userService, times(1)).createAdministrator(registerAdminDto);
