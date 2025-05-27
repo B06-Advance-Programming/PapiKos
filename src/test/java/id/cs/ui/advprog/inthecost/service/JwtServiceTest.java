@@ -54,7 +54,7 @@ class JwtServiceTest {
     }
 
     @Test
-    void testIsTokenExpired() throws InterruptedException {
+    void testIsTokenExpired(){
         // Create token with short expiry (0 second)
         jwtService.jwtExpiration = 100000; // 0 sec
         UserDetails userDetails = new User("expireuser", "pass", Collections.emptyList());

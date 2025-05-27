@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
@@ -32,7 +33,7 @@ class UserControllerTest {
 
         ResponseEntity<List<User>> response = userController.allUsers();
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
         verify(userService).allUsers();
     }

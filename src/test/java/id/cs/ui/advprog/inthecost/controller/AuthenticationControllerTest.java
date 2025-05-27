@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -42,7 +43,7 @@ class AuthenticationControllerTest {
 
         ResponseEntity<User> response = authenticationController.register(registerDto);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockUser, response.getBody());
         verify(authenticationService).signup(registerDto);
     }
@@ -65,7 +66,7 @@ class AuthenticationControllerTest {
 
         ResponseEntity<LoginResponse> response = authenticationController.authenticate(loginDto);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(fakeToken, response.getBody().getToken());
         assertEquals(fakeExpire, response.getBody().getExpiresIn());
 
