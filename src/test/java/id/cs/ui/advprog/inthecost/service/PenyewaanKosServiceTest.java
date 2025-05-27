@@ -143,4 +143,80 @@ class PenyewaanKosServiceTest {
         assertEquals(2, all.size());
         verify(repository).findAll();
     }
+
+    @Test
+    void testCreatePenyewaanWithExistingPending() {
+        PenyewaanKos existing = new PenyewaanKos();
+        existing.setId(UUID.randomUUID());
+        existing.setNamaLengkap("Existing");
+        existing.setKos(kos);
+        existing.setUserId(UUID.randomUUID());
+        existing.setStatus(StatusPenyewaan.DIAJUKAN);
+
+        PenyewaanKos newPenyewaan = new PenyewaanKos();
+        newPenyewaan.setNamaLengkap("New");
+        newPenyewaan.setKos(kos);
+        newPenyewaan.setUserId(existing.getUserId());
+
+        when(repository.findByKos_KostIDAndUserIdAndStatus(
+                kos.getKostID(), existing.getUserId(), StatusPenyewaan.DIAJUKAN))
+                .thenReturn(List.of(existing));
+        when(repository.save(any(PenyewaanKos.class))).thenAnswer(i -> {
+            PenyewaanKos p = i.getArgument(0);
+            if (p.getId() == null) p.setId(UUID.randomUUID());
+            return p;
+        });
+
+        PenyewaanKos result = service.create(newPenyewaan);
+
+        assertNotNull(result.getId());
+        assertEquals(StatusPenyewaan.DIAJUKAN, result.getStatus());
+        verify(repository, times(2)).save(any(PenyewaanKos.class)); // existing updated + new saved
+    }
+
+    @Test
+    void testHasPendingPenyewaanWhenExists() {
+        UUID userId = UUID.randomUUID();
+        UUID kostId = UUID.randomUUID();
+        PenyewaanKos pending = new PenyewaanKos();
+        when(repository.findByKos_KostIDAndUserIdAndStatus(
+                kostId, userId, StatusPenyewaan.DIAJUKAN))
+                .thenReturn(List.of(pending));
+
+        boolean hasPending = service.hasPendingPenyewaan(userId, kostId);
+
+        assertTrue(hasPending);
+        verify(repository).findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
+    }
+
+    @Test
+    void testHasPendingPenyewaanWhenNone() {
+        UUID userId = UUID.randomUUID();
+        UUID kostId = UUID.randomUUID();
+        when(repository.findByKos_KostIDAndUserIdAndStatus(
+                kostId, userId, StatusPenyewaan.DIAJUKAN))
+                .thenReturn(Collections.emptyList());
+
+        boolean hasPending = service.hasPendingPenyewaan(userId, kostId);
+
+        assertFalse(hasPending);
+        verify(repository).findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
+    }
+
+    @Test
+    void testGetAllByUserIdAndStatus() {
+        UUID userId = UUID.randomUUID();
+        StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
+        PenyewaanKos p1 = new PenyewaanKos();
+        PenyewaanKos p2 = new PenyewaanKos();
+
+        when(repository.findByUserIdAndStatus(userId, status))
+                .thenReturn(List.of(p1, p2));
+
+        List<PenyewaanKos> result = service.getAllByUserIdAndStatus(userId, status);
+
+        assertEquals(2, result.size());
+        verify(repository).findByUserIdAndStatus(userId, status);
+    }
+
 }
