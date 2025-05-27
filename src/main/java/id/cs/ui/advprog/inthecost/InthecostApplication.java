@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
 @EnableAsync
 @SpringBootApplication
@@ -16,7 +17,6 @@ public class InthecostApplication {
     public void init() {
         // Set timezone ke Asia/Jakarta (WIB)
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Jakarta"));
-        System.out.println("Timezone set to: " + TimeZone.getDefault().getID());
     }
 
     public static void main(String[] args) {

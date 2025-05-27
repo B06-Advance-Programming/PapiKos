@@ -1,10 +1,11 @@
 package id.cs.ui.advprog.inthecost.service;
 
+import id.cs.ui.advprog.inthecost.exception.ValidationErrorCode;
+import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.KuponRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -77,7 +78,7 @@ public class KuponServiceImpl implements KuponService {
         if (kuponRepository.existsById(id)) {
             kuponRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Kupon dengan ID " + id + " tidak ditemukan.");
+            throw new ValidationException(ValidationErrorCode.INVALID_ID);
         }
     }
 

@@ -1,18 +1,14 @@
 package id.cs.ui.advprog.inthecost.service;
 
+import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
-import id.cs.ui.advprog.inthecost.model.Role;
-import id.cs.ui.advprog.inthecost.model.User;
 
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.KuponRepository;
-import id.cs.ui.advprog.inthecost.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.mockito.InjectMocks;
@@ -21,9 +17,7 @@ import org.mockito.Mock;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -104,7 +98,7 @@ class KuponServiceTest{
 
         List<UUID> kostIds = inputKupon.getKosPemilik().stream()
                 .map(Kost::getKostID)
-                .collect(Collectors.toList());
+                .toList();
 
         when(kuponRepository.findById(inputKupon.getIdKupon()))
                 .thenReturn(Optional.of(inputKupon));
@@ -133,10 +127,30 @@ class KuponServiceTest{
 
     @Test
     void testUpdateKuponFail() {
-        when(kuponRepository.findById(kuponList.get(1).getIdKupon()))
+        Kupon kuponToUpdate = kuponList.get(1);
+        UUID targetId = kuponToUpdate.getIdKupon();
+
+        when(kuponRepository.findById(targetId))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> kuponService.updateKupon(kuponList.get(1).getIdKupon(), kuponList.get(1).getKosPemilik().stream().map(Kost::getKostID).collect(Collectors.toList()), kuponList.get(1).getPersentase(), kuponList.get(1).getNamaKupon(), kuponList.get(1).getMasaBerlaku(), kuponList.get(1).getDeskripsi(), kuponList.get(1).getQuantity()))
+        List<UUID> kostIds = kuponToUpdate.getKosPemilik().stream()
+                .map(Kost::getKostID)
+                .toList();
+        int persentase = kuponToUpdate.getPersentase();
+        String namaKupon = kuponToUpdate.getNamaKupon();
+        LocalDate masaBerlaku = kuponToUpdate.getMasaBerlaku();
+        String deskripsi = kuponToUpdate.getDeskripsi();
+        int quantity = kuponToUpdate.getQuantity();
+
+        assertThatThrownBy(() -> kuponService.updateKupon(
+                targetId,
+                kostIds,
+                persentase,
+                namaKupon,
+                masaBerlaku,
+                deskripsi,
+                quantity
+        ))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -206,8 +220,7 @@ class KuponServiceTest{
         when(kuponRepository.existsById(invalidId)).thenReturn(false);
 
         assertThatThrownBy(() -> kuponService.deleteKupon(invalidId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("tidak ditemukan");
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -216,7 +229,7 @@ class KuponServiceTest{
 
         List<Kupon> result = kuponService.getAllKupon().join();
 
-        assertThat(result).hasSize(kuponList.size());
+        assertThat(result).hasSize(kuponList.size()).containsExactlyElementsOf(kuponList);
         assertThat(result).containsExactlyElementsOf(kuponList);
     }
 
