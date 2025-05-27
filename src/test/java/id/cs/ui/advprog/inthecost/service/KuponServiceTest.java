@@ -230,7 +230,6 @@ class KuponServiceTest{
         List<Kupon> result = kuponService.getAllKupon().join();
 
         assertThat(result).hasSize(kuponList.size()).containsExactlyElementsOf(kuponList);
-        assertThat(result).containsExactlyElementsOf(kuponList);
     }
 
 }
