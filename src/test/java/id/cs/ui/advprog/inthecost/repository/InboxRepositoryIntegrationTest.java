@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InboxRepositoryIntegrationTest {
+class InboxRepositoryIntegrationTest {
 
     static class User {
         private UUID id;

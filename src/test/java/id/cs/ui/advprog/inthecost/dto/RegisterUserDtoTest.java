@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RegisterUserDtoTest {
+class RegisterUserDtoTest {
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         RegisterUserDto dto = new RegisterUserDto();
 
         String email = "user@example.com";

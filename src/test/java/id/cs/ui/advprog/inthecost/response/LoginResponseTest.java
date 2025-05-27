@@ -3,10 +3,10 @@ package id.cs.ui.advprog.inthecost.response;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LoginResponseTest {
+class LoginResponseTest {
 
     @Test
-    public void testTokenGetterAndSetter() {
+    void testTokenGetterAndSetter() {
         LoginResponse response = new LoginResponse();
         String expectedToken = "sample.jwt.token";
 
@@ -16,7 +16,7 @@ public class LoginResponseTest {
     }
 
     @Test
-    public void testExpiresInGetterAndSetter() {
+    void testExpiresInGetterAndSetter() {
         LoginResponse response = new LoginResponse();
         long expectedExpiresIn = 3600L;
 
@@ -26,7 +26,7 @@ public class LoginResponseTest {
     }
 
     @Test
-    public void testFullObjectSetAndGet() {
+    void testFullObjectSetAndGet() {
         LoginResponse response = new LoginResponse();
         String expectedToken = "another.jwt.token";
         long expectedExpiresIn = 7200L;
