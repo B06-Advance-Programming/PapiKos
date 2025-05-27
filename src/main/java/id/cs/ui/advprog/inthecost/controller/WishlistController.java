@@ -18,7 +18,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/wishlist")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class WishlistController {
 
     // Constants for repeated string literals
