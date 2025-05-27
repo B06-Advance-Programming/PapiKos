@@ -42,6 +42,12 @@ public class Kost implements Subject {
     @Transient
     private boolean enableObservers = true; // Flag to enable/disable observer notifications
 
+    private static final String kosanKosong = "Nama kosan tidak boleh kosong";
+    private static final String alamatKosong = "Alamat kosan tidak boleh kosong";
+    private static final String deskripsiKosong = "Deskripsi kosan tidak boleh kosong";
+    private static final String kamarNegatif = "Jumlah kamar tidak boleh negatif";
+    private static final String hargaString = "Harga per bulan harus lebih besar dari 0";
+
     // manual set each times
     public Kost() {
         kostID = UUID.randomUUID();
@@ -51,21 +57,21 @@ public class Kost implements Subject {
     public Kost(String nama, String alamat, String deskripsi, int jumlahKamar, int hargaPerBulan) {
         // handle null atau kosong
         if (nama == null || nama.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, kosanKosong);
         }
         if (alamat == null || alamat.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, alamatKosong);
         }
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, deskripsiKosong);
         }
 
         // handle integer value yang tidak diperbolehkan
         if (jumlahKamar < 0) {
-            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
+            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, kamarNegatif);
         }
         if (hargaPerBulan <= 0) {
-            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
+            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, hargaString);
         }
 
         this.kostID = UUID.randomUUID();
@@ -80,13 +86,13 @@ public class Kost implements Subject {
     public Kost(String nama, String alamat, String deskripsi, int jumlahKamar, int hargaPerBulan, UUID ownerId) {
         // handle null atau kosong
         if (nama == null || nama.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, kosanKosong);
         }
         if (alamat == null || alamat.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, alamatKosong);
         }
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, deskripsiKosong);
         }
         if (ownerId == null) {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Owner ID tidak boleh kosong");
@@ -94,10 +100,10 @@ public class Kost implements Subject {
 
         // handle integer value yang tidak diperbolehkan
         if (jumlahKamar < 0) {
-            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
+            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, kamarNegatif);
         }
         if (hargaPerBulan <= 0) {
-            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
+            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, hargaString);
         }
 
         this.kostID = UUID.randomUUID();
@@ -112,25 +118,25 @@ public class Kost implements Subject {
     // cek manual saat set
     public void setNama(String nama) {
         if (nama == null || nama.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Nama kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, kosanKosong);
         }
         this.nama = nama;
     }
     public void setAlamat(String alamat) {
         if (alamat == null || alamat.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Alamat kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, alamatKosong);
         }
         this.alamat = alamat;
     }
     public void setDeskripsi(String deskripsi) {
         if (deskripsi == null || deskripsi.trim().isEmpty()) {
-            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, "Deskripsi kosan tidak boleh kosong");
+            throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, deskripsiKosong);
         }
         this.deskripsi = deskripsi;
     }
     public void setJumlahKamar(int jumlahKamar) {
         if (jumlahKamar < 0) {
-            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, "Jumlah kamar tidak boleh negatif");
+            throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, kamarNegatif);
         }
 
         int oldValue = this.jumlahKamar;
@@ -142,7 +148,7 @@ public class Kost implements Subject {
     }
     public void setHargaPerBulan(int hargaPerBulan) {
         if (hargaPerBulan <= 0) {
-            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, "Harga per bulan harus lebih besar dari 0");
+            throw new ValidationException(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE, hargaString);
         }
         this.hargaPerBulan = hargaPerBulan;
     }
