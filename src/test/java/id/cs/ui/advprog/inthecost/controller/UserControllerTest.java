@@ -19,7 +19,6 @@ import static org.mockito.Mockito.*;
 class UserControllerTest {
 
     @Mock private UserService userService;
-    @Mock private Authentication authentication;
 
     @InjectMocks private UserController userController;
 
@@ -54,7 +53,7 @@ class UserControllerTest {
 
         ResponseEntity<User> response = userController.authenticatedUser();
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(mockUser, response.getBody());
     }
 
@@ -69,7 +68,7 @@ class UserControllerTest {
 
         ResponseEntity<User> response = userController.authenticatedUser();
 
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 }
