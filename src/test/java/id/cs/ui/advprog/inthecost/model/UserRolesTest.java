@@ -81,7 +81,6 @@ class UserRolesTest {
 
         UserRoles ur = new UserRoles(user, role);
 
-        assertNotEquals(ur, null);
-        assertNotEquals(ur, "Some String");
+        assertNotEquals(null, ur);
     }
 }

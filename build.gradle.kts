@@ -35,35 +35,37 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
-    compileOnly("org.projectlombok:lombok")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    annotationProcessor("org.projectlombok:lombok")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
     // Spring Boot Starter for JPA
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     // PostgreSQL JDBC Driver
     implementation("org.postgresql:postgresql")
-    // Test dependencies
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
-    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
-
-//    // untuk user
+    // untuk user
     implementation("org.springframework.boot:spring-boot-starter-security")
-
     // Spring Session JDBC
     implementation("org.springframework.session:spring-session-jdbc")
-
     implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    implementation("me.paulschwarz:spring-dotenv:3.0.0")
+
+    compileOnly("org.projectlombok:lombok")
+
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    annotationProcessor("org.projectlombok:lombok")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Test dependencies
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+
     runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 
-    implementation("me.paulschwarz:spring-dotenv:3.0.0")
 }
 
 tasks.register<Test>("unitTest") {
