@@ -22,7 +22,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class NotificationController {
 
     // Constants for repeated string literals
@@ -128,8 +127,7 @@ public class NotificationController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<InboxNotification> createNotification(
             @PathVariable String userId,
-            @RequestBody Map<String, String> request) {
-        try {
+            @RequestBody Map<String, String> request) {        try {
             String message = request.get(MESSAGE_KEY);
             if (message == null || message.trim().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
@@ -137,6 +135,8 @@ public class NotificationController {
 
             InboxNotification notification = notificationService.createNotification(userId, message);
             return ResponseEntity.status(HttpStatus.CREATED).body(notification);
+        } catch (ResponseStatusException e) {
+            throw e; // Re-throw ResponseStatusException without wrapping
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
@@ -152,8 +152,7 @@ public class NotificationController {
      */
     @PostMapping("/broadcast")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> broadcastNotification(@RequestBody Map<String, String> request) {
-        try {
+    public ResponseEntity<Map<String, Object>> broadcastNotification(@RequestBody Map<String, String> request) {        try {
             String message = request.get(MESSAGE_KEY);
             if (message == null || message.trim().isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Message cannot be empty");
@@ -167,6 +166,8 @@ public class NotificationController {
             response.put("recipientCount", notificationCount);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (ResponseStatusException e) {
+            throw e; // Re-throw ResponseStatusException without wrapping
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {

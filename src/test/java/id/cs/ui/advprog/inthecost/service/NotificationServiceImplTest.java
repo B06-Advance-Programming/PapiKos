@@ -74,11 +74,11 @@ class NotificationServiceImplTest {
         // Assert
         verify(inboxRepository, never()).save(any(InboxNotification.class));
     }
-    
-    @Test
+      @Test
     void notifyUsers_WithExceptionDuringRetrieval_ShouldHandleGracefully() {
         // Arrange
-        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenThrow(new RuntimeException("Database error"));
+        RuntimeException dbException = new RuntimeException("Database error");
+        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenThrow(dbException);
         
         // Act & Assert
         assertThrows(RuntimeException.class, () -> notificationService.notifyUsers(testKost));
@@ -129,11 +129,11 @@ class NotificationServiceImplTest {
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> notificationService.getInbox("not-a-uuid"));
     }
-    
-    @Test
+      @Test
     void getInbox_WithDatabaseError_ShouldPropagateException() {
         // Arrange
-        when(inboxRepository.findByUserId(any(UUID.class))).thenThrow(new DataIntegrityViolationException("Database error"));
+        DataIntegrityViolationException dbException = new DataIntegrityViolationException("Database error");
+        when(inboxRepository.findByUserId(any(UUID.class))).thenThrow(dbException);
         
         // Act & Assert
         assertThrows(DataIntegrityViolationException.class, () -> notificationService.getInbox(testUserId.toString()));
@@ -251,6 +251,13 @@ class NotificationServiceImplTest {
     }
     
     @Test
+    void createNotification_WithWhitespaceOnlyMessage_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> 
+            notificationService.createNotification(testUserId.toString(), "   "));
+    }
+    
+    @Test
     void createNotification_WithUserNotFound_ShouldThrowException() {
         // Arrange
         when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
@@ -321,5 +328,103 @@ class NotificationServiceImplTest {
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> 
             notificationService.getNotificationById(null));
+    }
+      @Test
+    void notifyUsers_WithNullKost_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> notificationService.notifyUsers(null));
+    }
+      @Test
+    void notifyUsers_WithRepositorySaveFailure_ShouldPropagateException() {
+        // Arrange
+        Set<String> wishlistedUsers = Set.of(testUserId.toString());
+        DataIntegrityViolationException saveException = new DataIntegrityViolationException("Save failed");
+        
+        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
+        when(inboxRepository.existsByUserIdAndMessage(eq(testUserId), anyString())).thenReturn(false);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(inboxRepository.save(any(InboxNotification.class))).thenThrow(saveException);
+        
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> notificationService.notifyUsers(testKost));
+    }
+      @Test
+    void getInbox_WithNullUserId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> notificationService.getInbox(null));
+    }
+    
+    @Test
+    void countNotifications_WithNullUserId_ShouldThrowException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> notificationService.countNotifications(null));
+    }
+      @Test
+    void countNotifications_WithDatabaseError_ShouldPropagateException() {
+        // Arrange
+        DataIntegrityViolationException dbException = new DataIntegrityViolationException("Database error");
+        when(inboxRepository.findByUserId(any(UUID.class))).thenThrow(dbException);
+        
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> notificationService.countNotifications(testUserId.toString()));
+    }
+      @Test
+    void createNotificationForAllUsers_WithDatabaseErrorOnUserRetrieval_ShouldPropagateException() {
+        // Arrange
+        DataIntegrityViolationException dbException = new DataIntegrityViolationException("Database error");
+        when(userRepository.findAll()).thenThrow(dbException);
+        
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> 
+            notificationService.createNotificationForAllUsers("Test message"));
+    }
+      @Test
+    void createNotificationForAllUsers_WithSaveFailure_ShouldPropagateException() {
+        // Arrange
+        List<User> users = List.of(testUser);
+        DataIntegrityViolationException saveException = new DataIntegrityViolationException("Save failed");
+        when(userRepository.findAll()).thenReturn(users);
+        when(inboxRepository.save(any(InboxNotification.class))).thenThrow(saveException);
+        
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> 
+            notificationService.createNotificationForAllUsers("Test message"));
+    }
+      @Test
+    void deleteNotification_WithDatabaseError_ShouldPropagateException() {
+        // Arrange
+        UUID notificationId = UUID.randomUUID();
+        DataIntegrityViolationException dbException = new DataIntegrityViolationException("Database error");
+        when(inboxRepository.existsById(notificationId)).thenThrow(dbException);
+        
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> 
+            notificationService.deleteNotification(notificationId));
+    }
+      @Test
+    void getNotificationById_WithDatabaseError_ShouldPropagateException() {
+        // Arrange
+        UUID notificationId = UUID.randomUUID();
+        DataIntegrityViolationException dbException = new DataIntegrityViolationException("Database error");
+        when(inboxRepository.findById(notificationId)).thenThrow(dbException);
+        
+        // Act & Assert
+        assertThrows(DataIntegrityViolationException.class, () -> 
+            notificationService.getNotificationById(notificationId));
+    }
+    
+    @Test
+    void notifyUsers_WithKostHavingNullId_ShouldHandleGracefully() {
+        // Arrange
+        Kost kostWithNullId = new Kost("Test Kost", "Test Address", "Test Description", 5, 1000000);
+        kostWithNullId.setKostID(null);
+        
+        when(wishlistRepository.findUserIdsByKostId(null)).thenReturn(null);
+        
+        // Act & Assert - should not throw an exception
+        assertDoesNotThrow(() -> notificationService.notifyUsers(kostWithNullId));
+        
+        // Verify that no repository save calls were made
+        verify(inboxRepository, never()).save(any(InboxNotification.class));
     }
 }

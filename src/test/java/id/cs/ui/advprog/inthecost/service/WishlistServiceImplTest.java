@@ -298,4 +298,277 @@ class WishlistServiceImplTest {
         assertThrows(NullPointerException.class, () -> 
             wishlistService.countWishlistsByKostId(null));
     }
+
+    // Additional test cases for improved coverage
+    
+    @Test
+    void addToWishlist_WithNullUserId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.addToWishlist(null, testKostId1));
+        
+        verify(wishlistRepository, never()).save(any());
+    }
+    
+    @Test
+    void addToWishlist_WithNullKostId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.addToWishlist(testUserId, null));
+        
+        verify(wishlistRepository, never()).save(any());
+    }
+    
+    @Test
+    void addToWishlist_WithBothNullIds_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.addToWishlist(null, null));
+        
+        verify(wishlistRepository, never()).save(any());
+    }
+    
+    @Test
+    void addToWishlist_WhenRepositoryThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(kostRepository.findById(testKostId1)).thenReturn(Optional.of(testKost1));
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1)).thenReturn(Collections.emptyList());
+        when(wishlistRepository.save(any(Wishlist.class))).thenThrow(new DataAccessException("Database error") {});
+        
+        // Act & Assert
+        assertThrows(DataAccessException.class, () -> 
+            wishlistService.addToWishlist(testUserId, testKostId1));
+    }
+    
+    @Test
+    void removeFromWishlist_WithNullUserId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.removeFromWishlist(null, testKostId1));
+        
+        verify(wishlistRepository, never()).delete(any());
+    }
+    
+    @Test
+    void removeFromWishlist_WithNullKostId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.removeFromWishlist(testUserId, null));
+        
+        verify(wishlistRepository, never()).delete(any());
+    }
+    
+    @Test
+    void removeFromWishlist_WithBothNullIds_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.removeFromWishlist(null, null));
+        
+        verify(wishlistRepository, never()).delete(any());
+    }
+    
+    @Test
+    void removeFromWishlist_WhenRepositoryThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1))
+            .thenThrow(new DataAccessException("Database error") {});
+        
+        // Act & Assert
+        assertThrows(DataAccessException.class, () -> 
+            wishlistService.removeFromWishlist(testUserId, testKostId1));
+        
+        verify(wishlistRepository, never()).delete(any());
+    }
+    
+    @Test
+    void removeFromWishlist_WhenDeleteThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1))
+            .thenReturn(Collections.singletonList(testWishlistEntries.get(0)));
+        doThrow(new DataAccessException("Delete failed") {}).when(wishlistRepository).delete(any(Wishlist.class));
+        
+        // Act & Assert
+        assertThrows(DataAccessException.class, () -> 
+            wishlistService.removeFromWishlist(testUserId, testKostId1));
+    }
+    
+    @Test
+    void removeFromWishlist_WithMultipleEntries_ShouldDeleteAllMatching() {
+        // Arrange - Create multiple wishlist entries for the same user-kost combination
+        Wishlist duplicateEntry = new Wishlist();
+        duplicateEntry.setId(3L);
+        duplicateEntry.setUser(testUser);
+        duplicateEntry.setKos(testKost1);
+        duplicateEntry.setCreatedAt(LocalDateTime.now());
+        
+        List<Wishlist> multipleEntries = Arrays.asList(testWishlistEntries.get(0), duplicateEntry);
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1))
+            .thenReturn(multipleEntries);
+        
+        // Act
+        wishlistService.removeFromWishlist(testUserId, testKostId1);
+        
+        // Assert - Both entries should be deleted
+        verify(wishlistRepository, times(2)).delete(any(Wishlist.class));
+        verify(wishlistRepository).delete(testWishlistEntries.get(0));
+        verify(wishlistRepository).delete(duplicateEntry);
+    }
+    
+    @Test
+    void isInWishlist_WithNullUserId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.isInWishlist(null, testKostId1));
+    }
+    
+    @Test
+    void isInWishlist_WithNullKostId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.isInWishlist(testUserId, null));
+    }
+    
+    @Test
+    void isInWishlist_WithBothNullIds_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.isInWishlist(null, null));
+    }
+    
+    @Test
+    void isInWishlist_WhenRepositoryThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1))
+            .thenThrow(new DataAccessException("Database error") {});
+        
+        // Act & Assert
+        assertThrows(DataAccessException.class, () -> 
+            wishlistService.isInWishlist(testUserId, testKostId1));
+    }
+    
+    @Test
+    void isInWishlist_WithMultipleMatchingEntries_ShouldReturnTrue() {
+        // Arrange - Create multiple wishlist entries for the same user-kost combination
+        Wishlist duplicateEntry = new Wishlist();
+        duplicateEntry.setId(3L);
+        duplicateEntry.setUser(testUser);
+        duplicateEntry.setKos(testKost1);
+        duplicateEntry.setCreatedAt(LocalDateTime.now());
+        
+        List<Wishlist> multipleEntries = Arrays.asList(testWishlistEntries.get(0), duplicateEntry);
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1))
+            .thenReturn(multipleEntries);
+        
+        // Act
+        boolean result = wishlistService.isInWishlist(testUserId, testKostId1);
+        
+        // Assert
+        assertTrue(result);
+    }
+    
+    @Test
+    void countWishlistsByKostId_WhenRepositoryThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(wishlistRepository.findUserIdsByKostId(testKostId1))
+            .thenThrow(new DataAccessException("Database error") {});
+        
+        // Act & Assert
+        assertThrows(DataAccessException.class, () -> 
+            wishlistService.countWishlistsByKostId(testKostId1));
+    }
+    
+    @Test
+    void countWishlistsByKostId_WithLargeNumberOfUsers_ShouldReturnCorrectCount() {
+        // Arrange - Create a large set of user IDs
+        Set<String> manyUserIds = new HashSet<>();
+        for (int i = 0; i < 1000; i++) {
+            manyUserIds.add(UUID.randomUUID().toString());
+        }
+        when(wishlistRepository.findUserIdsByKostId(testKostId1)).thenReturn(manyUserIds);
+        
+        // Act
+        int count = wishlistService.countWishlistsByKostId(testKostId1);
+        
+        // Assert
+        assertEquals(1000, count);
+    }
+      @Test
+    void countWishlistsByKostId_WithDuplicateUserIds_ShouldNotCountDuplicates() {
+        // Arrange - Test that repository naturally returns unique user IDs 
+        String userId1 = UUID.randomUUID().toString();
+        String userId2 = UUID.randomUUID().toString();
+        Set<String> userIds = Set.of(userId1, userId2); // Set naturally contains unique elements
+        when(wishlistRepository.findUserIdsByKostId(testKostId1)).thenReturn(userIds);
+        
+        // Act
+        int count = wishlistService.countWishlistsByKostId(testKostId1);
+        
+        // Assert
+        assertEquals(2, count); // Should be 2, demonstrating Set's unique nature
+    }
+    
+    @Test
+    void getWishlistByUserId_WithNullUserId_ShouldThrowNullPointerException() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> 
+            wishlistService.getWishlistByUserId(null));
+        
+        verify(wishlistRepository, never()).findByUser_Id(any());
+    }
+    
+    @Test
+    void getWishlistByUserId_WithEmptyWishlist_ShouldReturnEmptyList() {
+        // Arrange
+        when(wishlistRepository.findByUser_Id(testUserId)).thenReturn(Collections.emptyList());
+        
+        // Act
+        List<Kost> result = wishlistService.getWishlistByUserId(testUserId);
+        
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(wishlistRepository).findByUser_Id(testUserId);
+    }
+    
+    @Test
+    void getWishlistByUserId_WithLargeWishlist_ShouldHandleCorrectly() {
+        // Arrange - Create a large wishlist
+        List<Wishlist> largeWishlist = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            Wishlist entry = new Wishlist();
+            entry.setId((long) i);
+            entry.setUser(testUser);
+            
+            Kost kost = new Kost("Kost " + i, "Address " + i, "Description " + i, 1, 1000000);
+            kost.setKostID(UUID.randomUUID());
+            entry.setKos(kost);
+            entry.setCreatedAt(LocalDateTime.now().minusDays(i));
+            
+            largeWishlist.add(entry);
+        }
+        when(wishlistRepository.findByUser_Id(testUserId)).thenReturn(largeWishlist);
+        
+        // Act
+        List<Kost> result = wishlistService.getWishlistByUserId(testUserId);
+        
+        // Assert
+        assertEquals(100, result.size());
+        verify(wishlistRepository).findByUser_Id(testUserId);
+    }
+    
+    @Test
+    void addToWishlist_WhenIsInWishlistThrowsException_ShouldPropagateException() {
+        // Arrange
+        when(wishlistRepository.findByUser_IdAndKos_KostID(testUserId, testKostId1))
+            .thenThrow(new DataAccessException("Database error") {});
+        
+        // Act & Assert
+        assertThrows(DataAccessException.class, () -> 
+            wishlistService.addToWishlist(testUserId, testKostId1));
+        
+        verify(userRepository, never()).findById(any());
+        verify(kostRepository, never()).findById(any());
+        verify(wishlistRepository, never()).save(any());
+    }
 }
