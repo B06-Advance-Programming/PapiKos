@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 @ComponentScan(basePackages = "id.cs.ui.advprog.inthecost")
-public class KuponRepositoryTest {
+class KuponRepositoryTest {
     @Autowired
     private KuponRepository kuponRepository;
 

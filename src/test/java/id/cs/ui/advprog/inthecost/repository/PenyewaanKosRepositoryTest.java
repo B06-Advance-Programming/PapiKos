@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class PenyewaanKosRepositoryTest {
+class PenyewaanKosRepositoryTest {
 
     @Autowired
     private PenyewaanKosRepository repository;
@@ -36,7 +36,7 @@ public class PenyewaanKosRepositoryTest {
     private Kost kos;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         // Create and save a User owner
         User owner = new User("owneruser", "password", "owneruser@example.com", new HashSet<>());
         owner = userRepository.save(owner);
@@ -47,7 +47,7 @@ public class PenyewaanKosRepositoryTest {
     }
 
     @Test
-    public void testCreatePenyewaan() {
+    void testCreatePenyewaan() {
         PenyewaanKos penyewaan = PenyewaanKosBuilder.builder()
                 .namaLengkap("Andi")
                 .nomorTelepon("08123456789")
@@ -62,7 +62,7 @@ public class PenyewaanKosRepositoryTest {
     }
 
     @Test
-    public void testGetAllPenyewaan() {
+    void testGetAllPenyewaan() {
         PenyewaanKos p1 = PenyewaanKosBuilder.builder()
                 .kos(kos).build();
         PenyewaanKos p2 = PenyewaanKosBuilder.builder()
@@ -76,7 +76,7 @@ public class PenyewaanKosRepositoryTest {
     }
 
     @Test
-    public void testGetById() {
+    void testGetById() {
         PenyewaanKos p = PenyewaanKosBuilder.builder()
                 .namaLengkap("Dina")
                 .kos(kos)
@@ -90,7 +90,7 @@ public class PenyewaanKosRepositoryTest {
     }
 
     @Test
-    public void testUpdateIfDiajukan() {
+    void testUpdateIfDiajukan() {
         PenyewaanKos p = PenyewaanKosBuilder.builder()
                 .namaLengkap("Ayu")
                 .kos(kos)
@@ -104,7 +104,7 @@ public class PenyewaanKosRepositoryTest {
     }
 
     @Test
-    public void testSaveWithDisetujuiStatus() {
+    void testSaveWithDisetujuiStatus() {
         PenyewaanKos p = PenyewaanKosBuilder.builder()
                 .namaLengkap("Bambang")
                 .status(StatusPenyewaan.DISETUJUI)
@@ -117,7 +117,7 @@ public class PenyewaanKosRepositoryTest {
     }
 
     @Test
-    public void testDeletePenyewaan() {
+    void testDeletePenyewaan() {
         PenyewaanKos p = PenyewaanKosBuilder.builder()
                 .namaLengkap("Bayu")
                 .kos(kos)

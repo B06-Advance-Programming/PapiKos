@@ -10,14 +10,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UserModelTest {
+class UserModelTest {
 
     private User user;
     private Role roleUser;
     private Role roleAdmin;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         roleUser = new Role("USER");
         roleAdmin = new Role("ADMIN");
 
@@ -29,7 +29,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testUserConstructorAndGetters() {
+    void testUserConstructorAndGetters() {
         assertThat(user).isNotNull();
         assertThat(user.getUsername()).isEqualTo("testuser");
         assertThat(user.getPassword()).isEqualTo("password");
@@ -39,7 +39,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testParameterizedConstructorWithBalance() {
+    void testParameterizedConstructorWithBalance() {
         Set<Role> roles = new HashSet<>();
         roles.add(new Role("MANAGER"));
 
@@ -51,7 +51,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testDefaultConstructor() {
+    void testDefaultConstructor() {
         User defaultUser = new User();
         assertThat(defaultUser.getUsername()).isNull();
         assertThat(defaultUser.getBalance()).isEqualTo(0.0);
@@ -59,7 +59,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testAddRoleToUser() {
+    void testAddRoleToUser() {
         Role roleManager = new Role("MANAGER");
         user.getRoles().add(roleManager);
 
@@ -68,7 +68,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testGetAuthorities() {
+    void testGetAuthorities() {
         Set<SimpleGrantedAuthority> authorities = (Set<SimpleGrantedAuthority>) user.getAuthorities();
 
         assertThat(authorities)
@@ -77,7 +77,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testUserDetailsMethods() {
+    void testUserDetailsMethods() {
         assertThat(user.isAccountNonExpired()).isTrue();
         assertThat(user.isAccountNonLocked()).isTrue();
         assertThat(user.isCredentialsNonExpired()).isTrue();
@@ -85,7 +85,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testSettersAndGetters() {
+    void testSettersAndGetters() {
         UUID newId = UUID.randomUUID();
         user.setId(newId);
         user.setUsername("newuser");
@@ -107,7 +107,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testRoleManagement() {
+    void testRoleManagement() {
         // Test empty roles
         user.setRoles(new HashSet<>());
         assertThat(user.getRoles()).isEmpty();
@@ -118,7 +118,7 @@ public class UserModelTest {
     }
 
     @Test
-    public void testIdGeneration() {
+    void testIdGeneration() {
         User newUser = new User();
         newUser.setId(UUID.randomUUID());
         assertThat(newUser.getId())

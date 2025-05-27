@@ -7,10 +7,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PenyewaanKosRequestDtoTest {
+class PenyewaanKosRequestDtoTest {
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         PenyewaanKosRequestDto dto = new PenyewaanKosRequestDto();
 
         UUID id = UUID.randomUUID();
