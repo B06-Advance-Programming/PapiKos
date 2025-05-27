@@ -202,9 +202,11 @@ public class KuponTest {
         kupon.setQuantity(1);
         kupon.decreaseQuantityByOne();
         assertEquals(0, kupon.getQuantity());
+        assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
         // Should remain at 0 if called again
         kupon.decreaseQuantityByOne();
         assertEquals(0, kupon.getQuantity());
+        assertEquals(KuponStatus.INVALID, kupon.getStatusKupon());
     }
 
     @Test
