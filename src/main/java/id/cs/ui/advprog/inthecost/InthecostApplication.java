@@ -7,7 +7,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 @EnableAsync
 @SpringBootApplication

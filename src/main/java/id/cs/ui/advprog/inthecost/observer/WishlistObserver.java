@@ -13,11 +13,8 @@ public class WishlistObserver implements Observer {
 
     @Override
     public void update(Object subject) {
-        if (subject instanceof Kost kost) {
-            // Only notify users if the Kost has available rooms
-            if (kost.getJumlahKamar() > 0) {
-                notificationService.notifyUsers(kost);
-            }
+        if (subject instanceof Kost kost && kost.getJumlahKamar() > 0) {
+            notificationService.notifyUsers(kost);
         }
     }
 }
