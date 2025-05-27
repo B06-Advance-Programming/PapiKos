@@ -61,42 +61,32 @@ public class KostModelTest {
     // 4. Test Harga per bulan Harus Positif (setter)
     @Test
     public void testHargaPerBulanHarusPositif() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
-            kost.setHargaPerBulan(-1000);
-        });
+        Kost kost1 = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
+        ValidationException exception = assertThrows(ValidationException.class, () -> kost1.setHargaPerBulan(-1000));
         assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
 
-        exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
-            kost.setHargaPerBulan(0);
-        });
+        Kost kost2 = new Kost("Kos Melati", "Jl. Melati No. 10", "Kos nyaman", 10, 500000);
+        exception = assertThrows(ValidationException.class, () -> kost2.setHargaPerBulan(0));
         assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 5. Test Jumlah kamar tidak boleh negatif (setter)
     @Test
     public void testJumlahKamarTidakBolehNegatif() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", 10, 600000);
-            kost.setJumlahKamar(-5);
-        });
+        Kost kost = new Kost("Kos Cendana", "Jl. Cendana No. 20", "Kos bersih dan rapi", 10, 600000);
+        ValidationException exception = assertThrows(ValidationException.class, () -> kost.setJumlahKamar(-5));
         assertEquals(ValidationErrorCode.NEGATIVE_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 6. Test Deskripsi tidak boleh kosong (setter)
     @Test
     public void testDeskripsiTidakBolehKosong() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "Valid desc", 5, 450000);
-            kost.setDeskripsi("");
-        });
+        Kost kost1 = new Kost("Kos Merah", "Jl. Merah No. 15", "Valid desc", 5, 450000);
+        ValidationException exception = assertThrows(ValidationException.class, () -> kost1.setDeskripsi(""));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
-        exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost("Kos Merah", "Jl. Merah No. 15", "Valid desc", 5, 450000);
-            kost.setDeskripsi(null);
-        });
+        Kost kost2 = new Kost("Kos Merah", "Jl. Merah No. 15", "Valid desc", 5, 450000);
+        exception = assertThrows(ValidationException.class, () -> kost2.setDeskripsi(null));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
@@ -112,91 +102,83 @@ public class KostModelTest {
     // 8. Test nama tidak boleh kosong (setter)
     @Test
     public void testNamaTidakBolehKosong() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost();
-            kost.setNama("");
-        });
+        Kost kost1 = new Kost();
+        ValidationException exception = assertThrows(ValidationException.class, () -> kost1.setNama(""));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
-        exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost();
-            kost.setNama(null);
-        });
+        Kost kost2 = new Kost();
+        exception = assertThrows(ValidationException.class, () -> kost2.setNama(null));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 9. Test alamat tidak boleh kosong (setter)
     @Test
     public void testAlamatTidakBolehKosong() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost();
-            kost.setAlamat("");
-        });
+        Kost kost1 = new Kost();
+        ValidationException exception = assertThrows(ValidationException.class, () -> kost1.setAlamat(""));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
-        exception = assertThrows(ValidationException.class, () -> {
-            Kost kost = new Kost();
-            kost.setAlamat(null);
-        });
+        Kost kost2 = new Kost();
+        exception = assertThrows(ValidationException.class, () -> kost2.setAlamat(null));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 10. Test constructor parameter gagal validasi nama kosong
     @Test
     public void testConstructorNamaKosongGagal() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            new Kost("", "Alamat", "Deskripsi", 1, 1000);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                new Kost("", "Alamat", "Deskripsi", 1, 1000)
+        );
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 11. Test constructor parameter gagal validasi alamat kosong
     @Test
     public void testConstructorAlamatKosongGagal() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            new Kost("Nama", " ", "Deskripsi", 1, 1000);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                new Kost("Nama", " ", "Deskripsi", 1, 1000)
+        );
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 12. Test constructor parameter gagal validasi deskripsi kosong
     @Test
     public void testConstructorDeskripsiKosongGagal() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            new Kost("Nama", "Alamat", "", 1, 1000);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                new Kost("Nama", "Alamat", "", 1, 1000)
+        );
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 13. Test constructor parameter gagal validasi jumlah kamar negatif
     @Test
     public void testConstructorJumlahKamarNegatifGagal() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            new Kost("Nama", "Alamat", "Deskripsi", -1, 1000);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                new Kost("Nama", "Alamat", "Deskripsi", -1, 1000)
+        );
         assertEquals(ValidationErrorCode.NEGATIVE_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 14. Test constructor parameter gagal validasi harga per bulan nol atau negatif
     @Test
     public void testConstructorHargaPerBulanNegatifGagal() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            new Kost("Nama", "Alamat", "Deskripsi", 1, 0);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                new Kost("Nama", "Alamat", "Deskripsi", 1, 0)
+        );
         assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
 
-        exception = assertThrows(ValidationException.class, () -> {
-            new Kost("Nama", "Alamat", "Deskripsi", 1, -100);
-        });
+        exception = assertThrows(ValidationException.class, () ->
+                new Kost("Nama", "Alamat", "Deskripsi", 1, -100)
+        );
         assertEquals(ValidationErrorCode.ZERO_OR_NEGATIVE_VALUE.getCode(), exception.getErrorCode());
     }
 
     // 15. Test constructor with ownerId null fails
     @Test
     public void testConstructorOwnerIdNullThrows() {
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            new Kost("Nama", "Alamat", "Deskripsi", 1, 1000, null);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                new Kost("Nama", "Alamat", "Deskripsi", 1, 1000, null)
+        );
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
     }
 
@@ -204,9 +186,7 @@ public class KostModelTest {
     @Test
     public void testSetOwnerIdValidation() {
         Kost kost = new Kost();
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            kost.setOwnerId(null);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () -> kost.setOwnerId(null));
         assertEquals(ValidationErrorCode.NULL_OR_EMPTY_VALUE.getCode(), exception.getErrorCode());
 
         UUID ownerId = UUID.randomUUID();
