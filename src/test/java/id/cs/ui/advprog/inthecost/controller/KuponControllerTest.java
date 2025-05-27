@@ -19,13 +19,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -53,29 +51,21 @@ public class KuponControllerTest {
 
     @BeforeEach
     void setUp(){
-        MockitoAnnotations.openMocks(this);
-
         kos1 = new Kost("Kos Alamanda", "Jl. Melati No. 1", "Nyaman", 10, 1000000);
-        when(kostRepository.save(any(Kost.class))).thenAnswer(invocation -> {
-                    Kost kos = invocation.getArgument(0);
-                    if (kos.getKostID() == null) {
-                        Field field = Kost.class.getDeclaredField("kostID");
-                        field.setAccessible(true);
-                        field.set(kos, UUID.randomUUID());
-                    }
-                    return kos;
-                }
-        );
-        kostRepository.save(kos1);
+        UUID kos1Id = UUID.fromString("2c387f5f-9362-4937-8964-acb0e8ccdde5");
+
+        try {
+            Field field = Kost.class.getDeclaredField("kostID");
+            field.setAccessible(true);
+            field.set(kos1, kos1Id);
+        } catch (Exception e) { throw new RuntimeException(e); }
     }
     private void injectId(Kupon kupon, UUID id) {
         try {
             Field field = Kupon.class.getDeclaredField("idKupon");
             field.setAccessible(true);
             field.set(kupon, id);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throw new RuntimeException(e); }
     }
 
     private void injectKodeUnik(Kupon kupon, String kodeUnik){
@@ -83,10 +73,9 @@ public class KuponControllerTest {
             Field field = Kupon.class.getDeclaredField("kodeUnik");
             field.setAccessible(true);
             field.set(kupon, kodeUnik);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throw new RuntimeException(e); }
     }
+
     @Test
     void testCreateKupon(){
         KuponRequest kuponRequest = new KuponRequest();
@@ -112,10 +101,11 @@ public class KuponControllerTest {
 
         var response = kuponController.createKupon(kuponRequest);
 
-        assert response.getStatusCode().is2xxSuccessful();
-        assert response.getBody() != null;
-        assert response.getBody().getNamaKupon().equals("Kupon Test Controller");
-        assert response.getBody().getPersentase() == 10;
+        assertNotNull(response.getBody());
+        assertEquals("Kupon Test Controller", response.getBody().getNamaKupon());
+        assertEquals(10, response.getBody().getPersentase());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
     }
 
     @Test
@@ -449,32 +439,28 @@ public class KuponControllerTest {
     @Test
     void testGetKuponById_NotFound() {
         UUID nonExistentId = UUID.randomUUID();
-        when(kuponService.getKuponById(nonExistentId)).thenThrow(new RuntimeException());
-        var response = kuponController.getKuponById(nonExistentId);
+        when(kuponService.getKuponById(nonExistentId)).thenThrow(new RuntimeException("Not Found"));
+
+        ResponseEntity<KuponResponse> response = kuponController.getKuponById(nonExistentId);
+
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(kuponService, times(1)).getKuponById(nonExistentId);
     }
 
     @Test
     void testLogCurrentUser_AnonymousUser() {
-        // Setup security context with null authentication
         SecurityContext securityContext = mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(null);
 
         try (MockedStatic<SecurityContextHolder> mocked = mockStatic(SecurityContextHolder.class)) {
             mocked.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-
-            // Create instance and test
-            KuponController controller = new KuponController();
-            controller.logCurrentUser();
-
-            // Verify no interactions with authentication
+            kuponController.logCurrentUser();
             verify(securityContext, times(1)).getAuthentication();
         }
     }
 
     @Test
     void testLogCurrentUser_Unauthenticated() {
-        // Setup unauthenticated user
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(false);
 
@@ -483,12 +469,7 @@ public class KuponControllerTest {
 
         try (MockedStatic<SecurityContextHolder> mocked = mockStatic(SecurityContextHolder.class)) {
             mocked.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-
-            // Create instance and test
-            KuponController controller = new KuponController();
-            controller.logCurrentUser();
-
-            // Verify interactions
+            kuponController.logCurrentUser();
             verify(auth).isAuthenticated();
             verify(securityContext, times(1)).getAuthentication();
         }

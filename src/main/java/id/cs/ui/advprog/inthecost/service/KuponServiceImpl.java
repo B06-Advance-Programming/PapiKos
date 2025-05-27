@@ -17,11 +17,13 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class KuponServiceImpl implements KuponService {
 
-    @Autowired
-    KuponRepository kuponRepository;
+    private final KuponRepository kuponRepository;
+    private final KostRepository kostRepository;
 
-    @Autowired
-    KostRepository kostRepository;
+    public KuponServiceImpl(KuponRepository kuponRepository, KostRepository kostRepository) {
+        this.kuponRepository = kuponRepository;
+        this.kostRepository = kostRepository;
+    }
 
     @Override
     public Kupon createKupon(Kupon kupon) {
