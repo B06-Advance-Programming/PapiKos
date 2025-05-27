@@ -34,30 +34,45 @@ public class KuponTest {
     }
 
     @Test
-    void testKuponNotNull() {assertNotNull(kupon);}
-
-    @Test
-    void testGetKosPemilikKupon(){
-        assertEquals(List.of("Kos Alamanda", "Kos Griya Asri"), this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());
+    void testKuponNotNull() {
+        assertNotNull(kupon);
     }
 
     @Test
-    void testGetPersentase(){assertEquals(10, this.kupon.getPersentase());}
+    void testGetKosPemilikKupon(){
+        assertEquals(List.of("Kos Alamanda", "Kos Griya Asri"),
+                this.kupon.getKosPemilik().stream().map(Kost::getNama).toList());
+    }
 
     @Test
-    void testGetNamaKupon(){assertEquals("Kupon Idul Fitri", this.kupon.getNamaKupon());}
+    void testGetPersentase(){
+        assertEquals(10, this.kupon.getPersentase());
+    }
 
     @Test
-    void testGetMasaBerlakuKupon(){assertEquals(LocalDate.of(2026, 10, 10), this.kupon.getMasaBerlaku());}
+    void testGetNamaKupon(){
+        assertEquals("Kupon Idul Fitri", this.kupon.getNamaKupon());
+    }
 
     @Test
-    void testGetDeskripsiKupon(){assertEquals("Kupon Lebaran Idul Fitri 2026 Diskon 10%", this.kupon.getDeskripsi());}
+    void testGetMasaBerlakuKupon(){
+        assertEquals(LocalDate.of(2026, 10, 10), this.kupon.getMasaBerlaku());
+    }
 
     @Test
-    void testGetQuantityKupon(){assertEquals(2, this.kupon.getQuantity());}
+    void testGetDeskripsiKupon(){
+        assertEquals("Kupon Lebaran Idul Fitri 2026 Diskon 10%", this.kupon.getDeskripsi());
+    }
 
     @Test
-    void testKodeUnikKuponNotNull(){assertNotNull(this.kupon.getKodeUnik());}
+    void testGetQuantityKupon(){
+        assertEquals(2, this.kupon.getQuantity());
+    }
+
+    @Test
+    void testKodeUnikKuponNotNull(){
+        assertNotNull(this.kupon.getKodeUnik());
+    }
 
     @Test
     void testUpdateKosPemilik(){
@@ -75,38 +90,50 @@ public class KuponTest {
 
         List<String> actualNames = this.kupon.getKosPemilik().stream()
                 .map(Kost::getNama)
-                .toList(); // Changed from .collect(Collectors.toList())
+                .toList();
 
         assertEquals(List.of("KOS1", "KOS3", "KOS4"), actualNames);
     }
 
     @Test
-    void testMasaBerlakuNull(){
+    void testMasaBerlakuNull() {
+        List<Kost> mockKosList = List.of(mock(Kost.class), mock(Kost.class));
         assertThrows(IllegalArgumentException.class, () ->
-                new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon" ,null, 10, "Kupon Lebaran Idul Fitri 2026", 6)
+                new Kupon(mockKosList, "Test Kupon", null, 10, "Kupon Lebaran Idul Fitri 2026", 6)
         );
     }
 
     @Test
-    void testPersentaseInvalid(){
+    void testPersentaseInvalid() {
+        List<Kost> mockKosList = List.of(mock(Kost.class), mock(Kost.class));
+        LocalDate validDate = LocalDate.of(2026, 4, 10);
+        String desc = "Kupon Lebaran Idul Fitri 2026";
+
         assertThrows(IllegalArgumentException.class, () ->
-                new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), -30, "Kupon Lebaran Idul Fitri 2026", 6)
+                new Kupon(mockKosList, "Test Kupon", validDate, -30, desc, 6)
         );
+
         assertThrows(IllegalArgumentException.class, () ->
-                new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 0, "Kupon Lebaran Idul Fitri 2026", 6)
+                new Kupon(mockKosList, "Test Kupon", validDate, 0, desc, 6)
         );
+
         assertThrows(IllegalArgumentException.class, () ->
-                new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 129, "Kupon Lebaran Idul Fitri 2026", 6)
+                new Kupon(mockKosList, "Test Kupon", validDate, 129, desc, 6)
         );
     }
 
     @Test
-    void testDeskripsiNull(){
+    void testDeskripsiNull() {
+        List<Kost> mockKosList = List.of(mock(Kost.class), mock(Kost.class));
+        LocalDate validDate = LocalDate.of(2026, 4, 10);
+        int percent = 10;
+
         assertThrows(IllegalArgumentException.class, () ->
-                new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 10, null, 6)
+                new Kupon(mockKosList, "Test Kupon", validDate, percent, null, 6)
         );
+
         assertThrows(IllegalArgumentException.class, () ->
-                new Kupon(List.of(mock(Kost.class), mock(Kost.class)), "Test Kupon",LocalDate.of(2026, 4, 10), 10, "", 6)
+                new Kupon(mockKosList, "Test Kupon", validDate, percent, "", 6)
         );
     }
 
