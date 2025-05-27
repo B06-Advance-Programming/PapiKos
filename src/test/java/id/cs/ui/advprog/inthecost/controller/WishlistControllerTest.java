@@ -79,13 +79,12 @@ public class WishlistControllerTest {
         assertThrows(ResponseStatusException.class, () -> {
             wishlistController.getWishlistByUserId("invalid-id");
         });
-    }
-
-    @Test
+    }    @Test
     void testGetWishlistByUserId_ServiceException() {
         // Arrange
+        RuntimeException serviceException = new RuntimeException("Database connection failed");
         when(wishlistService.getWishlistByUserId(any(UUID.class)))
-                .thenThrow(new RuntimeException("Database connection failed"));
+                .thenThrow(serviceException);
         
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
@@ -95,11 +94,11 @@ public class WishlistControllerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Error retrieving wishlist"));
     }
-    
-    @Test
+      @Test
     void testGetWishlistByUserId_NullPointerException() {
         // Arrange
-        when(wishlistService.getWishlistByUserId(any(UUID.class))).thenThrow(new NullPointerException("Test exception"));
+        NullPointerException nullException = new NullPointerException("Test exception");
+        when(wishlistService.getWishlistByUserId(any(UUID.class))).thenThrow(nullException);
         
         // Act & Assert
         assertThrows(ResponseStatusException.class, () -> {
@@ -121,12 +120,11 @@ public class WishlistControllerTest {
         assertEquals("Kost added to wishlist successfully", response.getBody().get("message"));
         
         verify(wishlistService, times(1)).addToWishlist(userId, kostId);
-    }
-
-    @Test
+    }    @Test
     void testAddToWishlist_ServiceException() {
         // Arrange
-        doThrow(new RuntimeException("Database error")).when(wishlistService).addToWishlist(any(UUID.class), any(UUID.class));
+        RuntimeException dbException = new RuntimeException("Database error");
+        doThrow(dbException).when(wishlistService).addToWishlist(any(UUID.class), any(UUID.class));
         
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
@@ -171,12 +169,11 @@ public class WishlistControllerTest {
         assertEquals("Kost removed from wishlist successfully", response.getBody().get("message"));
         
         verify(wishlistService, times(1)).removeFromWishlist(userId, kostId);
-    }
-
-    @Test
+    }    @Test
     void testRemoveFromWishlist_ServiceException() {
         // Arrange
-        doThrow(new RuntimeException("Database error")).when(wishlistService).removeFromWishlist(any(UUID.class), any(UUID.class));
+        RuntimeException dbException = new RuntimeException("Database error");
+        doThrow(dbException).when(wishlistService).removeFromWishlist(any(UUID.class), any(UUID.class));
         
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
@@ -249,13 +246,12 @@ public class WishlistControllerTest {
         
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
         assertTrue(exception.getReason().contains("Invalid ID format"));
-    }
-
-    @Test
+    }    @Test
     void testIsInWishlist_ServiceException() {
         // Arrange
+        RuntimeException dbException = new RuntimeException("Database error");
         when(wishlistService.isInWishlist(any(UUID.class), any(UUID.class)))
-                .thenThrow(new RuntimeException("Database error"));
+                .thenThrow(dbException);
         
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
@@ -303,13 +299,12 @@ public class WishlistControllerTest {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1000, response.getBody().get("count"));
-    }
-
-    @Test
+    }    @Test
     void testGetWishlistCount_ServiceException() {
         // Arrange
+        RuntimeException dbException = new RuntimeException("Database error");
         when(wishlistService.countWishlistsByKostId(any(UUID.class)))
-                .thenThrow(new RuntimeException("Database error"));
+                .thenThrow(dbException);
         
         // Act & Assert
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
