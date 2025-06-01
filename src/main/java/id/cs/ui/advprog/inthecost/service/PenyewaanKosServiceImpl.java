@@ -1,7 +1,9 @@
 package id.cs.ui.advprog.inthecost.service;
 
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
+import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -17,10 +19,12 @@ import java.util.concurrent.CompletableFuture;
 public class PenyewaanKosServiceImpl implements PenyewaanKosService {
 
     private final PenyewaanKosRepository repository;
+    private final KostRepository kostRepository;
 
     @Autowired
-    public PenyewaanKosServiceImpl(PenyewaanKosRepository repository) {
+    public PenyewaanKosServiceImpl(PenyewaanKosRepository repository, KostRepository kostRepository) {
         this.repository = repository;
+        this.kostRepository = kostRepository;
     }
 
     @Async
@@ -31,8 +35,13 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
             penyewaan.setId(UUID.randomUUID());
         }
 
+        Kost kost = penyewaan.getKos();
+        if (kost.getJumlahKamar() < 1) {
+            throw new IllegalStateException("Kamar sudah penuh, tidak bisa menyewa.");
+        }
+
         List<PenyewaanKos> existingList = repository.findByKos_KostIDAndUserIdAndStatus(
-                penyewaan.getKos().getKostID(),
+                kost.getKostID(),
                 penyewaan.getUserId(),
                 StatusPenyewaan.DIAJUKAN
         );
@@ -40,9 +49,16 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         for (PenyewaanKos existing : existingList) {
             existing.setStatus(StatusPenyewaan.DIBATALKAN);
             repository.save(existing);
+            kost.setJumlahKamar(kost.getJumlahKamar() + 1);
         }
 
+        // Kurangi jumlah kamar
+        kost.setJumlahKamar(kost.getJumlahKamar() - 1);
         penyewaan.setStatus(StatusPenyewaan.DIAJUKAN);
+
+        // Simpan update kost
+        kostRepository.save(kost);
+
         PenyewaanKos saved = repository.save(penyewaan);
 
         return CompletableFuture.completedFuture(saved);
@@ -57,11 +73,21 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         if (existing.getStatus() != StatusPenyewaan.DIAJUKAN) {
             throw new IllegalStateException(String.format(
                     "Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN. status sekarang '%s'",
-                    penyewaan.getStatus()
+                    existing.getStatus()
             ));
         }
 
+        Kost kost = existing.getKos();
+        if (penyewaan.getStatus() == StatusPenyewaan.DIBATALKAN) {
+            kost.setJumlahKamar(kost.getJumlahKamar() + 1);
+        }
+        kostRepository.save(kost);
+
         PenyewaanKos updated = repository.save(penyewaan);
+
+        // force initialize before session closes
+        updated.getKos().getNama();
+
         return CompletableFuture.completedFuture(updated);
     }
 
