@@ -1,9 +1,14 @@
 package id.cs.ui.advprog.inthecost.dto;
 
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Getter
+@Setter
 public class PenyewaanKosDto {
 
     private UUID id;
@@ -26,14 +31,4 @@ public class PenyewaanKosDto {
         this.userId = userId;
         this.kostId = kostId;
     }
-
-    // Getters and setters (bisa pakai Lombok @Getter @Setter kalau mau)
-    public UUID getId() { return id; }
-    public String getNamaLengkap() { return namaLengkap; }
-    public String getNomorTelepon() { return nomorTelepon; }
-    public LocalDate getTanggalCheckIn() { return tanggalCheckIn; }
-    public int getDurasiBulan() { return durasiBulan; }
-    public StatusPenyewaan getStatus() { return status; }
-    public UUID getUserId() { return userId; }
-    public UUID getKostId() { return kostId; }
 }

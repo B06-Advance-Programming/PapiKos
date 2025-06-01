@@ -8,6 +8,8 @@ import org.mockito.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
 
@@ -17,7 +19,6 @@ import static org.mockito.Mockito.*;
 class UserControllerTest {
 
     @Mock private UserService userService;
-    @Mock private Authentication authentication;
 
     @InjectMocks private UserController userController;
 
@@ -36,5 +37,38 @@ class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(2, response.getBody().size());
         verify(userService).allUsers();
+    }
+
+    @Test
+    void authenticatedUser_shouldReturnOk_whenPrincipalIsUser() {
+        User mockUser = new User();
+        mockUser.setUsername("testuser");
+
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(mockUser);
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        ResponseEntity<User> response = userController.authenticatedUser();
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(mockUser, response.getBody());
+    }
+
+    @Test
+    void authenticatedUser_shouldReturnInternalServerError_whenPrincipalIsNotUser() {
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn("notAUserObject");
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        ResponseEntity<User> response = userController.authenticatedUser();
+
+        assertEquals(500, response.getStatusCode().value());
+        assertNull(response.getBody());
     }
 }
