@@ -18,10 +18,10 @@ public class PenyewaanKosDto {
     private int durasiBulan;
     private StatusPenyewaan status;
     private UUID userId;
-    private UUID kostId;
+    private String namaKos;
 
     public PenyewaanKosDto(UUID id, String namaLengkap, String nomorTelepon, LocalDate tanggalCheckIn,
-                           int durasiBulan, StatusPenyewaan status, UUID userId, UUID kostId) {
+                           int durasiBulan, StatusPenyewaan status, UUID userId, String namaKos) {
         this.id = id;
         this.namaLengkap = namaLengkap;
         this.nomorTelepon = nomorTelepon;
@@ -29,6 +29,6 @@ public class PenyewaanKosDto {
         this.durasiBulan = durasiBulan;
         this.status = status;
         this.userId = userId;
-        this.kostId = kostId;
+        this.namaKos = namaKos;
     }
 }

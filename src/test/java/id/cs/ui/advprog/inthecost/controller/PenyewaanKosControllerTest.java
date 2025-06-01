@@ -54,6 +54,7 @@ class PenyewaanKosControllerTest {
         kostId = UUID.randomUUID();
         kost = new Kost();
         kost.setKostID(kostId);
+        kost.setNama("test");
         kost.setOwnerId(userId);
 
         penyewaan = new PenyewaanKos();
@@ -127,7 +128,7 @@ class PenyewaanKosControllerTest {
         List<PenyewaanKosDto> result = controller.getAllByPemilik();
 
         assertEquals(1, result.size());
-        assertEquals(kostId, result.get(0).getKostId());
+        assertEquals("test", result.get(0).getNamaKos());
     }
 
     @Test
