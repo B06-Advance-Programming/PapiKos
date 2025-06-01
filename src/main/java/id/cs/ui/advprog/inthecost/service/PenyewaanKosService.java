@@ -8,8 +8,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface PenyewaanKosService {
-    PenyewaanKos create(PenyewaanKos penyewaan);
-    PenyewaanKos update(PenyewaanKos penyewaan);
+    CompletableFuture<PenyewaanKos> create(PenyewaanKos penyewaan);
+    CompletableFuture<PenyewaanKos> update(PenyewaanKos penyewaan);
     CompletableFuture<Void> delete(UUID id);
     PenyewaanKos findById(UUID id);
     List<PenyewaanKos> findAll();

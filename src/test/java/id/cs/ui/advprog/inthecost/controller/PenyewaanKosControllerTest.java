@@ -18,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -68,7 +70,7 @@ class PenyewaanKosControllerTest {
     }
 
     @Test
-    void testCreate() {
+    void testCreate() throws ExecutionException, InterruptedException {
         PenyewaanKosRequestDto dto = new PenyewaanKosRequestDto();
         dto.setNamaLengkap("Test");
         dto.setNomorTelepon("0812");
@@ -78,13 +80,15 @@ class PenyewaanKosControllerTest {
         dto.setKostId(kostId);
 
         when(kostRepository.findById(kostId)).thenReturn(Optional.of(kost));
-        when(service.create(any(PenyewaanKos.class))).thenReturn(penyewaan);
+        when(service.create(any(PenyewaanKos.class)))
+                .thenReturn(CompletableFuture.completedFuture(penyewaan));
 
-        PenyewaanKos result = controller.create(dto);
+        PenyewaanKosDto result = controller.create(dto);
 
         assertNotNull(result);
         assertEquals("Test User", result.getNamaLengkap());
     }
+
 
     @Test
     void testGetAll() {
@@ -127,7 +131,7 @@ class PenyewaanKosControllerTest {
     }
 
     @Test
-    void testUpdate() {
+    void testUpdate() throws ExecutionException, InterruptedException {
         PenyewaanKosRequestDto dto = new PenyewaanKosRequestDto();
         dto.setId(penyewaan.getId());
         dto.setNamaLengkap("Update");
@@ -139,8 +143,7 @@ class PenyewaanKosControllerTest {
         dto.setKostId(kostId);
 
         when(kostRepository.findById(kostId)).thenReturn(Optional.of(kost));
-        when(service.update(any(PenyewaanKos.class))).thenReturn(penyewaan);
-
+        when(service.update(any(PenyewaanKos.class))).thenReturn(CompletableFuture.completedFuture(penyewaan));
         PenyewaanKosDto result = controller.update(dto);
 
         assertNotNull(result);
