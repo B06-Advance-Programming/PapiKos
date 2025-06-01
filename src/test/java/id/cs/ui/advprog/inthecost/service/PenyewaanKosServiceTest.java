@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,7 +52,7 @@ class PenyewaanKosServiceTest {
     }
 
     @Test
-    void testCreatePenyewaan() {
+    void testCreatePenyewaan() throws ExecutionException, InterruptedException {
         PenyewaanKos penyewaan = new PenyewaanKos();
         penyewaan.setNamaLengkap("Ayu");
         penyewaan.setNomorTelepon("08123456789");
@@ -65,7 +66,7 @@ class PenyewaanKosServiceTest {
             return arg;
         });
 
-        PenyewaanKos result = service.create(penyewaan);
+        PenyewaanKos result = service.create(penyewaan).get();
 
         assertNotNull(result.getId());
         assertEquals(StatusPenyewaan.DIAJUKAN, result.getStatus());
@@ -73,7 +74,7 @@ class PenyewaanKosServiceTest {
     }
 
     @Test
-    void testUpdatePenyewaanBerhasilJikaDiajukan() {
+    void testUpdatePenyewaanBerhasilJikaDiajukan() throws ExecutionException, InterruptedException {
         PenyewaanKos penyewaan = new PenyewaanKos();
         penyewaan.setId(UUID.randomUUID());
         penyewaan.setNamaLengkap("Rina");
@@ -84,7 +85,7 @@ class PenyewaanKosServiceTest {
         when(repository.save(any(PenyewaanKos.class))).thenAnswer(i -> i.getArgument(0));
 
         penyewaan.setNamaLengkap("Rina Update");
-        PenyewaanKos updated = service.update(penyewaan);
+        PenyewaanKos updated = service.update(penyewaan).get();
 
         assertEquals("Rina Update", updated.getNamaLengkap());
         verify(repository).save(penyewaan);
@@ -145,7 +146,7 @@ class PenyewaanKosServiceTest {
     }
 
     @Test
-    void testCreatePenyewaanWithExistingPending() {
+    void testCreatePenyewaanWithExistingPending() throws ExecutionException, InterruptedException {
         PenyewaanKos existing = new PenyewaanKos();
         existing.setId(UUID.randomUUID());
         existing.setNamaLengkap("Existing");
@@ -167,7 +168,7 @@ class PenyewaanKosServiceTest {
             return p;
         });
 
-        PenyewaanKos result = service.create(newPenyewaan);
+        PenyewaanKos result = service.create(newPenyewaan).get();
 
         assertNotNull(result.getId());
         assertEquals(StatusPenyewaan.DIAJUKAN, result.getStatus());

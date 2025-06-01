@@ -6,6 +6,7 @@ import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,14 +23,19 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         this.repository = repository;
     }
 
+    @Async
     @Override
-    public PenyewaanKos create(PenyewaanKos penyewaan) {
+    @Transactional
+    public CompletableFuture<PenyewaanKos> create(PenyewaanKos penyewaan) {
         if (penyewaan.getId() == null) {
             penyewaan.setId(UUID.randomUUID());
         }
 
-        // Ambil semua penyewaan lain dengan userId + kostId + status diajukan
-        List<PenyewaanKos> existingList = repository.findByKos_KostIDAndUserIdAndStatus(penyewaan.getKos().getKostID(), penyewaan.getUserId(), StatusPenyewaan.DIAJUKAN);
+        List<PenyewaanKos> existingList = repository.findByKos_KostIDAndUserIdAndStatus(
+                penyewaan.getKos().getKostID(),
+                penyewaan.getUserId(),
+                StatusPenyewaan.DIAJUKAN
+        );
 
         for (PenyewaanKos existing : existingList) {
             existing.setStatus(StatusPenyewaan.DIBATALKAN);
@@ -37,18 +43,26 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
         }
 
         penyewaan.setStatus(StatusPenyewaan.DIAJUKAN);
-        return repository.save(penyewaan);
+        PenyewaanKos saved = repository.save(penyewaan);
+
+        return CompletableFuture.completedFuture(saved);
     }
 
+    @Async
     @Override
-    public PenyewaanKos update(PenyewaanKos penyewaan) {
+    @Transactional
+    public CompletableFuture<PenyewaanKos> update(PenyewaanKos penyewaan) {
         PenyewaanKos existing = findById(penyewaan.getId());
 
         if (existing.getStatus() != StatusPenyewaan.DIAJUKAN) {
-            throw new IllegalStateException(String.format("Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN. status sekarang '%s'", penyewaan.getStatus()));
+            throw new IllegalStateException(String.format(
+                    "Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN. status sekarang '%s'",
+                    penyewaan.getStatus()
+            ));
         }
 
-        return repository.save(penyewaan);
+        PenyewaanKos updated = repository.save(penyewaan);
+        return CompletableFuture.completedFuture(updated);
     }
 
     @Async
@@ -71,7 +85,9 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
 
     @Override
     public boolean hasPendingPenyewaan(UUID userId, UUID kostId) {
-        List<PenyewaanKos> pendingList = repository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
+        List<PenyewaanKos> pendingList = repository.findByKos_KostIDAndUserIdAndStatus(
+                kostId, userId, StatusPenyewaan.DIAJUKAN
+        );
         return !pendingList.isEmpty();
     }
 
