@@ -19,7 +19,7 @@ class PenyewaanKosDtoTest {
         int durasiBulan = 3;
         StatusPenyewaan status = StatusPenyewaan.DIAJUKAN;
         UUID userId = UUID.randomUUID();
-        UUID kostId = UUID.randomUUID();
+        String namaKos = "bukpis";
 
         PenyewaanKosDto dto = new PenyewaanKosDto(
                 id,
@@ -29,7 +29,7 @@ class PenyewaanKosDtoTest {
                 durasiBulan,
                 status,
                 userId,
-                kostId
+                namaKos
         );
 
         assertAll(
@@ -40,7 +40,7 @@ class PenyewaanKosDtoTest {
                 () -> assertEquals(durasiBulan, dto.getDurasiBulan(), "Durasi bulan should match"),
                 () -> assertEquals(status, dto.getStatus(), "Status should match"),
                 () -> assertEquals(userId, dto.getUserId(), "User ID should match"),
-                () -> assertEquals(kostId, dto.getKostId(), "Kost ID should match")
+                () -> assertEquals(namaKos, dto.getNamaKos(), "Kost ID should match")
         );
     }
 }
