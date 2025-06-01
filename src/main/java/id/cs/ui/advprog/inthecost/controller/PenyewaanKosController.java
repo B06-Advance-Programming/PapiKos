@@ -56,6 +56,7 @@ public class PenyewaanKosController {
                 created.getDurasiBulan(),
                 created.getStatus(),
                 created.getUserId(),
+                created.getKos().getKostID(),
                 created.getKos().getNama()
         );
     }
@@ -73,6 +74,7 @@ public class PenyewaanKosController {
                         p.getDurasiBulan(),
                         p.getStatus(),
                         p.getUserId(),
+                        p.getKos().getKostID(),
                         p.getKos().getNama()
                 ))
                 .toList();
@@ -95,6 +97,7 @@ public class PenyewaanKosController {
                         p.getDurasiBulan(),
                         p.getStatus(),
                         p.getUserId(),
+                        p.getKos().getKostID(),
                         p.getKos().getNama()
                 ))
                 .toList();
@@ -117,6 +120,7 @@ public class PenyewaanKosController {
                         p.getDurasiBulan(),
                         p.getStatus(),
                         p.getUserId(),
+                        p.getKos().getKostID(),
                         p.getKos().getNama()
                 ))
                 .toList();
@@ -148,6 +152,7 @@ public class PenyewaanKosController {
                 updated.getDurasiBulan(),
                 updated.getStatus(),
                 updated.getUserId(),
+                updated.getKos().getKostID(),
                 updated.getKos().getNama()
         );
     }
