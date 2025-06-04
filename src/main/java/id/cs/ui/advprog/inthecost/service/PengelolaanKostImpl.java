@@ -5,7 +5,7 @@ import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.observer.WishlistObserver;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 public class PengelolaanKostImpl implements PengelolaanKost {
 
@@ -64,7 +65,7 @@ public class PengelolaanKostImpl implements PengelolaanKost {
             kostToUpdate.clearObservers();
             kostToUpdate.addObserver(new WishlistObserver(notificationService));
             
-            System.out.println("🔄 UPDATING KOST: '" + kostToUpdate.getNama() + "' from " + kostToUpdate.getJumlahKamar() + " to " + kost.getJumlahKamar() + " rooms");
+            log.info("🔄 UPDATING KOST: '{}' from {} to {} rooms", kostToUpdate.getNama(), kostToUpdate.getJumlahKamar(), kost.getJumlahKamar());
             
             kostToUpdate.setNama(kost.getNama());
             kostToUpdate.setAlamat(kost.getAlamat());

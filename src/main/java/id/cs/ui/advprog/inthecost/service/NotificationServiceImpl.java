@@ -7,6 +7,7 @@ import id.cs.ui.advprog.inthecost.repository.InboxRepository;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
  * Implementation of the NotificationService interface
  * Handles notifications for users about kost availability and inbox messaging
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -37,14 +39,13 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (wishlistedUsers == null || wishlistedUsers.isEmpty()) {
             return;
-        }        for (String userId : wishlistedUsers) {
-            // Convert userId to UUID
+        }        for (String userId : wishlistedUsers) {            // Convert userId to UUID
             UUID userUUID = UUID.fromString(userId);
 
             // Create unique message with timestamp to allow multiple notifications
             String message = "Kamar tersedia di " + kost.getNama() + " (" + kost.getJumlahKamar() + " kamar tersedia)";
             
-            System.out.println("CREATING NOTIFICATION: '" + message + "' for user " + userId);
+            log.info("📧 CREATING NOTIFICATION: '{}' for user {}", message, userId);
 
             // Fetch the User object using the userId
             User user = userRepository.findById(userUUID)
@@ -54,7 +55,7 @@ public class NotificationServiceImpl implements NotificationService {
             InboxNotification notif = new InboxNotification(user, message);
             inboxRepository.save(notif);
             
-            System.out.println("NOTIFICATION SAVED: ID=" + notif.getId());
+            log.info("✅ NOTIFICATION SAVED: ID={}", notif.getId());
         }
     }
 

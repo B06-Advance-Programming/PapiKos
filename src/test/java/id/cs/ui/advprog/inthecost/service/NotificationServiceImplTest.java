@@ -109,6 +109,7 @@ class NotificationServiceImplTest {
     void notifyUsers_WithValidInputs_ShouldCreateNotificationWithCorrectTimestamp() {
         // Arrange
         Set<String> wishlistedUsers = Set.of(testUserId.toString());
+        testKost.setJumlahKamar(3); // Different room count to make test unique
 
         when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
         when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -123,8 +124,9 @@ class NotificationServiceImplTest {
 
         assertEquals(testUser, savedNotification.getUser());
         assertTrue(savedNotification.getMessage().contains(testKost.getNama()));
-        assertTrue(savedNotification.getMessage().contains("kamar tersedia"));
-
+        assertTrue(savedNotification.getMessage().contains("3 kamar tersedia")); // Verify specific room count
+        
+        // Verify timestamp is properly set
         if (savedNotification.getCreatedAt() != null) {
             LocalDateTime now = LocalDateTime.now();
             assertTrue(savedNotification.getCreatedAt().isBefore(now.plusSeconds(1)));

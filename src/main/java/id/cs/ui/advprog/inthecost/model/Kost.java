@@ -5,11 +5,13 @@ import id.cs.ui.advprog.inthecost.observer.Observer;
 import id.cs.ui.advprog.inthecost.observer.Subject;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Getter
 @Entity
 @Table(name = "kost")
@@ -136,13 +138,11 @@ public class Kost implements Subject {
     }    public void setJumlahKamar(int jumlahKamar) {
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, KAMAR_NEGATIF);
-        }
-
-        int oldValue = this.jumlahKamar;
+        }        int oldValue = this.jumlahKamar;
         this.jumlahKamar = jumlahKamar;
 
         if (enableObservers && oldValue == 0 && jumlahKamar > 0) {
-            System.out.println("🔔 OBSERVER PATTERN TRIGGERED: Kost '" + this.nama + "' rooms changed from " + oldValue + " to " + jumlahKamar + " - Notifying observers!");
+            log.info("🔔 OBSERVER PATTERN TRIGGERED: Kost '{}' rooms changed from {} to {} - Notifying observers!", this.nama, oldValue, jumlahKamar);
             notifyObservers();
         }
     }
@@ -175,11 +175,9 @@ public class Kost implements Subject {
     // Clear all observers
     public void clearObservers() {
         observers.clear();
-    }
-
-    @Override
+    }    @Override
     public void notifyObservers() {
-        System.out.println("🔔 NOTIFY OBSERVERS: " + observers.size() + " observers registered");
+        log.debug("🔔 NOTIFY OBSERVERS: {} observers registered", observers.size());
         for (Observer observer : observers) {
             observer.update(this);
         }
