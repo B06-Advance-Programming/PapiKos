@@ -53,24 +53,30 @@ public class KuponServiceImpl implements KuponService {
             updated.setQuantity(quantity);
             return kuponRepository.save(updated);
         } else {
-            throw new IllegalArgumentException("Kupon dengan ID " + idKupon + " tidak ditemukan.");
+            throw new ValidationException(ValidationErrorCode.INVALID_ID);
         }
     }
 
     @Async
     @Override
     public CompletableFuture<Kupon> getKuponById(UUID id) {
-        Kupon kupon = kuponRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Kupon dengan ID " + id + " tidak ditemukan."));
-        return CompletableFuture.completedFuture(kupon);
+        Optional<Kupon> kupon = kuponRepository.findById(id);
+        if(kupon.isPresent()) {
+            return CompletableFuture.completedFuture(kupon.get());
+        }else {
+            throw new ValidationException(ValidationErrorCode.INVALID_ID);
+        }
     }
 
     @Async
     @Override
     public CompletableFuture<Kupon> getKuponByKodeUnik(String kodeUnik){
-        Kupon kupon = kuponRepository.findByKodeUnik(kodeUnik)
-                .orElseThrow(() -> new RuntimeException("Kupon dengan Kode unik " + kodeUnik + " tidak ditemukan."));
-        return CompletableFuture.completedFuture(kupon);
+        Optional<Kupon> kupon = kuponRepository.findByKodeUnik(kodeUnik);
+        if(kupon.isPresent()) {
+            return CompletableFuture.completedFuture(kupon.get());
+        }else {
+            throw new ValidationException(ValidationErrorCode.INVALID_CODE);
+        }
     }
 
     @Override
