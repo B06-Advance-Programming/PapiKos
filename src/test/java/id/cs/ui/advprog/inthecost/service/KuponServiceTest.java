@@ -151,7 +151,7 @@ class KuponServiceTest{
                 deskripsi,
                 quantity
         ))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -175,8 +175,7 @@ class KuponServiceTest{
         when(kuponRepository.findById(invalidId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> kuponService.getKuponById(invalidId))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("tidak ditemukan");
+                .isInstanceOf(ValidationException.class);
     }
 
 
@@ -197,8 +196,7 @@ class KuponServiceTest{
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> kuponService.getKuponByKodeUnik(invalidKode))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("tidak ditemukan");
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
