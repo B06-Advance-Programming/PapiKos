@@ -1,5 +1,7 @@
 package id.cs.ui.advprog.inthecost.controller;
 
+import id.cs.ui.advprog.inthecost.exception.ValidationErrorCode;
+import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.service.KuponService;
@@ -20,6 +22,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,8 +40,6 @@ public class KuponController{
 
     @GetMapping
     public ResponseEntity<List<KuponResponse>> getAllKupon() {
-        logCurrentUser();
-
         List<Kupon> kupons = kuponService.getAllKupon().join();
         logger.debug("kupons size: {}", kupons.size());
         kupons.forEach(k -> logger.debug("Kupon: {}", k.getNamaKupon()));
@@ -56,12 +57,13 @@ public class KuponController{
 
     @GetMapping("/{id}")
     public ResponseEntity<KuponResponse> getKuponById(@PathVariable UUID id) {
-        logCurrentUser();
         try{
             Kupon kupon = kuponService.getKuponById(id).join();
             return ResponseEntity.ok(mapToResponse(kupon));
-        }catch (RuntimeException e){
+        }catch (ValidationException e) {
             return ResponseEntity.notFound().build();
+        }catch (Exception ex){
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -72,8 +74,10 @@ public class KuponController{
             kuponService.getKuponById(id);
             kuponService.deleteKupon(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
+        }catch (ValidationException e) {
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -81,7 +85,6 @@ public class KuponController{
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<KuponResponse> updateKupon(@PathVariable UUID id, @RequestBody KuponRequest request) {
-        logCurrentUser();
         try {
             kuponService.updateKupon(
                     id,
@@ -106,8 +109,6 @@ public class KuponController{
     @PostMapping
     @PreAuthorize("hasRole('PEMILIK') or hasRole('ADMIN')")
     public ResponseEntity<KuponResponse> createKupon(@RequestBody KuponRequest request) {
-        logCurrentUser();
-
         if (request.getPersentase() < 0 || request.getPersentase() > 100
                 || request.getKosPemilik() == null || request.getKosPemilik().isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -133,8 +134,6 @@ public class KuponController{
 
     @GetMapping("/kost/{kostId}")
     public ResponseEntity<List<KuponResponse>> getKuponsByKost(@PathVariable UUID kostId) {
-        logCurrentUser();
-
         List<Kupon> kupons = kuponService.findByKostId(kostId).join();
         if (kupons.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -173,13 +172,11 @@ public class KuponController{
 
     @GetMapping("/kode/{kodeUnik}")
     public ResponseEntity<KuponResponse> getKuponByKodeUnik(@PathVariable String kodeUnik) {
-        logCurrentUser();
-
         try {
             Kupon kupon = kuponService.getKuponByKodeUnik(kodeUnik).join();
             return ResponseEntity.ok(mapToResponse(kupon));
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("tidak ditemukan")) {
+        } catch (CompletionException e) {
+            if (e.getCause() instanceof ValidationException) {
                 return ResponseEntity.notFound().build();
             }
             return ResponseEntity.internalServerError().build();
@@ -201,18 +198,5 @@ public class KuponController{
                 .toList();
         response.setKosPemilik(kostInfoList);
         return response;
-    }
-
-    void logCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated()) {
-            String username = auth.getName();
-            String roles = auth.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.joining(", "));
-            logger.debug("User: {}, Roles: {}", username, roles);
-        } else {
-            logger.debug("Anonymous or unauthenticated request");
-        }
     }
 }
