@@ -13,10 +13,10 @@ import java.util.UUID;
 @Repository
 public interface KuponRepository extends JpaRepository<Kupon, UUID> {
 
+    // Fungsi tambahan, di luar default JPARepository
+
     Optional<Kupon> findByKodeUnik(String kodeUnik);
 
     @Query("SELECT k FROM Kupon k JOIN FETCH k.kosPemilik kp WHERE kp.kostID = :kostId")
     List<Kupon> findByKostId(@Param("kostId") UUID kostId);
-
-
 }

@@ -1,6 +1,5 @@
 package id.cs.ui.advprog.inthecost.model;
 
-import id.cs.ui.advprog.inthecost.strategy.QuantityBasedKuponStatusStrategy;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 
 import id.cs.ui.advprog.inthecost.enums.KuponStatus;
 import id.cs.ui.advprog.inthecost.strategy.KuponStatusStrategy;
-import id.cs.ui.advprog.inthecost.strategy.DefaultKuponStatusStrategy;
+import id.cs.ui.advprog.inthecost.strategy.KuponStatusStrategyManagement;
 
 @Getter
 @Setter
@@ -47,26 +46,21 @@ public class Kupon {
 
     @Setter(AccessLevel.NONE)
     @Column(name = "status_kupon", nullable = false, length = 50)
+
     @Enumerated(EnumType.STRING)
     private KuponStatus statusKupon;
 
+    // Join dengan table kupon_kost untuk mendefinisikan hubungan many to many
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "kupon_kost",
             joinColumns = @JoinColumn(name = "id_kupon"),
             inverseJoinColumns = @JoinColumn(name = "id_kost")
     )
-
     private List<Kost> kosPemilik = new ArrayList<>();
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
-
-    @Transient
-    private static final List<KuponStatusStrategy> evaluationStrategies = List.of(
-            new DefaultKuponStatusStrategy(),
-            new QuantityBasedKuponStatusStrategy()
-    );
 
     public Kupon() {
         this.quantity = 1;
@@ -102,13 +96,14 @@ public class Kupon {
         }
     }
 
+    //Kode unik random, hanya 6 huruf/angka. Seperti: ABCDE
     private String generateKodeUnik() {
         return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     public void refreshStatus() {
         this.statusKupon = KuponStatus.VALID;
-        for (KuponStatusStrategy strategy : evaluationStrategies) {
+        for (KuponStatusStrategy strategy : KuponStatusStrategyManagement.getStrategies()) {
             if (strategy.evaluate(this) == KuponStatus.INVALID) {
                 this.statusKupon = KuponStatus.INVALID;
                 return;

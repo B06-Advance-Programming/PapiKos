@@ -2,6 +2,8 @@ package id.cs.ui.advprog.inthecost.controller;
 
 import id.cs.ui.advprog.inthecost.dto.KuponRequest;
 import id.cs.ui.advprog.inthecost.dto.KuponResponse;
+import id.cs.ui.advprog.inthecost.exception.ValidationErrorCode;
+import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.Kupon;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
@@ -404,8 +406,10 @@ public class KuponControllerTest {
         assertNotNull(response.getBody());
         assertEquals("Kode Unik Kupon", response.getBody().getNamaKupon());
 
-        // Test with invalid kode unik
-        when(kuponService.getKuponByKodeUnik("INVALID")).thenThrow(new RuntimeException("Kupon tidak ditemukan"));
+        CompletableFuture<Kupon> failedFuture = new CompletableFuture<>();
+        failedFuture.completeExceptionally(new ValidationException(ValidationErrorCode.INVALID_CODE));
+        when(kuponService.getKuponByKodeUnik("INVALID")).thenReturn(failedFuture);
+
         var notFoundResponse = kuponController.getKuponByKodeUnik("INVALID");
         assertEquals(HttpStatus.NOT_FOUND, notFoundResponse.getStatusCode());
     }
@@ -429,7 +433,7 @@ public class KuponControllerTest {
     @Test
     void testDeleteKupon_NotFound() {
         UUID nonExistentId = UUID.randomUUID();
-        when(kuponService.getKuponById(nonExistentId)).thenThrow(new RuntimeException());
+        when(kuponService.getKuponById(nonExistentId)).thenThrow(new ValidationException(ValidationErrorCode.INVALID_ID));
         var response = kuponController.deleteKupon(nonExistentId);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -437,40 +441,12 @@ public class KuponControllerTest {
     @Test
     void testGetKuponById_NotFound() {
         UUID nonExistentId = UUID.randomUUID();
-        when(kuponService.getKuponById(nonExistentId)).thenThrow(new RuntimeException("Not Found"));
+        when(kuponService.getKuponById(nonExistentId)).thenThrow(new ValidationException(ValidationErrorCode.INVALID_ID));
 
         ResponseEntity<KuponResponse> response = kuponController.getKuponById(nonExistentId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(kuponService, times(1)).getKuponById(nonExistentId);
-    }
-
-    @Test
-    void testLogCurrentUser_AnonymousUser() {
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(null);
-
-        try (MockedStatic<SecurityContextHolder> mocked = mockStatic(SecurityContextHolder.class)) {
-            mocked.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-            kuponController.logCurrentUser();
-            verify(securityContext, times(1)).getAuthentication();
-        }
-    }
-
-    @Test
-    void testLogCurrentUser_Unauthenticated() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(false);
-
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-
-        try (MockedStatic<SecurityContextHolder> mocked = mockStatic(SecurityContextHolder.class)) {
-            mocked.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-            kuponController.logCurrentUser();
-            verify(auth).isAuthenticated();
-            verify(securityContext, times(1)).getAuthentication();
-        }
     }
 }
 

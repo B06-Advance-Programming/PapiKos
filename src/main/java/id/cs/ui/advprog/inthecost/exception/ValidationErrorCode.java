@@ -7,7 +7,8 @@ public enum ValidationErrorCode {
     NEGATIVE_VALUE("err_3", "Field tidak boleh bernilai negatif."),
     ZERO_VALUE("err_4", "Field tidak boleh bernilai 0."),
     ZERO_OR_NEGATIVE_VALUE("err_5", "Field harus bernilai positif"),
-    INVALID_ID("err_6", "ID atau key tidak ditemukan.");
+    INVALID_ID("err_6", "ID atau key tidak ditemukan."),
+    INVALID_CODE("err_7", "Code tidak ditemukan.");
 
     private final String code;
     private final String message;
