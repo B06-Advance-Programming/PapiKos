@@ -96,6 +96,7 @@ public class Kupon {
         }
     }
 
+    //Kode unik random, hanya 6 huruf/angka. Seperti: ABCDE
     private String generateKodeUnik() {
         return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
