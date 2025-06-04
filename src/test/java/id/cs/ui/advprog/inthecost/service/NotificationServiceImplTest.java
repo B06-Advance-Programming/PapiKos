@@ -58,57 +58,12 @@ class NotificationServiceImplTest {
         UUID ownerId = UUID.randomUUID(); // Added for Kost constructor if needed
         testKost = new Kost("Test Kost", "Test Address", "Test Description", 5, 1000000, ownerId);
         testKost.setKostID(UUID.randomUUID());
-    }
-
-    @Test
-    void notifyUsers_WithDuplicateNotifications_ShouldNotCreateDuplicates() {
-        // Arrange
-        Set<String> wishlistedUsers = Set.of(testUserId.toString());
-        String expectedMessage = "Kamar tersedia di Test Kost";
-
-        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
-        when(inboxRepository.existsByUserIdAndMessage(testUserId, expectedMessage)).thenReturn(true);
-
-        // Act
-        final Kost kostArg = testKost;
-        notificationService.notifyUsers(kostArg);
-
-        // Assert
-        verify(inboxRepository, never()).save(any(InboxNotification.class));
-    }
-
-    @Test
-    void notifyUsers_WithExceptionDuringRetrieval_ShouldHandleGracefully() {
-        // Arrange
-        RuntimeException dbException = new RuntimeException("Database error");
-        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenThrow(dbException);
-
-        // Act & Assert
-        final Kost kostArg = testKost;
-        assertThrows(RuntimeException.class, () -> notificationService.notifyUsers(kostArg));
-    }
-
-    @Test
-    void notifyUsers_WithUserNotFound_ShouldThrowException() {
+    }    @Test
+    void notifyUsers_WithValidInputs_ShouldCreateNotification() {
         // Arrange
         Set<String> wishlistedUsers = Set.of(testUserId.toString());
 
         when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
-        when(inboxRepository.existsByUserIdAndMessage(eq(testUserId), anyString())).thenReturn(false);
-        when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        final Kost kostArg = testKost;
-        assertThrows(IllegalArgumentException.class, () -> notificationService.notifyUsers(kostArg));
-    }
-
-    @Test
-    void notifyUsers_WithValidInputs_ShouldCreateNotificationWithCorrectTimestamp() {
-        // Arrange
-        Set<String> wishlistedUsers = Set.of(testUserId.toString());
-
-        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
-        when(inboxRepository.existsByUserIdAndMessage(eq(testUserId), anyString())).thenReturn(false);
         when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
 
         // Act
@@ -121,7 +76,57 @@ class NotificationServiceImplTest {
 
         assertEquals(testUser, savedNotification.getUser());
         assertTrue(savedNotification.getMessage().contains(testKost.getNama()));
+        assertTrue(savedNotification.getMessage().contains("kamar tersedia"));
 
+        if (savedNotification.getCreatedAt() != null) {
+            LocalDateTime now = LocalDateTime.now();
+            assertTrue(savedNotification.getCreatedAt().isBefore(now.plusSeconds(1)));
+            assertTrue(savedNotification.getCreatedAt().isAfter(now.minusMinutes(1)));
+        }
+    }
+
+    @Test
+    void notifyUsers_WithExceptionDuringRetrieval_ShouldHandleGracefully() {
+        // Arrange
+        RuntimeException dbException = new RuntimeException("Database error");
+        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenThrow(dbException);
+
+        // Act & Assert
+        final Kost kostArg = testKost;
+        assertThrows(RuntimeException.class, () -> notificationService.notifyUsers(kostArg));
+    }    @Test
+    void notifyUsers_WithUserNotFound_ShouldThrowException() {
+        // Arrange
+        Set<String> wishlistedUsers = Set.of(testUserId.toString());
+
+        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        final Kost kostArg = testKost;
+        assertThrows(IllegalArgumentException.class, () -> notificationService.notifyUsers(kostArg));
+    }    @Test
+    void notifyUsers_WithValidInputs_ShouldCreateNotificationWithCorrectTimestamp() {
+        // Arrange
+        Set<String> wishlistedUsers = Set.of(testUserId.toString());
+        testKost.setJumlahKamar(3); // Different room count to make test unique
+
+        when(wishlistRepository.findUserIdsByKostId(testKost.getKostID())).thenReturn(wishlistedUsers);
+        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+        // Act
+        final Kost kostArg = testKost;
+        notificationService.notifyUsers(kostArg);
+
+        // Assert
+        verify(inboxRepository).save(notificationCaptor.capture());
+        InboxNotification savedNotification = notificationCaptor.getValue();
+
+        assertEquals(testUser, savedNotification.getUser());
+        assertTrue(savedNotification.getMessage().contains(testKost.getNama()));
+        assertTrue(savedNotification.getMessage().contains("3 kamar tersedia")); // Verify specific room count
+        
+        // Verify timestamp is properly set
         if (savedNotification.getCreatedAt() != null) {
             LocalDateTime now = LocalDateTime.now();
             assertTrue(savedNotification.getCreatedAt().isBefore(now.plusSeconds(1)));
@@ -362,9 +367,7 @@ class NotificationServiceImplTest {
         // Act & Assert
         final Kost nullKost = null;
         assertThrows(NullPointerException.class, () -> notificationService.notifyUsers(nullKost));
-    }
-
-    @Test
+    }    @Test
     void notifyUsers_WithRepositorySaveFailure_ShouldPropagateException() {
         // Arrange
         Set<String> wishlistedUsers = Set.of(testUserId.toString());
@@ -372,7 +375,6 @@ class NotificationServiceImplTest {
         final Kost kostArg = testKost;
 
         when(wishlistRepository.findUserIdsByKostId(kostArg.getKostID())).thenReturn(wishlistedUsers);
-        when(inboxRepository.existsByUserIdAndMessage(eq(testUserId), anyString())).thenReturn(false);
         when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
         when(inboxRepository.save(any(InboxNotification.class))).thenThrow(saveException);
 

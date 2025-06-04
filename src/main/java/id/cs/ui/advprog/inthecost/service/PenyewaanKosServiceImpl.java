@@ -1,11 +1,14 @@
 package id.cs.ui.advprog.inthecost.service;
 
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
+import id.cs.ui.advprog.inthecost.model.Kost;
 import id.cs.ui.advprog.inthecost.model.PenyewaanKos;
+import id.cs.ui.advprog.inthecost.repository.KostRepository;
 import id.cs.ui.advprog.inthecost.repository.PenyewaanKosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -16,39 +19,76 @@ import java.util.concurrent.CompletableFuture;
 public class PenyewaanKosServiceImpl implements PenyewaanKosService {
 
     private final PenyewaanKosRepository repository;
+    private final KostRepository kostRepository;
 
     @Autowired
-    public PenyewaanKosServiceImpl(PenyewaanKosRepository repository) {
+    public PenyewaanKosServiceImpl(PenyewaanKosRepository repository, KostRepository kostRepository) {
         this.repository = repository;
+        this.kostRepository = kostRepository;
     }
 
+    @Async
     @Override
-    public PenyewaanKos create(PenyewaanKos penyewaan) {
+    @Transactional
+    public CompletableFuture<PenyewaanKos> create(PenyewaanKos penyewaan) {
         if (penyewaan.getId() == null) {
             penyewaan.setId(UUID.randomUUID());
         }
 
-        // Ambil semua penyewaan lain dengan userId + kostId + status diajukan
-        List<PenyewaanKos> existingList = repository.findByKos_KostIDAndUserIdAndStatus(penyewaan.getKos().getKostID(), penyewaan.getUserId(), StatusPenyewaan.DIAJUKAN);
+        Kost kost = penyewaan.getKos();
+        if (kost.getJumlahKamar() < 1) {
+            throw new IllegalStateException("Kamar sudah penuh, tidak bisa menyewa.");
+        }
+
+        List<PenyewaanKos> existingList = repository.findByKos_KostIDAndUserIdAndStatus(
+                kost.getKostID(),
+                penyewaan.getUserId(),
+                StatusPenyewaan.DIAJUKAN
+        );
 
         for (PenyewaanKos existing : existingList) {
             existing.setStatus(StatusPenyewaan.DIBATALKAN);
             repository.save(existing);
+            kost.setJumlahKamar(kost.getJumlahKamar() + 1);
         }
 
+        // Kurangi jumlah kamar
+        kost.setJumlahKamar(kost.getJumlahKamar() - 1);
         penyewaan.setStatus(StatusPenyewaan.DIAJUKAN);
-        return repository.save(penyewaan);
+
+        // Simpan update kost
+        kostRepository.save(kost);
+
+        PenyewaanKos saved = repository.save(penyewaan);
+
+        return CompletableFuture.completedFuture(saved);
     }
 
+    @Async
     @Override
-    public PenyewaanKos update(PenyewaanKos penyewaan) {
+    @Transactional
+    public CompletableFuture<PenyewaanKos> update(PenyewaanKos penyewaan) {
         PenyewaanKos existing = findById(penyewaan.getId());
 
         if (existing.getStatus() != StatusPenyewaan.DIAJUKAN) {
-            throw new IllegalStateException(String.format("Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN. status sekarang '%s'", penyewaan.getStatus()));
+            throw new IllegalStateException(String.format(
+                    "Penyewaan hanya bisa diubah jika masih berstatus DIAJUKAN. status sekarang '%s'",
+                    existing.getStatus()
+            ));
         }
 
-        return repository.save(penyewaan);
+        Kost kost = existing.getKos();
+        if (penyewaan.getStatus() == StatusPenyewaan.DIBATALKAN) {
+            kost.setJumlahKamar(kost.getJumlahKamar() + 1);
+        }
+        kostRepository.save(kost);
+
+        PenyewaanKos updated = repository.save(penyewaan);
+
+        // force initialize before session closes
+        updated.getKos().getNama();
+
+        return CompletableFuture.completedFuture(updated);
     }
 
     @Async
@@ -71,7 +111,9 @@ public class PenyewaanKosServiceImpl implements PenyewaanKosService {
 
     @Override
     public boolean hasPendingPenyewaan(UUID userId, UUID kostId) {
-        List<PenyewaanKos> pendingList = repository.findByKos_KostIDAndUserIdAndStatus(kostId, userId, StatusPenyewaan.DIAJUKAN);
+        List<PenyewaanKos> pendingList = repository.findByKos_KostIDAndUserIdAndStatus(
+                kostId, userId, StatusPenyewaan.DIAJUKAN
+        );
         return !pendingList.isEmpty();
     }
 

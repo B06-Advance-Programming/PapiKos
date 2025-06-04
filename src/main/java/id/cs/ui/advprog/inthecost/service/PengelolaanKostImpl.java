@@ -3,8 +3,9 @@ package id.cs.ui.advprog.inthecost.service;
 import id.cs.ui.advprog.inthecost.exception.ValidationErrorCode;
 import id.cs.ui.advprog.inthecost.exception.ValidationException;
 import id.cs.ui.advprog.inthecost.model.Kost;
+import id.cs.ui.advprog.inthecost.observer.WishlistObserver;
 import id.cs.ui.advprog.inthecost.repository.KostRepository;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -14,14 +15,17 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 public class PengelolaanKostImpl implements PengelolaanKost {
 
     private final KostRepository kostRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public PengelolaanKostImpl(KostRepository kostRepository) {
+    public PengelolaanKostImpl(KostRepository kostRepository, NotificationService notificationService) {
         this.kostRepository = kostRepository;
+        this.notificationService = notificationService;
     }
 
     @Override @Async
@@ -55,9 +59,14 @@ public class PengelolaanKostImpl implements PengelolaanKost {
 
             if (existingKost.isEmpty()) {
                 throw new ValidationException(ValidationErrorCode.INVALID_ID, "ID Kost tidak ditemukan.");
-            }
-
-            Kost kostToUpdate = existingKost.get();
+            }            Kost kostToUpdate = existingKost.get();
+            
+            // Clear any existing observers and register fresh observer for each update
+            kostToUpdate.clearObservers();
+            kostToUpdate.addObserver(new WishlistObserver(notificationService));
+            
+            log.info("🔄 UPDATING KOST: '{}' from {} to {} rooms", kostToUpdate.getNama(), kostToUpdate.getJumlahKamar(), kost.getJumlahKamar());
+            
             kostToUpdate.setNama(kost.getNama());
             kostToUpdate.setAlamat(kost.getAlamat());
             kostToUpdate.setDeskripsi(kost.getDeskripsi());

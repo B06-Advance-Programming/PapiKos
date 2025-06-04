@@ -1,5 +1,6 @@
 package id.cs.ui.advprog.inthecost.controller;
 
+import id.cs.ui.advprog.inthecost.builder.PenyewaanKosBuilder;
 import id.cs.ui.advprog.inthecost.dto.PenyewaanKosDto;
 import id.cs.ui.advprog.inthecost.dto.PenyewaanKosRequestDto;
 import id.cs.ui.advprog.inthecost.enums.StatusPenyewaan;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/penyewaan")
@@ -31,20 +33,34 @@ public class PenyewaanKosController {
     }
 
     @PostMapping
-    public PenyewaanKos create(@RequestBody PenyewaanKosRequestDto dto) {
-        PenyewaanKos penyewaan = new PenyewaanKos();
-        penyewaan.setNamaLengkap(dto.getNamaLengkap());
-        penyewaan.setNomorTelepon(dto.getNomorTelepon());
-        penyewaan.setTanggalCheckIn(dto.getTanggalCheckIn());
-        penyewaan.setDurasiBulan(dto.getDurasiBulan());
-        penyewaan.setUserId(dto.getUserId());
-
+    public PenyewaanKosDto create(@RequestBody PenyewaanKosRequestDto dto) throws ExecutionException, InterruptedException {
         Kost kost = kosRepository.findById(dto.getKostId())
                 .orElseThrow(() -> new RuntimeException("Kost not found"));
-        penyewaan.setKos(kost);
 
-        return service.create(penyewaan);
+        PenyewaanKos penyewaan = PenyewaanKosBuilder.builder()
+                .namaLengkap(dto.getNamaLengkap())
+                .nomorTelepon(dto.getNomorTelepon())
+                .tanggalCheckIn(dto.getTanggalCheckIn())
+                .durasiBulan(dto.getDurasiBulan())
+                .kos(kost)
+                .userId(dto.getUserId())
+                .build();
+
+        PenyewaanKos created = service.create(penyewaan).get();
+
+        return new PenyewaanKosDto(
+                created.getId(),
+                created.getNamaLengkap(),
+                created.getNomorTelepon(),
+                created.getTanggalCheckIn(),
+                created.getDurasiBulan(),
+                created.getStatus(),
+                created.getUserId(),
+                created.getKos().getKostID(),
+                created.getKos().getNama()
+        );
     }
+
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN')")
@@ -58,7 +74,8 @@ public class PenyewaanKosController {
                         p.getDurasiBulan(),
                         p.getStatus(),
                         p.getUserId(),
-                        p.getKos().getKostID()  // ambil hanya ID, bukan seluruh objek Kost
+                        p.getKos().getKostID(),
+                        p.getKos().getNama()
                 ))
                 .toList();
     }
@@ -80,7 +97,8 @@ public class PenyewaanKosController {
                         p.getDurasiBulan(),
                         p.getStatus(),
                         p.getUserId(),
-                        p.getKos().getKostID()
+                        p.getKos().getKostID(),
+                        p.getKos().getNama()
                 ))
                 .toList();
     }
@@ -102,27 +120,29 @@ public class PenyewaanKosController {
                         p.getDurasiBulan(),
                         p.getStatus(),
                         p.getUserId(),
-                        p.getKos().getKostID()
+                        p.getKos().getKostID(),
+                        p.getKos().getNama()
                 ))
                 .toList();
     }
 
     @PutMapping
-    public PenyewaanKosDto update(@RequestBody PenyewaanKosRequestDto dto) {
-        PenyewaanKos penyewaan = new PenyewaanKos();
-        penyewaan.setId(dto.getId());
-        penyewaan.setNamaLengkap(dto.getNamaLengkap());
-        penyewaan.setNomorTelepon(dto.getNomorTelepon());
-        penyewaan.setTanggalCheckIn(dto.getTanggalCheckIn());
-        penyewaan.setDurasiBulan(dto.getDurasiBulan());
-        penyewaan.setUserId(dto.getUserId());
-        penyewaan.setStatus(StatusPenyewaan.valueOf(dto.getStatus()));
-
+    public PenyewaanKosDto update(@RequestBody PenyewaanKosRequestDto dto) throws ExecutionException, InterruptedException {
         Kost kost = kosRepository.findById(dto.getKostId())
                 .orElseThrow(() -> new RuntimeException("Kost not found"));
-        penyewaan.setKos(kost);
 
-        PenyewaanKos updated = service.update(penyewaan);
+        PenyewaanKos penyewaan = PenyewaanKosBuilder.builder()
+                .id(dto.getId())
+                .namaLengkap(dto.getNamaLengkap())
+                .nomorTelepon(dto.getNomorTelepon())
+                .tanggalCheckIn(dto.getTanggalCheckIn())
+                .durasiBulan(dto.getDurasiBulan())
+                .kos(kost)
+                .userId(dto.getUserId())
+                .status(StatusPenyewaan.valueOf(dto.getStatus()))
+                .build();
+
+        PenyewaanKos updated = service.update(penyewaan).get();
 
         return new PenyewaanKosDto(
                 updated.getId(),
@@ -132,7 +152,8 @@ public class PenyewaanKosController {
                 updated.getDurasiBulan(),
                 updated.getStatus(),
                 updated.getUserId(),
-                updated.getKos().getKostID()
+                updated.getKos().getKostID(),
+                updated.getKos().getNama()
         );
     }
 

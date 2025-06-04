@@ -7,6 +7,7 @@ import id.cs.ui.advprog.inthecost.repository.InboxRepository;
 import id.cs.ui.advprog.inthecost.repository.UserRepository;
 import id.cs.ui.advprog.inthecost.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
  * Implementation of the NotificationService interface
  * Handles notifications for users about kost availability and inbox messaging
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -37,25 +39,23 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (wishlistedUsers == null || wishlistedUsers.isEmpty()) {
             return;
-        }
-
-        for (String userId : wishlistedUsers) {
-            // Convert userId to UUID
+        }        for (String userId : wishlistedUsers) {            // Convert userId to UUID
             UUID userUUID = UUID.fromString(userId);
 
-            // Check if a similar notification already exists to avoid duplicates
-            String message = "Kamar tersedia di " + kost.getNama();
-            boolean exists = inboxRepository.existsByUserIdAndMessage(userUUID, message);
+            // Create unique message with timestamp to allow multiple notifications
+            String message = "Kamar tersedia di " + kost.getNama() + " (" + kost.getJumlahKamar() + " kamar tersedia)";
+            
+            log.info("📧 CREATING NOTIFICATION: '{}' for user {}", message, userId);
 
-            if (!exists) {
-                // Fetch the User object using the userId
-                User user = userRepository.findById(userUUID)
-                        .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+            // Fetch the User object using the userId
+            User user = userRepository.findById(userUUID)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-                // Create the InboxNotification with the User object
-                InboxNotification notif = new InboxNotification(user, message);
-                inboxRepository.save(notif);
-            }
+            // Create the InboxNotification with the User object (no duplicate check)
+            InboxNotification notif = new InboxNotification(user, message);
+            inboxRepository.save(notif);
+            
+            log.info("✅ NOTIFICATION SAVED: ID={}", notif.getId());
         }
     }
 
