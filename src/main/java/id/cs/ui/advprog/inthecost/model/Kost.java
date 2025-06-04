@@ -133,8 +133,7 @@ public class Kost implements Subject {
             throw new ValidationException(ValidationErrorCode.NULL_OR_EMPTY_VALUE, DESKRIPSI_KOSONG);
         }
         this.deskripsi = deskripsi;
-    }
-    public void setJumlahKamar(int jumlahKamar) {
+    }    public void setJumlahKamar(int jumlahKamar) {
         if (jumlahKamar < 0) {
             throw new ValidationException(ValidationErrorCode.NEGATIVE_VALUE, KAMAR_NEGATIF);
         }
@@ -143,6 +142,7 @@ public class Kost implements Subject {
         this.jumlahKamar = jumlahKamar;
 
         if (enableObservers && oldValue == 0 && jumlahKamar > 0) {
+            System.out.println("🔔 OBSERVER PATTERN TRIGGERED: Kost '" + this.nama + "' rooms changed from " + oldValue + " to " + jumlahKamar + " - Notifying observers!");
             notifyObservers();
         }
     }
@@ -167,15 +167,19 @@ public class Kost implements Subject {
     @Override
     public void addObserver(Observer observer) {
         observers.add(observer);
-    }
-
-    @Override
+    }    @Override
     public void removeObserver(Observer observer) {
         observers.remove(observer);
     }
 
+    // Clear all observers
+    public void clearObservers() {
+        observers.clear();
+    }
+
     @Override
     public void notifyObservers() {
+        System.out.println("🔔 NOTIFY OBSERVERS: " + observers.size() + " observers registered");
         for (Observer observer : observers) {
             observer.update(this);
         }

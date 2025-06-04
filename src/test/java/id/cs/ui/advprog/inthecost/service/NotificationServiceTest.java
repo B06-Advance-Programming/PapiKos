@@ -38,9 +38,7 @@ class NotificationServiceTest {
     @BeforeEach
     void setUp() {
         // The @Mock and @InjectMocks annotations handle the mocking and injection
-    }
-
-    @Test
+    }    @Test
     void testNotifyUsersCreatesInboxForEachUser() {
         Kost kost = new Kost("Kos Lavender", "Jl. Lavender", "Deskripsi Kos Lavender", 1, 1000000);
 
@@ -59,8 +57,6 @@ class NotificationServiceTest {
             when(userRepositoryMock.findById(userUUID)).thenReturn(java.util.Optional.of(user));
         }
 
-        when(inboxRepositoryMock.existsByUserIdAndMessage(any(UUID.class), anyString())).thenReturn(false);
-
         notificationService.notifyUsers(kost);
 
         // Verify that notifications are created for each user
@@ -69,7 +65,8 @@ class NotificationServiceTest {
             verify(inboxRepositoryMock, times(1)).save(
                     argThat(notification ->
                             notification.getUser().getId().equals(userUUID) &&
-                                    notification.getMessage().contains("Kos Lavender")
+                                    notification.getMessage().contains("Kos Lavender") &&
+                                    notification.getMessage().contains("kamar tersedia")
                     )
             );
         }

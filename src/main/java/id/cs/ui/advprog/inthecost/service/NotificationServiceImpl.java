@@ -37,25 +37,24 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (wishlistedUsers == null || wishlistedUsers.isEmpty()) {
             return;
-        }
-
-        for (String userId : wishlistedUsers) {
+        }        for (String userId : wishlistedUsers) {
             // Convert userId to UUID
             UUID userUUID = UUID.fromString(userId);
 
-            // Check if a similar notification already exists to avoid duplicates
-            String message = "Kamar tersedia di " + kost.getNama();
-            boolean exists = inboxRepository.existsByUserIdAndMessage(userUUID, message);
+            // Create unique message with timestamp to allow multiple notifications
+            String message = "Kamar tersedia di " + kost.getNama() + " (" + kost.getJumlahKamar() + " kamar tersedia)";
+            
+            System.out.println("CREATING NOTIFICATION: '" + message + "' for user " + userId);
 
-            if (!exists) {
-                // Fetch the User object using the userId
-                User user = userRepository.findById(userUUID)
-                        .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+            // Fetch the User object using the userId
+            User user = userRepository.findById(userUUID)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
 
-                // Create the InboxNotification with the User object
-                InboxNotification notif = new InboxNotification(user, message);
-                inboxRepository.save(notif);
-            }
+            // Create the InboxNotification with the User object (no duplicate check)
+            InboxNotification notif = new InboxNotification(user, message);
+            inboxRepository.save(notif);
+            
+            System.out.println("NOTIFICATION SAVED: ID=" + notif.getId());
         }
     }
 
